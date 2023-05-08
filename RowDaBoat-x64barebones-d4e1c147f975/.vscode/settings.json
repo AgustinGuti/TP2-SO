@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "stdarg.h": "c",
+        "video_driver.h": "c",
+        "functions.h": "c",
+        "syscallinterface.h": "c",
+        "time.h": "c",
+        "stdint.h": "c",
+        "fonts.h": "c",
+        "videodriver.h": "c",
+        "bashconsole.h": "c",
+        "tron.h": "c",
+        "keyboard.h": "c",
+        "stdio1.h": "c",
+        "defs.h": "c",
+        "stdio.h": "c",
+        "displaytime.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}
