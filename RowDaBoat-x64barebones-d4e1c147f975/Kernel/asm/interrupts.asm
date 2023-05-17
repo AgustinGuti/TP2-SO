@@ -379,7 +379,7 @@ section .data
 	isStackSaved dq 0
 
 section .bss
-	maxSysCall resb 8
+	maxSysCall resb 15
 	sysCallsPointers resb 128		;Alcanza para 16 sysCalls
 	registers resq 17
 

@@ -16,11 +16,12 @@ char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty]);
 char exit(uint8_t argumentQty, char arguments[argumentQty]);
 char callInforeg(uint8_t argumentQty, char arguments[argumentQty]);
 char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty]);
+char callMalloc(uint8_t argumentQty, char arguments[argumentQty]);
 
-#define COMMAND_QTY 11
+#define COMMAND_QTY 12
 
-static char *commandNames[COMMAND_QTY] =       {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria"};
-static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exit,&callHimnoAlegria}; 
+static char *commandNames[COMMAND_QTY] =       {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc"};
+static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exit,&callHimnoAlegria,&callMalloc}; 
 static char *commandDescriptions[COMMAND_QTY] = 
         {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
          "Vacia la consola.",
@@ -170,6 +171,24 @@ char startTron(uint8_t argumentQty, char arguments[argumentQty]){
         printf("Argumento invalido para tron\n", 0);
     }else{
         tron();
+    }
+    return 0;
+}
+
+char callMalloc(uint8_t argumentQty, char arguments[argumentQty]){
+    if(argumentQty == 1 && isHexaNumber(arguments)){
+        char flag = 0;
+        uint64_t size = hexaStrToNum(arguments, strlen(arguments), &flag);
+        if (flag == 1){
+            printerr("Numero muy grande. Overflow\n",0);
+        }else{
+            void * ptr = malloc(size);
+       
+                printf("Se reservo memoria en la direccion %x\n",1,ptr);
+            
+        }       
+    }else{
+        printf("Argumento invalido para malloc\n", 0);
     }
     return 0;
 }

@@ -12,6 +12,7 @@ GLOBAL _sys_getFontSize
 GLOBAL _sys_formatWrite
 GLOBAL _sys_getScreenBpp
 GLOBAL _sys_getSavedRegisters
+GLOBAL _sys_malloc
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -174,6 +175,18 @@ _sys_getSavedRegisters:
     mov rbp, rsp
     
     mov rax, 13     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void *      sys_malloc(uint64_t size);
+_sys_malloc:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 14     ;id 
     int 80h
 
     mov rsp, rbp
