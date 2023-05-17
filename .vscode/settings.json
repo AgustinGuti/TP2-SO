@@ -1,9 +1,11 @@
 {
     "files.associations": {
+        "*.jsx": "javascriptreact",
         "compare": "c",
         "type_traits": "c",
         "memorymanager.h": "c",
         "memorydump.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "stdint.h": "c"
     }
 }
