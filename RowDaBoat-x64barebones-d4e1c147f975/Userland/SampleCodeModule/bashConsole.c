@@ -1,4 +1,5 @@
 #include <bashConsole.h>
+#include <stddef.h>
 
 extern void zeroDivision();
 extern void displayTime();
@@ -182,10 +183,12 @@ char callMalloc(uint8_t argumentQty, char arguments[argumentQty]){
         if (flag == 1){
             printerr("Numero muy grande. Overflow\n",0);
         }else{
-            void * ptr = malloc(size);
-       
+            uint64_t * ptr = malloc(size);
+            if (ptr == NULL){
+                printf("No se reservo memoria\n",0);
+            }else {
                 printf("Se reservo memoria en la direccion %x\n",1,ptr);
-            
+            }
         }       
     }else{
         printf("Argumento invalido para malloc\n", 0);

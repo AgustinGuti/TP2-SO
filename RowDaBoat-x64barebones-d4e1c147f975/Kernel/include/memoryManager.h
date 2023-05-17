@@ -9,6 +9,6 @@ typedef struct MemoryManagerCDT *MemoryManagerADT;
 
 MemoryManagerADT createMemoryManager(void *const memoryForMemoryManager, void *const managedMemory);
 
-void *allocMemory(MemoryManagerADT const memoryManager, const size_t memoryToAllocate);
+//void *allocMemory(MemoryManagerADT const memoryManager, const size_t memoryToAllocate);
 
 #endif

@@ -4,6 +4,12 @@
         "type_traits": "c",
         "memorymanager.h": "c",
         "memorydump.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "stdlib.h": "c",
+        "*.tcc": "c",
+        "cstdlib": "c",
+        "memory": "c",
+        "new": "c",
+        "math.h": "c"
     }
 }
