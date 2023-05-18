@@ -2,11 +2,13 @@
 #include <stdlib.h>
 
 #include "CuTest.h"
-#include "MemoryManager.h"
+#include "buddyMemory.h"
 #include "MemoryManagerTest.h"
 
 #define ALLOCATION_SIZE 1024
 #define WRITTEN_VALUE 'a'
+
+#define MANAGED_MEMORY_SIZE 0x100000
 
 void testAllocMemory(CuTest *const cuTest);
 void testTwoAllocations(CuTest *const cuTest);
@@ -27,7 +29,7 @@ static inline void thenTheTwoAdressesAreDifferent(CuTest *const cuTest);
 static inline void thenBothDoNotOverlap(CuTest *const cuTest);
 static inline void thenMemorySuccessfullyWritten(CuTest *const cuTest);
 
-static MemoryManagerADT memoryManager;
+static BuddyADT memoryManager;
 
 static size_t memoryToAllocate;
 
@@ -80,7 +82,8 @@ void testWriteMemory(CuTest *const cuTest)
 
 inline void givenAMemoryManager(CuTest *const cuTest)
 {
-  void *memoryForMemoryManager = malloc(sizeof(void *));
+
+  void *memoryForMemoryManager = malloc(calculateRequiredBuddySize(MANAGED_MEMORY_SIZE));
   if (memoryForMemoryManager == NULL)
   {
     CuFail(cuTest, "[givenAMemoryManager] Memory for Memory Manager cannot be null");
@@ -92,7 +95,8 @@ inline void givenAMemoryManager(CuTest *const cuTest)
     CuFail(cuTest, "[givenAMemoryManager] Managed Memory cannot be null");
   }
 
-  memoryManager = createMemoryManager(memoryForMemoryManager, managedMemory);
+  memoryManager = init_buddy((uint64_t)MANAGED_MEMORY_SIZE, (uint64_t)managedMemory, (uint64_t)memoryForMemoryManager, (uint64_t)memoryForMemoryManager + calculateRequiredBuddySize(MANAGED_MEMORY_SIZE));
+
 }
 
 inline void givenAMemoryAmount()

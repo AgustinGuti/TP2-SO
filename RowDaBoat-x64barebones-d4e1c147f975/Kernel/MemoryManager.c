@@ -12,7 +12,7 @@ MemoryManagerADT createMemoryManager(void *const restrict memoryForMemoryManager
 
 	return memoryManager;
 }
-
+/*
 void *allocMemory(MemoryManagerADT const restrict memoryManager, const size_t memoryToAllocate)
 {
 	char *allocation = memoryManager->nextAddress;
@@ -21,3 +21,4 @@ void *allocMemory(MemoryManagerADT const restrict memoryManager, const size_t me
 
 	return (void *)allocation;
 }
+*/

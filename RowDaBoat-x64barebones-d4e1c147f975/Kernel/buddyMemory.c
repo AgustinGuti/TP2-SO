@@ -2,7 +2,6 @@
 
 #include <lib.h>
 #include <math.h>
-#include <videoDriver.h>
 
 // Necesita 256 MB para mapear los 64 GB de memoria, con bloques de 32 bytes
 
@@ -30,20 +29,20 @@ typedef struct BuddyCDT {
 uint64_t alignMemoryToBlock(uint64_t size);
 
 
-uint64_t getBlockState(uint64_t *memory, uint64_t bit) {
+uint8_t getBlockState(uint64_t *memory, uint64_t bit) {
     return (memory[bit/64] >> (bit%64)) & 1;
 }
 
-uint64_t occupyBlock(uint64_t *memory, uint64_t bit) {
+void occupyBlock(uint64_t *memory, uint64_t bit) {
     memory[bit/64] |= 1UL << (bit%64);
 }
 
-uint64_t freeBlock(uint64_t *memory, uint64_t bit) {
+void freeBlock(uint64_t *memory, uint64_t bit) {
     memory[bit/64] &= ~(1UL << (bit%64));
 }
 
-uint64_t getOrder(uint64_t bit){
-    uint64_t order = 0;
+uint8_t getOrder(uint64_t bit){
+    uint8_t order = 0;
     while (bit > 0) {
         bit = (bit-1)/2;
         order++;
@@ -106,23 +105,23 @@ BuddyADT init_buddy(uint64_t size, uint64_t initialDirection, uint64_t memoryFor
     return buddy;
 }
 
-void printTree(BuddyADT buddy, int order){
+void printTree(BuddyADT buddy, uint8_t order){
     // print the first order levels of binary tree  in buddy->memory
     int i;
     uint64_t bit = 0;
     for (i = 0; i < order; i++) {
-        printf("Level %d: ",1, i+1);
+     //   printf("Level %d: ",1, i+1);
         while (bit < buddy->neededBlocks && getOrder(bit) == i) {
             if (getBlockState(buddy->memory, bit) == OCCUPIED) {
-                printf("1 ",0);
+         //       printf("1 ", 0);
             } else {
-                printf("0 ",0);
+          //      printf("0 ", 0);
             }
             bit++;
         }
-        printf("\n", 0);
+       // printf("\n", 0);
     }
-    printf("\n",0);
+  //  printf("\n", 0);
 }
 
 uint64_t alignMemoryToBlock(uint64_t size){
@@ -160,13 +159,12 @@ void* allocMemoryRec(BuddyADT buddy, uint64_t size, uint64_t bit){
     }
     occupyBlock(buddy->memory, bit);
     //printf("Allocated block of size %d at address %x\n", 2, block_size, getBlockStart(buddy, bit));
-    return buddy->initialDirection + getBlockStart(buddy, bit);
+    return (void*) (buddy->initialDirection + getBlockStart(buddy, bit));
 }
 
 void* allocMemory(BuddyADT buddy, uint64_t size) {
-    uint64_t bit = 0;
     void* res= allocMemoryRec(buddy, size, 0);
-    printTree(buddy, 6);
+   // printTree(buddy, 6);
     return res;
 }
 
