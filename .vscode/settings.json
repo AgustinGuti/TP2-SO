@@ -12,6 +12,8 @@
         "memory": "c",
         "new": "c",
         "math.h": "c",
-        "stdint.h": "c"
-    }
+        "stdint.h": "c",
+        "lib.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
