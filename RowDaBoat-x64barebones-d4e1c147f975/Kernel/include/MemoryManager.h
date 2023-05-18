@@ -2,12 +2,16 @@
 #define MEMORY_MANAGER_H
 
 #include <stdlib.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#define MIN_BLOCK_SIZE 32
 
 #define MANAGED_MEMORY_SIZE 0x10000
 
 typedef struct MemoryManagerCDT *MemoryManagerADT;
 
-MemoryManagerADT createMemoryManager(void *const memoryForMemoryManager, void *const managedMemory);
+MemoryManagerADT createMemoryManager(uint64_t size, uint64_t initialDirection, uint64_t memoryForBuddy, uint64_t memoryForBuddyEnd);
 
 //void *allocMemory(MemoryManagerADT const memoryManager, const size_t memoryToAllocate);
 

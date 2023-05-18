@@ -1,4 +1,4 @@
-#include <buddyMemory.h>
+#include <MemoryManager.h>>
 
 #include <lib.h>
 #include <math.h>
@@ -19,13 +19,13 @@
 
 
 // estructura para representar el buddy allocator
-typedef struct BuddyCDT {
+typedef struct MemoryManagerCDT {
     uint64_t initialDirection;
     uint32_t size; // tamaño de la memoria total
     uint32_t neededBlocks;
     // uint64_t memory[neededBlocks/64]
     uint64_t *memory;  //0 representa que está libre, 1 que está ocupado, es un arreglo que ocupa desde su posicion hasta el final de la posicion asignada al buddy
-} BuddyCDT;
+} MemoryManagerCDT;
 
 uint64_t alignMemoryToBlock(uint64_t size);
 
@@ -51,20 +51,20 @@ uint8_t getOrder(uint64_t bit){
     return order;
 }
 
-uint64_t getBlockSize(BuddyADT buddy, uint64_t bit) {
+uint64_t getBlockSize(MemoryManagerADT buddy, uint64_t bit) {
     uint64_t order = getOrder(bit);
     uint64_t block_size = buddy->size >> order;
     return block_size;
 }
 
-uint64_t getBlockStart(BuddyADT buddy, uint64_t bit) {
+uint64_t getBlockStart(MemoryManagerADT buddy, uint64_t bit) {
     uint64_t order = getOrder(bit);
     uint64_t block_size = buddy->size >> order;
     uint64_t block_start = block_size * ((bit + 1) - (1 << order));
     return block_start;
 }
 
-long getBlockIndex(BuddyADT  buddy, void* address) {
+long getBlockIndex(MemoryManagerADT  buddy, void* address) {
     uint64_t bit = 0;
     uint64_t currentAddress = buddy->initialDirection;
     uint64_t block_size = buddy->size;
@@ -94,12 +94,12 @@ uint64_t calculateRequiredBuddySize(uint64_t memoryToMap){
     return buddySize;
 }
 
-BuddyADT init_buddy(uint64_t size, uint64_t initialDirection, uint64_t memoryForBuddyStart, uint64_t memoryForBuddyEnd) {
+MemoryManagerADT createMemoryManager(uint64_t size, uint64_t initialDirection, uint64_t memoryForBuddyStart, uint64_t memoryForBuddyEnd) {
     uint64_t memoryToMapAligned = alignMemoryToBlock(size);
     if (memoryForBuddyEnd - memoryForBuddyStart < calculateRequiredBuddySize(memoryToMapAligned)){
         return NULL;
     }
-    BuddyADT buddy = (BuddyADT)memoryForBuddyStart;
+    MemoryManagerADT buddy = (MemoryManagerADT)memoryForBuddyStart;
     buddy->size = size;
     buddy->neededBlocks = (memoryToMapAligned/MIN_BLOCK_SIZE) * 2 - 1; //Suma de potencias de 2 hasta size es 2**(size+1) - 1
     buddy->initialDirection = initialDirection;
@@ -108,7 +108,7 @@ BuddyADT init_buddy(uint64_t size, uint64_t initialDirection, uint64_t memoryFor
     return buddy;
 }
 
-void printTree(BuddyADT buddy, uint8_t order){
+void printTree(MemoryManagerADT buddy, uint8_t order){
     // print the first order levels of binary tree  in buddy->memory
     int i;
     uint64_t bit = 0;
@@ -138,7 +138,7 @@ uint64_t alignMemoryToBlock(uint64_t size){
     return alignedSize;
 }
 
-void* allocMemoryRec(BuddyADT buddy, uint64_t size, uint64_t bit){
+void* allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit){
     uint64_t block_size = getBlockSize(buddy, bit);
     if (block_size < size) {
         return NULL;
@@ -164,13 +164,13 @@ void* allocMemoryRec(BuddyADT buddy, uint64_t size, uint64_t bit){
     return (void*) (buddy->initialDirection + getBlockStart(buddy, bit));
 }
 
-void* allocMemory(BuddyADT buddy, uint64_t size) {
+void* allocMemory(MemoryManagerADT buddy, uint64_t size) {
     void* res= allocMemoryRec(buddy, size, 0);
     printTree(buddy, 6);
     return res;
 }
 
-uint64_t freeMemory(BuddyADT buddy, void *ptr) {
+uint64_t freeMemory(MemoryManagerADT buddy, void *ptr) {
     if (ptr == NULL){
         return 0;
     }

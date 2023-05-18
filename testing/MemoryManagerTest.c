@@ -29,7 +29,7 @@ static inline void thenTheTwoAdressesAreDifferent(CuTest *const cuTest);
 static inline void thenBothDoNotOverlap(CuTest *const cuTest);
 static inline void thenMemorySuccessfullyWritten(CuTest *const cuTest);
 
-static BuddyADT memoryManager;
+static MemoryManagerADT memoryManager;
 
 static size_t memoryToAllocate;
 
@@ -95,7 +95,7 @@ inline void givenAMemoryManager(CuTest *const cuTest)
     CuFail(cuTest, "[givenAMemoryManager] Managed Memory cannot be null");
   }
 
-  memoryManager = init_buddy((uint64_t)MANAGED_MEMORY_SIZE, (uint64_t)managedMemory, (uint64_t)memoryForMemoryManager, (uint64_t)memoryForMemoryManager + calculateRequiredBuddySize(MANAGED_MEMORY_SIZE));
+  memoryManager = createMemoryManager((uint64_t)MANAGED_MEMORY_SIZE, (uint64_t)managedMemory, (uint64_t)memoryForMemoryManager, (uint64_t)memoryForMemoryManager + calculateRequiredBuddySize(MANAGED_MEMORY_SIZE));
 
 }
 
