@@ -14,7 +14,7 @@ BuddyADT init_buddy(uint64_t size, uint64_t initialDirection, uint64_t memoryFor
 
 void* allocMemory(BuddyADT buddy, uint64_t size);
 
-uint64_t freeMemory(BuddyADT buddy, void *address);
+uint64_t freeMemory(BuddyADT buddy, void *ptr);
 
 
 #endif

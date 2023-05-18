@@ -13,6 +13,7 @@ GLOBAL _sys_formatWrite
 GLOBAL _sys_getScreenBpp
 GLOBAL _sys_getSavedRegisters
 GLOBAL _sys_malloc
+GLOBAL _sys_free
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -187,6 +188,18 @@ _sys_malloc:
     mov rbp, rsp
     
     mov rax, 14     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void        sys_free(void * ptr);
+_sys_free:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 15     ;id 
     int 80h
 
     mov rsp, rbp
