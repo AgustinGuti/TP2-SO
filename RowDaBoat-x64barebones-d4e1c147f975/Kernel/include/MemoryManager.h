@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define MIN_BLOCK_SIZE 32
+
 #define MANAGED_MEMORY_SIZE 0x10000
 
 typedef struct MemoryManagerCDT *MemoryManagerADT;

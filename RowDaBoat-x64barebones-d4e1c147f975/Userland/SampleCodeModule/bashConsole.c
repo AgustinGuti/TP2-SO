@@ -18,11 +18,12 @@ char exit(uint8_t argumentQty, char arguments[argumentQty]);
 char callInforeg(uint8_t argumentQty, char arguments[argumentQty]);
 char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty]);
 char callMalloc(uint8_t argumentQty, char arguments[argumentQty]);
+char callFree(uint8_t argumentQty, char arguments[argumentQty]);
 
-#define COMMAND_QTY 12
+#define COMMAND_QTY 13
 
-static char *commandNames[COMMAND_QTY] =       {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc"};
-static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exit,&callHimnoAlegria,&callMalloc}; 
+static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free"};
+static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exit,&callHimnoAlegria,&callMalloc, &callFree}; 
 static char *commandDescriptions[COMMAND_QTY] = 
         {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
          "Vacia la consola.",
@@ -172,6 +173,22 @@ char startTron(uint8_t argumentQty, char arguments[argumentQty]){
         printf("Argumento invalido para tron\n", 0);
     }else{
         tron();
+    }
+    return 0;
+}
+
+char callFree(uint8_t argumentQty, char arguments[argumentQty]){
+    if(argumentQty == 1 && isHexaNumber(arguments)){
+        char flag = 0;
+        uint64_t ptr = hexaStrToNum(arguments, strlen(arguments), &flag);
+        if (flag == 1){
+            printerr("Numero muy grande. Overflow\n",0);
+        }else{
+            const freedBytes = free(ptr);
+            printf("%x bytes liberados\n", 1, freedBytes);
+        }       
+    }else{
+        printf("Argumento invalido para free\n", 0);
     }
     return 0;
 }
