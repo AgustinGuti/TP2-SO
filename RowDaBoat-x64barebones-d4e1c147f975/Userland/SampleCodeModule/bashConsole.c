@@ -1,5 +1,7 @@
 #include <bashConsole.h>
 #include <stddef.h>
+#include <processes.h>
+#include <testProcesses.h>
 
 extern void zeroDivision();
 extern void displayTime();
@@ -19,11 +21,12 @@ char callInforeg(uint8_t argumentQty, char arguments[argumentQty]);
 char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty]);
 char callMalloc(uint8_t argumentQty, char arguments[argumentQty]);
 char callFree(uint8_t argumentQty, char arguments[argumentQty]);
+char callExec(uint8_t argumentQty, char arguments[argumentQty]);
 
-#define COMMAND_QTY 13
+#define COMMAND_QTY 14
 
-static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free"};
-static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exit,&callHimnoAlegria,&callMalloc, &callFree}; 
+static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free", "exec"};
+static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exit,&callHimnoAlegria,&callMalloc, &callFree, &callExec}; 
 static char *commandDescriptions[COMMAND_QTY] = 
         {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
          "Vacia la consola.",
@@ -173,6 +176,18 @@ char startTron(uint8_t argumentQty, char arguments[argumentQty]){
         printf("Argumento invalido para tron\n", 0);
     }else{
         tron();
+    }
+    return 0;
+}
+
+char callExec(uint8_t argumentQty, char arguments[argumentQty]){
+    if(argumentQty == 0){
+        char *args[1] = {"processA"};
+        execve(&processA, args);
+        char *args2[1] = {"processB"};
+        execve(&processB, args2);
+    }else{
+        printf("Argumento invalido para exec\n", 0);
     }
     return 0;
 }

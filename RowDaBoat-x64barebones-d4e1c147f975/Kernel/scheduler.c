@@ -23,9 +23,6 @@ static pid_t currentPID = 0;  // Static variable to track the current PID
 
 static Process processList[1];   //  printf("RSP: %x\n",1, stackPointer);
   //La primera vez que me llama el kernel tengo que guardar su stackPointer en algun lado
-static int currentProcess = 0;
-static int processCount = 0;
-static int ready = 0;
 
 Process getNextProcess() ;
 
@@ -42,6 +39,16 @@ void initScheduler() {
     scheduler->currentProcess = NULL;
 }
 
+void printProcesses(){
+    Process it = iterator(scheduler->processList);
+    int count = 0;
+    while (count < getSize(scheduler->processList)){
+        printf("Process %s with pid %d\n", 2, ((Process)getData(it))->name, ((Process)getData(it))->pid);
+        it = next(it);
+        count++;
+    }
+}
+
 void * schedule(void* rsp) {
     if (scheduler != NULL){
         if (scheduler->currentProcess != NULL){
@@ -50,7 +57,13 @@ void * schedule(void* rsp) {
                 scheduler->currentProcess->state = READY;
             }
         }
+        int pid = scheduler->currentProcess->pid;
         scheduler->currentProcess = getNextProcess();
+        // if (scheduler->currentProcess->pid != pid){
+        //    printf("Switching to process %s\n",1, scheduler->currentProcess->name);
+        //    printProcesses();
+        // }
+        printf("%d", 1, pid);
         if (scheduler->currentProcess != NULL){
             scheduler->currentProcess->state = RUNNING;
             return scheduler->currentProcess->stackPointer;
@@ -60,10 +73,10 @@ void * schedule(void* rsp) {
 }
 
 Process getNextProcess() {
-    scheduler->it = next(scheduler->processList);
+    scheduler->it = next(scheduler->it);
     int count = 0;
     while (((Process)getData(scheduler->it))->state != READY && count < getSize(scheduler->processList)){
-        scheduler->it = next(scheduler->processList);
+        scheduler->it = next(scheduler->it);
         count++;
     }
     if (count == getSize(scheduler->processList)){
@@ -77,7 +90,7 @@ int fork() {
 }
 
 int execve(void* entryPoint, char * const argv[]){
-    return -1; //createProcess(argv[0], entryPoint, 1, 1, argv);
+    return createProcess(argv[0], entryPoint, 1, 1, argv);
 }
 
 pid_t generatePID() {
@@ -92,11 +105,28 @@ uint64_t popFromStack(Process process) {
     return *(process->stackPointer++);
 }
 
+
+Process getProcess(pid_t pid){
+    Process it = iterator(scheduler->processList);
+    int count = 0;
+    while (count < getSize(scheduler->processList)){
+        if (((Process)getData(it))->pid == pid){
+            return ((Process)getData(it));
+        }
+        it = next(it);
+        count++;
+    }
+    return NULL;
+}
+
+void killProcess() {
+    printf("Killing process %s\n", 1, scheduler->currentProcess->name);
+    scheduler->currentProcess->state = ZOMBIE;
+    triggerTimer();
+}
+
 pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t foreground, char * argv[]) {
 
-    /*if( entryPoint == NULL ) {
-        return -1;
-    }*/
     Process process = (Process) malloc(sizeof(ProcessCDT));
     if(process == NULL){
         /*not enough memory to allocate process*/
@@ -124,6 +154,7 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
     }
     process->stackBase = process->stack + STACK_SIZE;
     process->stackPointer = process->stackBase;
+    pushToStack(process, &killProcess);            //return address                   
     pushToStack(process, 0x0);                     //ss
     pushToStack(process, process->stackBase);      //stackPointer
     pushToStack(process, 0x202);                   //rflags

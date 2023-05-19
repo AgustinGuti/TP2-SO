@@ -46,15 +46,17 @@ void insert(struct LinkedListCDT* list, void* data) {
     if (newNode == NULL)
         return;
 
+    printf("Inserting \n", 0);
     newNode->data = data;
     newNode->next = NULL;
 
     if (list->head == NULL) {
         list->head = newNode;
-        list->tail = newNode;
+        newNode->next = newNode;
     } else {
-        list->tail->next = newNode;
-        list->tail = newNode;
+        newNode->next = list->head->next;
+        list->head->next = newNode;
+        list->head = newNode;  // Update the head to the new node
     }
 
     list->size++;
