@@ -4,7 +4,6 @@
 typedef struct ProcessCDT{
     pid_t pid;
     char *name;
-    void* rsp;
     processState state;
     uint8_t priority;
     uint64_t *stack;
@@ -15,19 +14,31 @@ typedef struct ProcessCDT{
 
 static pid_t currentPID = 0;  // Static variable to track the current PID
 
-static Process processList[1]; 
+static Process processList[1];   //  printf("RSP: %x\n",1, stackPointer);
+  //La primera vez que me llama el kernel tengo que guardar su stackPointer en algun lado
+static int currentProcess = 0;
+static int processCount = 0;
 static int ready = 0;
 
-void *schedule(void* rsp) {
-  //  printf("RSP: %x\n",1, rsp);
+void *schedule(void* stackPointer) {
+  //  printf("RSP: %x\n",1, stackPointer);
+  //La primera vez que me llama el kernel tengo que guardar su stackPointer en algun lado
     if (ready){
+        //No hacerlo si viene del kernel ?
+        //processList[currentProcess]->stackPointer = stackPointer;
+
+      /*  currentProcess = (currentProcess + 1) % 3;
+        if (currentProcess >= processCount) {
+            currentProcess = 0;
+        }
+        currentProcess = 0;*/
         // printf("Scheduling process with pid: %d\n",1, processList[0]->pid);
         // printf("Process name: %s\n",1, processList[0]->name);
-        // printf("Process rsp: %x\n",1, processList[0]->rsp);
+        // printf("Process stackPointer: %x\n",1, processList[0]->stackPointer);
         ready = 0;
-        return processList[0]->rsp;
+        return processList[0]->stackPointer;
     }
-    return rsp;
+    return stackPointer;
 }
 
 int fork() {
@@ -35,17 +46,20 @@ int fork() {
 }
 
 int execve(void* entryPoint, char * const argv[]){
-    return -1;
+    return -1; //createProcess(argv[0], entryPoint, 1, 1, argv);
 }
 
 pid_t generatePID() {
     return currentPID++;         // Increment and return the new PID
 }
 
-void pushStack(Process process, uint64_t value) {
+void pushToStack(Process process, uint64_t value) {
    *(--process->stackPointer) = value;
 }
 
+uint64_t popFromStack(Process process) {
+    return *(process->stackPointer++);
+}
 
 pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t foreground, char * argv[]) {
 
@@ -79,30 +93,26 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
     }
     process->stackBase = process->stack + STACK_SIZE;
     process->stackPointer = process->stackBase;
-    pushStack(process, 0x0);                     //ss
-    pushStack(process, process->stackBase);      //rsp
-    pushStack(process, 0x202);                   //rflags
-    pushStack(process, 0x8);                     //cs
-    pushStack(process, entryPoint);              //rip
+    pushToStack(process, 0x0);                     //ss
+    pushToStack(process, process->stackBase);      //stackPointer
+    pushToStack(process, 0x202);                   //rflags
+    pushToStack(process, 0x8);                     //cs
+    pushToStack(process, entryPoint);              //rip
 
-    //Si hay parametros van en algun lado aca adentro
-    for(int i = 0; i < 15; i++){
-        if (i == 5){
-            pushStack(process, argc);
-        }else if (i == 6){
-            pushStack(process, argv);
+    for(int i = 0; i < 15; i++){     //push 15 registries
+        if (i == 5){    //rdi
+            pushToStack(process, argc);
+        }else if (i == 6){  //rsi
+            pushToStack(process, argv);
         }else{
-            pushStack(process, 0x0);    //push 15 registries
+            pushToStack(process, 0x0);   
         }
     }
 
-    process->rsp = process->stackPointer;
-
     processList[0] = process;
+    //processCount++;
     ready = 1;
-    
    // printf("Process created with pid: %d\n",1, process->pid);
-
     return process->pid;
 }
 

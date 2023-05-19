@@ -284,11 +284,6 @@ _irq00Handler:
 	mov al, 20h
 	out 20h, al
 
-	; mov rdi, textTest
-	; mov rsi, 1
-	; mov rdx, rsp
-	; call printf
-
 	popState
 	
 	iretq

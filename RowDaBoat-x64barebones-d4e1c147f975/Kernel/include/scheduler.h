@@ -13,7 +13,7 @@ typedef int pid_t;
 
 typedef struct ProcessCDT * Process;
 
-void *schedule(void* rsp);
+void *schedule(void* stackPointer);
 int fork();
 int execve(void* entryPoint, char * const argv[]);
 pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t foreground, char * argv[]);
