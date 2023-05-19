@@ -27,8 +27,8 @@ static Process processList[1];   //  printf("RSP: %x\n",1, stackPointer);
   //La primera vez que me llama el kernel tengo que guardar su stackPointer en algun lado
 
 Process getNextProcess() ;
-
 void printProcesses();
+Process getProcess(pid_t pid);
 
 
 void initScheduler() {
@@ -41,17 +41,15 @@ void initScheduler() {
     scheduler->processList = createLinkedList();
     int kernelPID = createProcess("Kernel", NULL, 0, 1, NULL);
     scheduler->it = iterator(scheduler->processList);
-    scheduler->currentProcess = NULL;
+    scheduler->currentProcess = getProcess(kernelPID);
 }
 
 
 void * schedule(void* rsp) {
     if (scheduler != NULL){
-        if (scheduler->currentProcess != NULL){
-            scheduler->currentProcess->stackPointer = rsp;
-            if (scheduler->currentProcess->state == RUNNING){
-                scheduler->currentProcess->state = READY;
-            }
+        scheduler->currentProcess->stackPointer = rsp;
+        if (scheduler->currentProcess->state == RUNNING){
+            scheduler->currentProcess->state = READY;
         }
         scheduler->currentProcess = getNextProcess();
         if (scheduler->currentProcess != NULL){
@@ -120,8 +118,12 @@ Process getProcess(pid_t pid){
 }
 
 void killProcess() {
-    //printf("Killing process %s\n", 1, scheduler->currentProcess->name);
     scheduler->currentProcess->state = ZOMBIE;
+    if (scheduler->currentProcess->pid <= 1){
+        printf("Killing process %d\n", 1, scheduler->currentProcess->pid);
+        Process kernel = getProcess(0);
+        kernel->state = READY;
+    }
     triggerTimer();
 }
 
@@ -160,7 +162,6 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
     }
     process->stackBase = process->stack + STACK_SIZE;
     process->stackPointer = process->stackBase;
-    pushToStack(process, &killProcess);            //return address
     pushToStack(process, 0x0);                     //ss
     pushToStack(process, process->stackBase);      //stackPointer
     pushToStack(process, 0x202);                   //rflags
@@ -171,7 +172,7 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
         if (i == RDI){    
             pushToStack(process, entryPoint);
         }else if (i == RSI){ 
-            pushToStack(process, argv);
+            pushToStack(process, argc);
         }else if (i == RDX){ 
             pushToStack(process, argv);
         }else{
