@@ -1,4 +1,5 @@
 #include "linkedList.h"
+#include <videoDriver.h>
 
 // Structure representing a node in the linked list
 typedef struct NodeCDT {
@@ -12,7 +13,6 @@ typedef struct LinkedListCDT {
     struct NodeCDT* tail;
     uint8_t size;
 }LinkedListCDT;
-
 
 LinkedList createLinkedList() {
     struct LinkedListCDT * list = (LinkedList)malloc(sizeof(struct LinkedListCDT));
@@ -87,4 +87,56 @@ void removeItem(LinkedList list, void* data) {
         previous = current;
         current = current->next;
     }
+}
+
+void * get(LinkedList list, int index) {
+    if (list == NULL || index < 0 || index >= list->size)
+        return NULL;
+
+    struct NodeCDT* current = list->head;
+    int i = 0;
+    while (i < index) {
+        current = current->next;
+        i++;
+    }
+
+    return current->data;
+}
+
+void * iterator(LinkedList list) {
+    if (list == NULL)
+        return NULL;
+
+    return list->head;
+}
+
+void * next(void * iterator) {
+    if (iterator == NULL)
+        return NULL;
+
+    struct NodeCDT* node = (struct NodeCDT*)iterator;
+    return node->next;
+}
+
+int hasNext(void * iterator) {
+    if (iterator == NULL)
+        return 0;
+
+    struct NodeCDT* node = (struct NodeCDT*)iterator;
+    return node->next != NULL;
+}
+
+void * getData(void * iterator) {
+    if (iterator == NULL)
+        return NULL;
+
+    struct NodeCDT* node = (struct NodeCDT*)iterator;
+    return node->data;
+}
+
+int getSize(LinkedList list) {
+    if (list == NULL)
+        return -1;
+
+    return list->size;
 }

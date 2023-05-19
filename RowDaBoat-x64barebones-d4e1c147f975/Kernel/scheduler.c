@@ -15,9 +15,10 @@ typedef struct ProcessCDT{
 typedef struct SchedulerCDT{
     LinkedList processList;
     Process currentProcess;
+    Process it;
 }SchedulerCDT;
 
-static Scheduler scheduler;
+static Scheduler scheduler = NULL;
 static pid_t currentPID = 0;  // Static variable to track the current PID
 
 static Process processList[1];   //  printf("RSP: %x\n",1, stackPointer);
@@ -26,34 +27,49 @@ static int currentProcess = 0;
 static int processCount = 0;
 static int ready = 0;
 
+Process getNextProcess() ;
+
 void initScheduler() {
     scheduler = (Scheduler) malloc(sizeof(SchedulerCDT));
     if( scheduler == NULL){
         /*not enough memory to allocate scheduler*/
         return;
     }
-    printf("Scheduler initialized\n",1);
+    printf("Scheduler initialized\n",0);
     scheduler->processList = createLinkedList();
+    int kernelPID = createProcess("Kernel", NULL, 0, 1, NULL);
+    scheduler->it = iterator(scheduler->processList);
     scheduler->currentProcess = NULL;
 }
 
 void * schedule(void* rsp) {
-    if (ready){
-        //No hacerlo si viene del kernel ?
-        //processList[currentProcess]->stackPointer = stackPointer;
-
-      /*  currentProcess = (currentProcess + 1) % 3;
-        if (currentProcess >= processCount) {
-            currentProcess = 0;
+    if (scheduler != NULL){
+        if (scheduler->currentProcess != NULL){
+            scheduler->currentProcess->stackPointer = rsp;
+            if (scheduler->currentProcess->state == RUNNING){
+                scheduler->currentProcess->state = READY;
+            }
         }
-        currentProcess = 0;*/
-        // printf("Scheduling process with pid: %d\n",1, processList[0]->pid);
-        // printf("Process name: %s\n",1, processList[0]->name);
-        // printf("Process stackPointer: %x\n",1, processList[0]->stackPointer);
-        ready = 0;
-        return scheduler->currentProcess->stackPointer;
+        scheduler->currentProcess = getNextProcess();
+        if (scheduler->currentProcess != NULL){
+            scheduler->currentProcess->state = RUNNING;
+            return scheduler->currentProcess->stackPointer;
+        }              
     }
-    return stackPointer;
+    return rsp; //TODO noop
+}
+
+Process getNextProcess() {
+    scheduler->it = next(scheduler->processList);
+    int count = 0;
+    while (((Process)getData(scheduler->it))->state != READY && count < getSize(scheduler->processList)){
+        scheduler->it = next(scheduler->processList);
+        count++;
+    }
+    if (count == getSize(scheduler->processList)){
+        return NULL;    ///No op
+    }
+    return ((Process)getData(scheduler->it));
 }
 
 int fork() {
@@ -78,9 +94,9 @@ uint64_t popFromStack(Process process) {
 
 pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t foreground, char * argv[]) {
 
-    if( entryPoint == NULL ) {
+    /*if( entryPoint == NULL ) {
         return -1;
-    }
+    }*/
     Process process = (Process) malloc(sizeof(ProcessCDT));
     if(process == NULL){
         /*not enough memory to allocate process*/
@@ -123,11 +139,14 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
             pushToStack(process, 0x0);   
         }
     }
-
-    process->rsp = process->stackPointer;
+    
     insert(scheduler->processList, process);
-    scheduler->currentProcess = process;
-    ready = 1;
+    if (entryPoint == NULL){
+        process->state = BLOCKED;
+    }else{
+        process->state = READY;
+    }
+
     return process->pid;
 }
 
