@@ -1,6 +1,8 @@
 #include "scheduler.h"
 #include "videoDriver.h"
 
+enum {RAX, RBX, RCX, RDX, RBP, RDI, RSI, R8, R9, R10, R11, R12, R13, R14, R15};
+
 typedef struct ProcessCDT{
     pid_t pid;
     char *name;
@@ -26,6 +28,9 @@ static Process processList[1];   //  printf("RSP: %x\n",1, stackPointer);
 
 Process getNextProcess() ;
 
+void printProcesses();
+
+
 void initScheduler() {
     scheduler = (Scheduler) malloc(sizeof(SchedulerCDT));
     if( scheduler == NULL){
@@ -39,15 +44,6 @@ void initScheduler() {
     scheduler->currentProcess = NULL;
 }
 
-void printProcesses(){
-    Process it = iterator(scheduler->processList);
-    int count = 0;
-    while (count < getSize(scheduler->processList)){
-        printf("Process %s with pid %d\n", 2, ((Process)getData(it))->name, ((Process)getData(it))->pid);
-        it = next(it);
-        count++;
-    }
-}
 
 void * schedule(void* rsp) {
     if (scheduler != NULL){
@@ -57,19 +53,23 @@ void * schedule(void* rsp) {
                 scheduler->currentProcess->state = READY;
             }
         }
-        int pid = scheduler->currentProcess->pid;
         scheduler->currentProcess = getNextProcess();
-        // if (scheduler->currentProcess->pid != pid){
-        //    printf("Switching to process %s\n",1, scheduler->currentProcess->name);
-        //    printProcesses();
-        // }
-        printf("%d", 1, pid);
         if (scheduler->currentProcess != NULL){
             scheduler->currentProcess->state = RUNNING;
             return scheduler->currentProcess->stackPointer;
         }              
     }
     return rsp; //TODO noop
+}
+
+void printProcesses(){
+    Process it = iterator(scheduler->processList);
+    int count = 0;
+    while (count < getSize(scheduler->processList)){
+        printf("Process %s with pid %d\n", 2, ((Process)getData(it))->name, ((Process)getData(it))->pid);
+        it = next(it);
+        count++;
+    }
 }
 
 Process getNextProcess() {
@@ -120,10 +120,16 @@ Process getProcess(pid_t pid){
 }
 
 void killProcess() {
-    printf("Killing process %s\n", 1, scheduler->currentProcess->name);
+    //printf("Killing process %s\n", 1, scheduler->currentProcess->name);
     scheduler->currentProcess->state = ZOMBIE;
     triggerTimer();
 }
+
+void startWrapper(void* entryPoint, char argc, char * argv[]) {
+    int ret = ((int (*)(int, char *[]))entryPoint)(argc, argv);
+    killProcess();
+}
+
 
 pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t foreground, char * argv[]) {
 
@@ -154,17 +160,19 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
     }
     process->stackBase = process->stack + STACK_SIZE;
     process->stackPointer = process->stackBase;
-    pushToStack(process, &killProcess);            //return address                   
+    pushToStack(process, &killProcess);            //return address
     pushToStack(process, 0x0);                     //ss
     pushToStack(process, process->stackBase);      //stackPointer
     pushToStack(process, 0x202);                   //rflags
     pushToStack(process, 0x8);                     //cs
-    pushToStack(process, entryPoint);              //rip
+    pushToStack(process, &startWrapper);              //rip
 
     for(int i = 0; i < 15; i++){     //push 15 registries
-        if (i == 5){    //rdi
-            pushToStack(process, argc);
-        }else if (i == 6){  //rsi
+        if (i == RDI){    
+            pushToStack(process, entryPoint);
+        }else if (i == RSI){ 
+            pushToStack(process, argv);
+        }else if (i == RDX){ 
             pushToStack(process, argv);
         }else{
             pushToStack(process, 0x0);   
