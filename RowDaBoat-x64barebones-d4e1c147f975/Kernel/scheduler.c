@@ -13,19 +13,31 @@ typedef struct ProcessCDT{
     uint8_t foreground;
 }ProcessCDT;
 
+typedef struct SchedulerCDT{
+    LinkedList processList;
+    Process currentProcess;
+}SchedulerCDT;
+
+static Scheduler scheduler;
 static pid_t currentPID = 0;  // Static variable to track the current PID
 
-static Process processList[1]; 
 static int ready = 0;
 
-void *schedule(void* rsp) {
-  //  printf("RSP: %x\n",1, rsp);
+void initScheduler() {
+    scheduler = (Scheduler) malloc(sizeof(SchedulerCDT));
+    if( scheduler == NULL){
+        /*not enough memory to allocate scheduler*/
+        return;
+    }
+    printf("Scheduler initialized\n",1);
+    scheduler->processList = createLinkedList();
+    scheduler->currentProcess = NULL;
+}
+
+void * schedule(void* rsp) {
     if (ready){
-        // printf("Scheduling process with pid: %d\n",1, processList[0]->pid);
-        // printf("Process name: %s\n",1, processList[0]->name);
-        // printf("Process rsp: %x\n",1, processList[0]->rsp);
         ready = 0;
-        return processList[0]->rsp;
+        return scheduler->currentProcess->rsp;
     }
     return rsp;
 }
@@ -97,12 +109,9 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
     }
 
     process->rsp = process->stackPointer;
-
-    processList[0] = process;
+    insert(scheduler->processList, process);
+    scheduler->currentProcess = process;
     ready = 1;
-    
-   // printf("Process created with pid: %d\n",1, process->pid);
-
     return process->pid;
 }
 

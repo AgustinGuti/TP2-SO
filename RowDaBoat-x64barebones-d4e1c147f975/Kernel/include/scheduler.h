@@ -12,7 +12,9 @@ typedef enum {READY, RUNNING, BLOCKED, ZOMBIE} processState;
 typedef int pid_t;
 
 typedef struct ProcessCDT * Process;
+typedef struct SchedulerCDT * Scheduler;
 
+void initScheduler();
 void *schedule(void* rsp);
 int fork();
 int execve(void* entryPoint, char * const argv[]);

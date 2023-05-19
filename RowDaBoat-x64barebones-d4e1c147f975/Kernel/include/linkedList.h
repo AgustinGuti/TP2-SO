@@ -2,14 +2,14 @@
 #define LINKED_LIST_H
 
 #include <stdint.h>
-#include "MemoryManager.h"
+#include "memory.h"
 
 
 typedef struct NodeCTD * Node;
 typedef struct LinkedListCDT * LinkedList;
 
 // Function declarations
-LinkedList createLinkedList(MemoryManagerADT memoryManager);
+LinkedList createLinkedList();
 void destroyLinkedList(LinkedList list);
 void insert(LinkedList list, void* data);
 void removeItem(LinkedList list, void* data);
