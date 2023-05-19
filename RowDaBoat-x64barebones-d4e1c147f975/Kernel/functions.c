@@ -90,3 +90,7 @@ uint32_t strlen(char *str)
   }
   return len;
 }
+
+void strcpy(char *dest, char *src){
+  memcpy(dest, src, strlen(src) + 1);
+}

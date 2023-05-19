@@ -1,5 +1,6 @@
 #include <sysCalls.h>
 #include <MemoryManager.h>
+#include <memory.h>
 
 #define OUT_LETTER_COLOR BLACK // Blanco sobre negro
 #define OUT_BACK_COLOR BLACK
@@ -8,7 +9,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 16 // functions quantity in sysCalls[]
+#define READY_CALLS 18 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -28,12 +29,14 @@ uint8_t sys_getScreenBpp();
 char sys_getSavedRegisters(uint64_t registers[REGISTER_QTY]);
 void *sys_malloc(uint64_t size);
 uint64_t sys_free(void *ptr);
+int sys_fork();
+int sys_execve(void* entryPoint, char * const argv[]);
 
 static uint64_t sysCalls[] = {(uint64_t)&sys_write, (uint64_t)&sys_read, (uint64_t)&sys_drawSprite, (uint64_t)&sys_getMillis,
                               (uint64_t)&sys_cleanScreen, (uint64_t)&sys_getScreenWidth, (uint64_t)&sys_getScreenHeight,
                               (uint64_t)&sys_beep, (uint64_t)&sys_getTime, (uint64_t)&sys_setFontSize, (uint64_t)&sys_getFontSize,
                               (uint64_t)&sys_formatWrite, (uint64_t)&sys_getScreenBpp, (uint64_t)&sys_getSavedRegisters, (uint64_t)&sys_malloc,
-                              (uint64_t)&sys_free};
+                              (uint64_t)&sys_free, (uint64_t)&sys_fork, (uint64_t)sys_execve};
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
 extern void _speaker_tune(uint16_t tune);
@@ -44,13 +47,7 @@ extern uint64_t savedRegisters[REGISTER_QTY];
 extern char haveSaved;
 extern void saveCurrentRegs();
 
-MemoryManagerADT memoryManager;
-
-#define MEMORY_INITIAL_DIRECTION 0x400000
-#define MEMORY_TO_MAP_SIZE 0x10000000 - MEMORY_INITIAL_DIRECTION
-
 void setupSysCalls(){
-    memoryManager = createMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredBuddySize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t)MEMORY_INITIAL_DIRECTION-1);
     _setupSysCalls(READY_CALLS, sysCalls);
 }
 
@@ -86,15 +83,24 @@ int sys_read(int fd, const uint16_t *buf, uint32_t count)
 
 void *sys_malloc(uint64_t size)
 {
-    return allocMemory(memoryManager, size);
+    return malloc(size);
 }
 
 uint64_t sys_free(void *ptr)
 {
     if (ptr != NULL){
-        return freeMemory(memoryManager, ptr);
+        return free(ptr);
     }
     return 0;
+}
+
+int sys_fork()
+{
+    return fork();
+}
+
+int sys_execve(void* entryPoint, char * const argv[]){
+    return execve(entryPoint, argv);
 }
 
 void sys_drawSprite(uint16_t xTopLeft, uint16_t yTopLeft, uint16_t width, uint16_t height, uint8_t sprite[height][width * getScreenBpp() / 8])

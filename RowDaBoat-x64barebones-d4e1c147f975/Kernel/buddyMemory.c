@@ -1,4 +1,4 @@
-#include <MemoryManager.h>>
+#include <MemoryManager.h>
 
 #include <lib.h>
 #include <math.h>
@@ -166,7 +166,7 @@ void* allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit){
 
 void* allocMemory(MemoryManagerADT buddy, uint64_t size) {
     void* res= allocMemoryRec(buddy, size, 0);
-    printTree(buddy, 6);
+    //printTree(buddy, 6);
     return res;
 }
 
@@ -194,7 +194,7 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr) {
         freeBlock(buddy->memory, bit);
     }
 
-    printTree(buddy, 6);
+    //printTree(buddy, 6);
     // Return the amount of bytes freed
     return block_size;
 }

@@ -1,9 +1,10 @@
 #include <stdint.h>
-#include <string.h>
 #include <lib.h>
 #include <moduleLoader.h>
 #include <videoDriver.h>
 #include <idtLoader.h>
+#include <memory.h>
+#include <scheduler.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -52,12 +53,21 @@ void * initializeKernelBinary()
 extern void saveRegisters();
 extern void restoreStack();
 
+#define MEMORY_INITIAL_DIRECTION 0x600000
+#define MEMORY_TO_MAP_SIZE 0x8000000 - MEMORY_INITIAL_DIRECTION
+ 
+
 int main()
 {	
 	load_idt();
 	saveRegisters();
 	restoreStack();
-	((EntryPoint)sampleCodeModuleAddress)();
+
+    initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredBuddySize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t)MEMORY_INITIAL_DIRECTION-1);
+	
+	createProcess("shell", sampleCodeModuleAddress, 1, 1, NULL);
+	triggerTimer();
+	//((EntryPoint)sampleCodeModuleAddress)();
 	drawRect((pxlCoord){0,0},0x00FF00,getScreenWidth(),getScreenHeight());		//Execution has ended succesfully
 	return 0;
 }

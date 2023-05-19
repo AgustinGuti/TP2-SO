@@ -24,8 +24,12 @@ GLOBAL saveCurrentRegs
 GLOBAL savedRegisters
 GLOBAL haveSaved
 
+GLOBAL restoreStack
+
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
+
+EXTERN schedule
 
 EXTERN printf
 
@@ -69,6 +73,40 @@ SECTION .text
 	pop rax
 %endmacro
 
+%macro pushStateNoRAX 0
+	push rbx
+	push rcx
+	push rdx
+	push rbp
+	push rdi
+	push rsi
+	push r8
+	push r9
+	push r10
+	push r11
+	push r12
+	push r13
+	push r14
+	push r15
+%endmacro
+
+%macro popStateNoRAX 0
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop r11
+	pop r10
+	pop r9
+	pop r8
+	pop rsi
+	pop rdi
+	pop rbp
+	pop rdx
+	pop rcx
+	pop rbx
+%endmacro
+
 %macro irqHandlerMaster 1
 	pushState
 
@@ -82,8 +120,6 @@ SECTION .text
 	popState
 	iretq
 %endmacro
-
-
 
 %macro exceptionHandler 1
 
@@ -191,7 +227,13 @@ _sysCallHandler:
 	mov rbx, 8
 	mul rbx						;Donde esta el puntero al que quiero ir
 	pop rdx
+
+	pushStateNoRAX
+
 	call [sysCallsPointers+rax]		;Ejecuto la funcion, con los mismos parametros que me habian pasado
+
+	popStateNoRAX
+
 .end:
 	pop rbx
 	mov rsp, rbp
@@ -229,7 +271,27 @@ _setupSysCalls:
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+	pushState
+
+	mov rdi, 0 ; handler del timer tick
+	call irqDispatcher
+
+	mov rdi, rsp
+	call schedule
+	mov rsp, rax
+
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+	; mov rdi, textTest
+	; mov rsi, 1
+	; mov rdx, rsp
+	; call printf
+
+	popState
+	
+	iretq
 
 ;Keyboard
 _irq01Handler:
@@ -338,7 +400,6 @@ saveRegisters:
 
 	ret
 
-GLOBAL restoreStack
 restoreStack:		;restores the first 3 entries of the stack
 
 	;Change rsp pointer without losing its return value
@@ -377,10 +438,11 @@ restoreStack:		;restores the first 3 entries of the stack
 section .data
 	haveSaved dq 0
 	isStackSaved dq 0
+	textTest db "ASM RSP: %x", 0
 
 section .bss
-	maxSysCall resb 16
-	sysCallsPointers resb 128		;Alcanza para 16 sysCalls
+	maxSysCall resb 18
+	sysCallsPointers resb 256		;Alcanza para 32 sysCalls
 	registers resq 17
 
 	startRegisters resq 17

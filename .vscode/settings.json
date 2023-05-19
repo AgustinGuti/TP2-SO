@@ -12,6 +12,12 @@
         "memory": "c",
         "new": "c",
         "math.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "time.h": "c",
+        "scheduler.h": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c",
+        "linkedlist.h": "c"
     }
 }
