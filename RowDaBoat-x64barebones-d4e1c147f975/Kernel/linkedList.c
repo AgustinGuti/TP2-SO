@@ -11,17 +11,15 @@ typedef struct LinkedListCDT {
     struct NodeCDT* head;
     struct NodeCDT* tail;
     uint8_t size;
-    MemoryManagerADT memoryManager;
 }LinkedListCDT;
 
 
-LinkedList createLinkedList(MemoryManagerADT memoryManager) {
-    struct LinkedListCDT * list = (LinkedList)allocMemory(memoryManager, sizeof(struct LinkedListCDT));
+LinkedList createLinkedList() {
+    struct LinkedListCDT * list = (LinkedList)malloc(sizeof(struct LinkedListCDT));
     if (list != NULL) {
         list->head = NULL;
         list->tail = NULL;
         list->size = 0;
-        list->memoryManager = memoryManager;
     }
     return list;
 }
@@ -33,18 +31,18 @@ void destroyLinkedList(LinkedList list) {
     struct NodeCDT * current = list->head;
     while (current != NULL) {
         Node next = current->next;
-        freeMemory(list->memoryManager, current);
+        free(current);
         current = next;
     }
 
-    freeMemory(list->memoryManager, list);
+    free(list);
 }
 
 void insert(struct LinkedListCDT* list, void* data) {
     if (list == NULL)
         return;
 
-    struct NodeCDT * newNode = (Node)allocMemory(list->memoryManager, sizeof(struct NodeCDT));
+    struct NodeCDT * newNode = (Node)malloc(sizeof(struct NodeCDT));
     if (newNode == NULL)
         return;
 
@@ -81,7 +79,7 @@ void removeItem(LinkedList list, void* data) {
                     list->tail = previous;
             }
 
-            freeMemory(list->memoryManager, current);
+            free(current);
             list->size--;
             return;
         }

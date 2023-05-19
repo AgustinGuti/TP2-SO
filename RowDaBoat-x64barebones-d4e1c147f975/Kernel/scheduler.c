@@ -12,6 +12,12 @@ typedef struct ProcessCDT{
     uint8_t foreground;
 }ProcessCDT;
 
+typedef struct SchedulerCDT{
+    LinkedList processList;
+    Process currentProcess;
+}SchedulerCDT;
+
+static Scheduler scheduler;
 static pid_t currentPID = 0;  // Static variable to track the current PID
 
 static Process processList[1];   //  printf("RSP: %x\n",1, stackPointer);
@@ -20,9 +26,18 @@ static int currentProcess = 0;
 static int processCount = 0;
 static int ready = 0;
 
-void *schedule(void* stackPointer) {
-  //  printf("RSP: %x\n",1, stackPointer);
-  //La primera vez que me llama el kernel tengo que guardar su stackPointer en algun lado
+void initScheduler() {
+    scheduler = (Scheduler) malloc(sizeof(SchedulerCDT));
+    if( scheduler == NULL){
+        /*not enough memory to allocate scheduler*/
+        return;
+    }
+    printf("Scheduler initialized\n",1);
+    scheduler->processList = createLinkedList();
+    scheduler->currentProcess = NULL;
+}
+
+void * schedule(void* rsp) {
     if (ready){
         //No hacerlo si viene del kernel ?
         //processList[currentProcess]->stackPointer = stackPointer;
@@ -36,7 +51,7 @@ void *schedule(void* stackPointer) {
         // printf("Process name: %s\n",1, processList[0]->name);
         // printf("Process stackPointer: %x\n",1, processList[0]->stackPointer);
         ready = 0;
-        return processList[0]->stackPointer;
+        return scheduler->currentProcess->stackPointer;
     }
     return stackPointer;
 }
@@ -109,10 +124,10 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
         }
     }
 
-    processList[0] = process;
-    //processCount++;
+    process->rsp = process->stackPointer;
+    insert(scheduler->processList, process);
+    scheduler->currentProcess = process;
     ready = 1;
-   // printf("Process created with pid: %d\n",1, process->pid);
     return process->pid;
 }
 

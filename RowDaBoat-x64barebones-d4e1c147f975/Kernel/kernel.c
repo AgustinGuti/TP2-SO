@@ -64,6 +64,7 @@ int main()
 	restoreStack();
 
     initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredBuddySize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t)MEMORY_INITIAL_DIRECTION-1);
+	initScheduler();
 	
 	createProcess("shell", sampleCodeModuleAddress, 1, 1, NULL);
 	triggerTimer();
