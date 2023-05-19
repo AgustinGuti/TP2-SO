@@ -1,12 +1,11 @@
 #include "MemoryManager.h"
 #include <lib.h>
+#include <videoDriver.h>
 
 #define FREE 0
 #define OCCUPIED 1
 #define NOT_USED 0
 #define USED 1
-
-void addBlockToList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size, uint8_t listType);
 
 #define MEMORY_MANAGER_STRUCT_SIZE 16 + 8 * BLOCK_QUANTITY / 64
 #define BLOCK_STRUCT_SIZE 32
@@ -30,6 +29,15 @@ typedef struct MemoryManagerCDT
 	uint64_t occupiedBlocksState[BLOCK_QUANTITY / 64];
 } MemoryManagerCDT;
 
+void printBlocks(MemoryManagerADT const memoryManager);
+void initializeBlock(MemoryBlock *block, void *const startAddress, const uint64_t size, uint64_t index);
+void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size);
+void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size);
+uint8_t getBlockState(uint64_t *memory, uint64_t bit);
+void setBlockUsed(uint64_t *memory, uint64_t bit);
+void setBlockNotUsed(uint64_t *memory, uint64_t bit);
+uint64_t getFirstNotUsedBlock(uint64_t *memory);
+
 uint8_t getBlockState(uint64_t *memory, uint64_t bit)
 {
 	return (memory[bit / 64] >> (bit % 64)) & 1;
@@ -45,7 +53,7 @@ void setBlockNotUsed(uint64_t *memory, uint64_t bit)
 	memory[bit / 64] &= ~(1UL << (bit % 64));
 }
 
-MemoryManagerADT createMemoryManager(void *const memoryForMemoryManager, void *const managedMemory, uint64_t managedMemorySize)
+MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const managedMemory, void *const memoryForMemoryManager, void *const memoryForManagerEnd)
 {
 	MemoryManagerADT memoryManager = (MemoryManagerADT)memoryForMemoryManager;
 	MemoryBlock *firstFreeBlock = (MemoryBlock *)((uint64_t *)memoryForMemoryManager + MEMORY_MANAGER_STRUCT_SIZE);
@@ -72,6 +80,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 	{
 		if (currentFreeBlock->size >= memoryToAllocate)
 		{
+			// printf("Allocating memory in direction %x\n", 1, currentFreeBlock->startAddress);
 			void *allocatedMemorystartAdress = currentFreeBlock->startAddress;
 			currentFreeBlock->startAddress += memoryToAllocate;
 			currentFreeBlock->size -= memoryToAllocate;
@@ -89,7 +98,8 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 				setBlockNotUsed(memoryManager->freeBlocksState, currentFreeBlock->index);
 				currentFreeBlock = NULL;
 			}
-			addBlockToList(memoryManager, allocatedMemorystartAdress, memoryToAllocate, OCCUPIED);
+			addBlockToOccupiedList(memoryManager, allocatedMemorystartAdress, memoryToAllocate);
+			// printBlocks(memoryManager);
 			return allocatedMemorystartAdress;
 		}
 		currentFreeBlock = currentFreeBlock->nextBlock;
@@ -97,7 +107,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 	return NULL;
 }
 
-void freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree)
+uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree)
 {
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
@@ -110,9 +120,37 @@ void freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree)
 			}
 			if (currentOccupiedBlock->prevBlock != NULL)
 				currentOccupiedBlock->nextBlock->prevBlock = currentOccupiedBlock->prevBlock;
-			addBlockToList(memoryManager, memoryToFree, currentOccupiedBlock->size, FREE);
-			return;
+			printf("Adding block to Free list\n", 0);
+			addBlockToFreeList(memoryManager, memoryToFree, currentOccupiedBlock->size);
+			setBlockNotUsed(memoryManager->occupiedBlocksState, currentOccupiedBlock->index);
+			uint64_t size = currentOccupiedBlock->size;
+			currentOccupiedBlock = NULL;
+			// printBlocks(memoryManager);
+			return size;
 		}
+		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
+	}
+	return 0;
+}
+
+void printBlocks(MemoryManagerADT const memoryManager)
+{
+	printf("\n", 0);
+	printf("Free blocks:\n", 0);
+	printf("\n", 0);
+	MemoryBlock *currentFreeBlock = memoryManager->firstFreeBlock;
+	while (currentFreeBlock != NULL)
+	{
+		printf("Free Block Index: %d Start address: %x, size: %x\n", 3, currentFreeBlock->index, currentFreeBlock->startAddress, currentFreeBlock->size);
+		currentFreeBlock = currentFreeBlock->nextBlock;
+	}
+	printf("\n", 0);
+	printf("Occupied blocks:\n", 0);
+	printf("\n", 0);
+	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
+	while (currentOccupiedBlock != NULL)
+	{
+		printf("Occupied Block Index: %d Start address: %x, size: %x\n", 3, currentOccupiedBlock->index, currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
 	}
 }
@@ -129,63 +167,80 @@ uint64_t getFirstNotUsedBlock(uint64_t *memory)
 	return bit;
 }
 
-void addBlockToList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size, uint8_t listType)
+void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
 {
-	MemoryBlock *currentBlock = listType == FREE ? memoryManager->firstFreeBlock : memoryManager->firstOccupiedBlock;
+	MemoryBlock *currentBlock = memoryManager->firstFreeBlock;
 	uint64_t index = getFirstNotUsedBlock(memoryManager->freeBlocksState);
-	MemoryBlock *newBlock;
-	if (listType == FREE)
-	{
-		newBlock = (MemoryBlock *)((uint64_t *)memoryManager + MEMORY_MANAGER_STRUCT_SIZE + index * BLOCK_STRUCT_SIZE);
-		setBlockUsed(memoryManager->freeBlocksState, index);
-	}
-	else
-	{
-		newBlock = (MemoryBlock *)((uint64_t *)memoryManager + MEMORY_MANAGER_STRUCT_SIZE + BLOCK_QUANTITY * BLOCK_STRUCT_SIZE + index * BLOCK_STRUCT_SIZE);
-		setBlockUsed(memoryManager->occupiedBlocksState, index);
-	}
-	newBlock->startAddress = startAddress;
-	newBlock->size = size;
-	newBlock->index = index;
-	newBlock->nextBlock = NULL;
-	newBlock->prevBlock = NULL;
-
+	MemoryBlock *newBlock = (MemoryBlock *)((uint64_t *)memoryManager + MEMORY_MANAGER_STRUCT_SIZE + index * BLOCK_STRUCT_SIZE);
+	setBlockUsed(memoryManager->freeBlocksState, index);
+	initializeBlock(newBlock, startAddress, size, index);
 	if (currentBlock == NULL)
 	{
-		if (listType == FREE)
-			memoryManager->firstFreeBlock = newBlock;
-		else
-			memoryManager->firstOccupiedBlock = newBlock;
+		memoryManager->firstFreeBlock = newBlock;
 		return;
 	}
 	while (currentBlock->nextBlock != NULL && currentBlock->startAddress < startAddress)
 		currentBlock = currentBlock->nextBlock;
 
 	// merge newBlock if adjacent
-	if (listType == FREE)
+	if (newBlock->startAddress + newBlock->size == currentBlock->startAddress)
 	{
-		if (newBlock->startAddress + newBlock->size == currentBlock->startAddress)
-		{
-			newBlock->size += currentBlock->size;
-			newBlock->nextBlock = currentBlock->nextBlock;
-			newBlock->prevBlock = currentBlock->prevBlock;
-			if (currentBlock->nextBlock != NULL)
-				currentBlock->nextBlock->prevBlock = newBlock;
-			if (currentBlock->prevBlock != NULL)
-				currentBlock->prevBlock->nextBlock = newBlock;
-			return;
-		}
-		if (currentBlock->prevBlock != NULL && currentBlock->prevBlock->startAddress + currentBlock->prevBlock->size == newBlock->startAddress)
-		{
-			currentBlock->prevBlock->size += newBlock->size;
-			setBlockNotUsed(memoryManager->freeBlocksState, newBlock->index);
-			newBlock = NULL;
-			return;
-		}
+		newBlock->size += currentBlock->size;
+		newBlock->nextBlock = currentBlock->nextBlock;
+		newBlock->prevBlock = currentBlock->prevBlock;
+		if (currentBlock->nextBlock != NULL)
+			currentBlock->nextBlock->prevBlock = newBlock;
+		if (currentBlock->prevBlock != NULL)
+			currentBlock->prevBlock->nextBlock = newBlock;
+		setBlockNotUsed(memoryManager->freeBlocksState, currentBlock->index);
+		currentBlock = NULL;
+		return;
+	}
+	if (currentBlock->prevBlock != NULL && currentBlock->prevBlock->startAddress + currentBlock->prevBlock->size == newBlock->startAddress)
+	{
+		currentBlock->prevBlock->size += newBlock->size;
+		setBlockNotUsed(memoryManager->freeBlocksState, newBlock->index);
+		newBlock = NULL;
+		return;
 	}
 	newBlock->nextBlock = currentBlock;
 	newBlock->prevBlock = currentBlock->prevBlock;
 	if (currentBlock->prevBlock != NULL)
 		currentBlock->prevBlock->nextBlock = newBlock;
+	else
+		memoryManager->firstFreeBlock = newBlock;
 	currentBlock->prevBlock = newBlock;
+}
+
+void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
+{
+	MemoryBlock *currentBlock = memoryManager->firstOccupiedBlock;
+	uint64_t index = getFirstNotUsedBlock(memoryManager->occupiedBlocksState);
+	// printf("New occupied block index: %d\n", 1, index);
+	MemoryBlock *newBlock = (MemoryBlock *)((uint64_t *)memoryManager + MEMORY_MANAGER_STRUCT_SIZE + BLOCK_QUANTITY * BLOCK_STRUCT_SIZE + index * BLOCK_STRUCT_SIZE);
+	setBlockUsed(memoryManager->occupiedBlocksState, index);
+	initializeBlock(newBlock, startAddress, size, index);
+	if (currentBlock == NULL)
+	{
+		memoryManager->firstOccupiedBlock = newBlock;
+		return;
+	}
+	while (currentBlock->nextBlock != NULL && currentBlock->startAddress < startAddress)
+		currentBlock = currentBlock->nextBlock;
+	newBlock->nextBlock = currentBlock;
+	newBlock->prevBlock = currentBlock->prevBlock;
+	if (currentBlock->prevBlock != NULL)
+		currentBlock->prevBlock->nextBlock = newBlock;
+	else
+		memoryManager->firstOccupiedBlock = newBlock;
+	currentBlock->prevBlock = newBlock;
+}
+
+void initializeBlock(MemoryBlock *block, void *const startAddress, const uint64_t size, uint64_t index)
+{
+	block->startAddress = startAddress;
+	block->size = size;
+	block->index = index;
+	block->nextBlock = NULL;
+	block->prevBlock = NULL;
 }

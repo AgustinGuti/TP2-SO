@@ -11,11 +11,11 @@
 
 typedef struct MemoryManagerCDT *MemoryManagerADT;
 
-MemoryManagerADT createMemoryManager(void *const memoryForMemoryManager, void *const managedMemory, uint64_t managedMemorySize);
+MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const managedMemory, void *const memoryForMemoryManager, void *const memoryForManagerEnd);
 
 void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToAllocate);
 
-void freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree);
+uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree);
 
 uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap);
 
