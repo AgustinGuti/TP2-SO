@@ -1,6 +1,9 @@
 #include <sysCalls.h>
-//#include <memoryManager.h>
+#include <MemoryManager.h>
 #include <buddyMemory.h>
+
+#define MEMORY_INITIAL_DIRECTION 0x400000
+#define MEMORY_TO_MAP_SIZE 0x10000000 - MEMORY_INITIAL_DIRECTION
 
 #define OUT_LETTER_COLOR BLACK // Blanco sobre negro
 #define OUT_BACK_COLOR BLACK
@@ -43,36 +46,37 @@ extern uint64_t savedRegisters[REGISTER_QTY];
 extern char haveSaved;
 extern void saveCurrentRegs();
 
-//MemoryManagerADT memoryManager;
+MemoryManagerADT memoryManager;
 
-// void setupSysCalls(){
-//     memoryManager = createMemoryManager((void*)0x400000 - MANAGED_MEMORY_SIZE, (void *)0x400000);
-//     _setupSysCalls(READY_CALLS, sysCalls);
-// }
-
-BuddyADT memoryManager;
-
-#define MEMORY_INITIAL_DIRECTION 0x400000
-#define MEMORY_TO_MAP_SIZE 0x10000000 - MEMORY_INITIAL_DIRECTION
-
-void setupSysCalls(){
-    //BuddyADT init_buddy(uint64_t size, uint64_t initialDirection, uint64_t memoryForBuddy, uint64_t memoryForBuddyEnd, uint16_t minBlockSize);
-
-    memoryManager = init_buddy((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredBuddySize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t)MEMORY_INITIAL_DIRECTION-1);
+void setupSysCalls()
+{
+    // MemoryManagerADT createMemoryManager(void *const memoryForMemoryManager, void *const managedMemory, uint64_t managedMemorySize);
+    memoryManager = createMemoryManager((uint64_t *)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t *)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_TO_MAP_SIZE);
     _setupSysCalls(READY_CALLS, sysCalls);
 }
 
+// BuddyADT memoryManager;
 
-void sys_write(int fd, const char *buf, uint64_t count){
-    switch (fd){
-        case STDOUT:
-            printStringLimited(0xFFFFFF,buf,count);
-            break;
-        case STDERR:
-            printStringLimited(0xFF0000,buf,count);
-            break;
-        default:
-            break;
+// void setupSysCalls()
+// {
+//     // BuddyADT init_buddy(uint64_t size, uint64_t initialDirection, uint64_t memoryForBuddy, uint64_t memoryForBuddyEnd, uint16_t minBlockSize);
+
+//     memoryManager = init_buddy((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredBuddySize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t)MEMORY_INITIAL_DIRECTION - 1);
+//     _setupSysCalls(READY_CALLS, sysCalls);
+// }
+
+void sys_write(int fd, const char *buf, uint64_t count)
+{
+    switch (fd)
+    {
+    case STDOUT:
+        printStringLimited(0xFFFFFF, buf, count);
+        break;
+    case STDERR:
+        printStringLimited(0xFF0000, buf, count);
+        break;
+    default:
+        break;
     }
 }
 
