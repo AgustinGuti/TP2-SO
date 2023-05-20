@@ -96,7 +96,6 @@ inline void givenAMemoryManager(CuTest *const cuTest)
   }
 
   memoryManager = createMemoryManager((uint64_t)MANAGED_MEMORY_SIZE, (uint64_t)managedMemory, (uint64_t)memoryForMemoryManager, (uint64_t)memoryForMemoryManager + calculateRequiredBuddySize(MANAGED_MEMORY_SIZE));
-
 }
 
 inline void givenAMemoryAmount()
