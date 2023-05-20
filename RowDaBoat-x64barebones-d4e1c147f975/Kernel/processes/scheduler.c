@@ -19,6 +19,8 @@ typedef struct SchedulerCDT{
     LinkedList processList;
     Process currentProcess;
     Process it;
+    int quantum;
+    int quantumCounter;
 }SchedulerCDT;
 
 static Scheduler scheduler = NULL;
@@ -43,20 +45,27 @@ void initScheduler() {
     int kernelPID = createProcess("Kernel", NULL, 0, 1, NULL);
     scheduler->it = iterator(scheduler->processList);
     scheduler->currentProcess = getProcess(kernelPID);
+    scheduler->quantum = BURST_TIME;
+    scheduler->quantumCounter = BURST_TIME-1;
 }
 
 
 void * schedule(void* rsp) {
     if (scheduler != NULL){
-        scheduler->currentProcess->stackPointer = rsp;
-        if (scheduler->currentProcess->state == RUNNING){
-            scheduler->currentProcess->state = READY;
+        scheduler->quantumCounter++;
+        if( scheduler->quantumCounter >= scheduler->quantum){
+            scheduler->quantumCounter = 0;
+            scheduler->currentProcess->stackPointer = rsp;
+            if (scheduler->currentProcess->state == RUNNING){
+                scheduler->currentProcess->state = READY;
+            }    
+            scheduler->currentProcess = getNextProcess();
+            if (scheduler->currentProcess != NULL){
+                //printf("Next process: %d\n", 1, scheduler->currentProcess->pid);
+                scheduler->currentProcess->state = RUNNING;
+                return scheduler->currentProcess->stackPointer;
+            }      
         }
-        scheduler->currentProcess = getNextProcess();
-        if (scheduler->currentProcess != NULL){
-            scheduler->currentProcess->state = RUNNING;
-            return scheduler->currentProcess->stackPointer;
-        }              
     }
     return rsp; //TODO noop
 }
@@ -79,6 +88,7 @@ int fork() {
 }
 
 void yield() {
+    scheduler->quantumCounter = scheduler->quantum;
     triggerTimer();
 }
 
@@ -179,6 +189,7 @@ void killProcess() {
         Process kernel = getProcess(-1);
         kernel->state = READY;
     }
+    scheduler->quantumCounter = scheduler->quantum;
     triggerTimer();
 }
 
