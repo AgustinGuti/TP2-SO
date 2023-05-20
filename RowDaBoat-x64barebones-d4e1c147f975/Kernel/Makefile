@@ -2,18 +2,45 @@ include Makefile.inc
 
 KERNEL=kernel.bin
 SOURCES=$(wildcard *.c)
-SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS=$(SOURCES:.c=.o)
+
+SOURCES_SYS=$(wildcard sys/*.c)
+OBJECTS_SYS=$(SOURCES_SYS:.c=.o)
+
+SOURCES_MEM := $(wildcard memory/*.c)
+SOURCES_MEM := $(filter-out memory/buddyMemory.c, $(SOURCES_MEM))
+OBJECTS_MEM := $(SOURCES_MEM:.c=.o)
+
+SOURCES_MEM2 := $(wildcard memory/*.c)
+SOURCES_MEM2 := $(filter-out memory/memoryManager.c, $(SOURCES_MEM2))
+OBJECTS_MEM2 := $(SOURCES_MEM2:.c=.o)
+
+SOURCES_PROCESSES=$(wildcard processes/*.c)
+OBJECTS_PROCESSES=$(SOURCES_PROCESSES:.c=.o)
+
+SOURCES_DRIVERS=$(wildcard drivers/*.c)
+OBJECTS_DRIVERS=$(SOURCES_DRIVERS:.c=.o)
+
+SOURCES_LIB=$(wildcard lib/*.c)
+OBJECTS_LIB=$(SOURCES_LIB:.c=.o)
+
+SOURCES_SYSCALLS=$(wildcard syscalls/*.c)
+OBJECTS_SYSCALLS=$(SOURCES_SYSCALLS:.c=.o)
+
+SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
 LOADERSRC=loader.asm
 
 LOADEROBJECT=$(LOADERSRC:.asm=.o)
 STATICLIBS=
 
-all: $(KERNEL)
+all: $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(OBJECTS_SYS) $(OBJECTS_MEM) $(OBJECTS_PROCESSES) $(OBJECTS_DRIVERS) $(OBJECTS_LIB) $(OBJECTS_STRUCTURES) $(OBJECTS_SYSCALLS) 
+	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_SYS) $(OBJECTS_MEM) $(OBJECTS_PROCESSES) $(OBJECTS_DRIVERS) $(OBJECTS_LIB) $(OBJECTS_STRUCTURES) $(OBJECTS_SYSCALLS) $(STATICLIBS)
+#	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_SYS) $(OBJECTS_MEM) $(OBJECTS_PROCESSES) $(OBJECTS_DRIVERS) $(OBJECTS_LIB) $(OBJECTS_STRUCTURES) $(OBJECTS_SYSCALLS) $(STATICLIBS)
 
-$(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+buddy: $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(OBJECTS_SYS) $(OBJECTS_MEM2) $(OBJECTS_PROCESSES) $(OBJECTS_DRIVERS) $(OBJECTS_LIB) $(OBJECTS_STRUCTURES) $(OBJECTS_SYSCALLS) 
+	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_SYS) $(OBJECTS_MEM2) $(OBJECTS_PROCESSES) $(OBJECTS_DRIVERS) $(OBJECTS_LIB) $(OBJECTS_STRUCTURES) $(OBJECTS_SYSCALLS) $(STATICLIBS)
+#	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_SYS) $(OBJECTS_KERNEL) $(OBJECTS_MEM2) $(OBJECTS_PROCESSES) $(OBJECTS_DRIVERS) $(OBJECTS_LIB) $(OBJECTS_STRUCTURES) $(OBJECTS_SYSCALLS) $(STATICLIBS)
 
 %.o: %.c
 	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
@@ -25,6 +52,47 @@ $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o *.o *.bin
+	rm -rf asm/*.o
+	rm -rf task/*.o
+	rm -rf functions/*.o
+	rm -rf sys/*.o 
+	rm -rf kernel/*.o 
+	rm -rf memory/*.o 
+	rm -rf drivers/*.o
+	rm -rf syscalls/*.o
+	rm -rf structures/*.o
+	rm -rf *.o
 
 .PHONY: all clean
+
+
+# include Makefile.inc
+
+# KERNEL=kernel.bin
+# SOURCES=$(wildcard *.c)
+# SOURCES_ASM=$(wildcard asm/*.asm)
+# OBJECTS=$(SOURCES:.c=.o)
+# OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
+# LOADERSRC=loader.asm
+
+# LOADEROBJECT=$(LOADERSRC:.asm=.o)
+# STATICLIBS=
+
+# all: $(KERNEL)
+
+# $(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
+# 	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+
+# %.o: %.c
+# 	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+
+# %.o : %.asm
+# 	$(ASM) $(ASMFLAGS) $< -o $@
+
+# $(LOADEROBJECT):
+# 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
+
+# clean:
+# 	rm -rf asm/*.o *.o *.bin
+
+# .PHONY: all clean
