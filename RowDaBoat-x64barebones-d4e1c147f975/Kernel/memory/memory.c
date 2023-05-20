@@ -1,5 +1,4 @@
 #include <memory.h>
-#include "MemoryManager.h"
 
 MemoryManagerADT myMemoryManager;
 

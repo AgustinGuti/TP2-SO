@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "MemoryManager.h"
+#include "memoryManager.h"
 
 
 MemoryManagerADT initializeMemoryManager(uint64_t size, uint64_t initialDirection, uint64_t memoryForManager, uint64_t memoryForManagerEnd);

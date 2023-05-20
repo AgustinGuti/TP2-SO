@@ -1,4 +1,4 @@
-#include <MemoryManager.h>
+#include <memoryManager.h>
 
 #include <lib.h>
 #include <math.h>
@@ -85,7 +85,7 @@ long getBlockIndex(MemoryManagerADT  buddy, void* address) {
     return bit;
 }
 
-uint64_t calculateRequiredBuddySize(uint64_t memoryToMap){
+uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap){
     uint64_t buddySize = 0;
     uint64_t memoryToMapAligned = alignMemoryToBlock(memoryToMap);
     uint64_t memoryToMapInBlocks = (memoryToMapAligned / MIN_BLOCK_SIZE) * 2 - 1;
@@ -94,16 +94,16 @@ uint64_t calculateRequiredBuddySize(uint64_t memoryToMap){
     return buddySize;
 }
 
-MemoryManagerADT createMemoryManager(uint64_t size, uint64_t initialDirection, uint64_t memoryForBuddyStart, uint64_t memoryForBuddyEnd) {
-    uint64_t memoryToMapAligned = alignMemoryToBlock(size);
-    if (memoryForBuddyEnd - memoryForBuddyStart < calculateRequiredBuddySize(memoryToMapAligned)){
+MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const managedMemory,  void *const  memoryForMemoryManager, void *const memoryForManagerEnd) {
+    uint64_t memoryToMapAligned = alignMemoryToBlock(managedMemorySize);
+    if (memoryForManagerEnd - memoryForMemoryManager < calculateRequiredMemoryManagerSize(memoryToMapAligned)){
         return NULL;
     }
-    MemoryManagerADT buddy = (MemoryManagerADT)memoryForBuddyStart;
-    buddy->size = size;
+    MemoryManagerADT buddy = (MemoryManagerADT)memoryForMemoryManager;
+    buddy->size = managedMemorySize;
     buddy->neededBlocks = (memoryToMapAligned/MIN_BLOCK_SIZE) * 2 - 1; //Suma de potencias de 2 hasta size es 2**(size+1) - 1
-    buddy->initialDirection = initialDirection;
-    buddy->memory = (uint64_t*) (memoryForBuddyStart + BUDDY_STRUCT_SIZE);
+    buddy->initialDirection = managedMemory;
+    buddy->memory = (uint64_t*) (memoryForMemoryManager + BUDDY_STRUCT_SIZE);
     memset(buddy->memory, 0, (buddy->neededBlocks+1)/64);
     return buddy;
 }
