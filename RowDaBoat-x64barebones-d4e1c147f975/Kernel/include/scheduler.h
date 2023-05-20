@@ -7,6 +7,7 @@
 #include "functions.h"
 
 #define STACK_SIZE 4096
+#define BURST_TIME 10
 
 typedef enum {READY, RUNNING, BLOCKED, ZOMBIE} processState;
 typedef int pid_t;
