@@ -1,6 +1,7 @@
 #include <sysCalls.h>
 #include <MemoryManager.h>
 #include <memory.h>
+#include <scheduler.h>
 
 #define OUT_LETTER_COLOR BLACK // Blanco sobre negro
 #define OUT_BACK_COLOR BLACK
@@ -9,7 +10,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 18 // functions quantity in sysCalls[]
+#define READY_CALLS 19 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -31,12 +32,17 @@ void *sys_malloc(uint64_t size);
 uint64_t sys_free(void *ptr);
 int sys_fork();
 int sys_execve(void* entryPoint, char * const argv[]);
+void sys_printProcesses();
+
+//TODO
+void sys_exit(int status);
+void sys_yield();
 
 static uint64_t sysCalls[] = {(uint64_t)&sys_write, (uint64_t)&sys_read, (uint64_t)&sys_drawSprite, (uint64_t)&sys_getMillis,
                               (uint64_t)&sys_cleanScreen, (uint64_t)&sys_getScreenWidth, (uint64_t)&sys_getScreenHeight,
                               (uint64_t)&sys_beep, (uint64_t)&sys_getTime, (uint64_t)&sys_setFontSize, (uint64_t)&sys_getFontSize,
                               (uint64_t)&sys_formatWrite, (uint64_t)&sys_getScreenBpp, (uint64_t)&sys_getSavedRegisters, (uint64_t)&sys_malloc,
-                              (uint64_t)&sys_free, (uint64_t)&sys_fork, (uint64_t)sys_execve};
+                              (uint64_t)&sys_free, (uint64_t)&sys_fork, (uint64_t)sys_execve, (uint64_t)&sys_printProcesses};
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
 extern void _speaker_tune(uint16_t tune);
@@ -189,4 +195,9 @@ char sys_getSavedRegisters(uint64_t registers[REGISTER_QTY])
         registers[i] = savedRegisters[i];
     }
     return 1;
+}
+
+void sys_printProcesses()
+{
+    printProcesses();
 }

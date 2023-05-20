@@ -16,6 +16,7 @@ GLOBAL _sys_malloc
 GLOBAL _sys_free
 GLOBAL _sys_fork
 GLOBAL _sys_execve
+GLOBAL _sys_printProcesses
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -226,6 +227,18 @@ _sys_execve:
     mov rbp, rsp
     
     mov rax, 17     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_printProcesses();
+_sys_printProcesses:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 18     ;id 
     int 80h
 
     mov rsp, rbp

@@ -3,6 +3,7 @@
 
 enum {RAX, RBX, RCX, RDX, RBP, RDI, RSI, R8, R9, R10, R11, R12, R13, R14, R15};
 
+#define KERNEL_PID -1
 typedef struct ProcessCDT{
     pid_t pid;
     char *name;
@@ -21,7 +22,7 @@ typedef struct SchedulerCDT{
 }SchedulerCDT;
 
 static Scheduler scheduler = NULL;
-static pid_t currentPID = 0;  // Static variable to track the current PID
+static pid_t currentPID = KERNEL_PID;  // Static variable to track the current PID
 
 static Process processList[1];   //  printf("RSP: %x\n",1, stackPointer);
   //La primera vez que me llama el kernel tengo que guardar su stackPointer en algun lado
@@ -60,15 +61,15 @@ void * schedule(void* rsp) {
     return rsp; //TODO noop
 }
 
-void printProcesses(){
-    Process it = iterator(scheduler->processList);
-    int count = 0;
-    while (count < getSize(scheduler->processList)){
-        printf("Process %s with pid %d\n", 2, ((Process)getData(it))->name, ((Process)getData(it))->pid);
-        it = next(it);
-        count++;
-    }
-}
+// void printProcesses(){
+//     Process it = iterator(scheduler->processList);
+//     int count = 0;
+//     while (count < getSize(scheduler->processList)){
+//         printf("Process %s with pid %d\n", 2, ((Process)getData(it))->name, ((Process)getData(it))->pid);
+//         it = next(it);
+//         count++;
+//     }
+// }
 
 Process getNextProcess() {
     scheduler->it = next(scheduler->it);
@@ -117,10 +118,45 @@ Process getProcess(pid_t pid){
     return NULL;
 }
 
+//Tenemos que usar una carpeta tipo /proc, o alcanza con esto?
+void printProcesses(){
+    Process it = iterator(scheduler->processList);
+    int count = 0;
+    printf("  Nombre    PID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n", 0);
+    while (count < getSize(scheduler->processList)){
+        if (((Process)getData(it))->pid != KERNEL_PID){
+            int nameLenght = strlen(((Process)getData(it))->name);
+            printf(" %s  ", 1, ((Process)getData(it))->name);
+            if (nameLenght < 10){
+                for (int i = 0; i < 10 - nameLenght; i++){
+                    printf(" ", 0);
+                }
+            }
+            printf("%d       %d          %d         0x%x       0x%x", 5, ((Process)getData(it))->pid, ((Process)getData(it))->priority, ((Process)getData(it))->foreground, ((Process)getData(it))->stackPointer, ((Process)getData(it))->stackBase);
+            char state = ((Process)getData(it))->state;
+            switch(state){
+                case 0:
+                    printf("    READY\n", 0);
+                    break;
+                case 1:
+                    printf("    RUNNING\n", 0);
+                    break;
+                case 2:
+                    printf("    BLOCKED\n", 0);
+                    break;
+                case 3:
+                    printf("    ZOMBIE\n", 0);
+                    break;
+            }
+        }
+        it = next(it);
+        count++;
+    }
+}
+
 void killProcess() {
     scheduler->currentProcess->state = ZOMBIE;
-    if (scheduler->currentProcess->pid <= 1){
-        printf("Killing process %d\n", 1, scheduler->currentProcess->pid);
+    if (scheduler->currentProcess->pid > 0){
         Process kernel = getProcess(0);
         kernel->state = READY;
     }
