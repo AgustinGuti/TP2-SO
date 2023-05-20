@@ -1,5 +1,10 @@
 #include <functions.h>
 
+int strcmp(const char* str1, const char* str2) {
+	for (; *str1 == *str2 && *str1 != '\0'; str1++, str2++);
+	return *str1 - *str2;
+}
+
 void hexToStr(char * char_num, long num){
 	  int digits = hexNumLength(num);
     if(num < 0){

@@ -74,12 +74,6 @@ int startConsole(){
     return 1;
 }
 
-int strcmp(const char* str1, const char* str2) {
-	for (; *str1 == *str2 && *str1 != '\0'; str1++, str2++);
-	return *str1 - *str2;
-}
-
-
 //Returns exit status
 char processCommand(uint8_t *str, int length){
     char command[length];

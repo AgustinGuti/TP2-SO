@@ -61,16 +61,6 @@ void * schedule(void* rsp) {
     return rsp; //TODO noop
 }
 
-// void printProcesses(){
-//     Process it = iterator(scheduler->processList);
-//     int count = 0;
-//     while (count < getSize(scheduler->processList)){
-//         printf("Process %s with pid %d\n", 2, ((Process)getData(it))->name, ((Process)getData(it))->pid);
-//         it = next(it);
-//         count++;
-//     }
-// }
-
 Process getNextProcess() {
     scheduler->it = next(scheduler->it);
     int count = 0;
@@ -167,6 +157,20 @@ void printProcesses(){
         it = next(it);
         count++;
     }
+}
+
+void blockProcess(int pid) {
+    if (pid == scheduler->currentProcess->pid){
+        scheduler->currentProcess->state = BLOCKED;
+        triggerTimer();
+    }
+    Process process = getProcess(pid);
+    process->state = BLOCKED;
+}
+
+void unblockProcess(int pid) {
+    Process process = getProcess(pid);
+    process->state = READY;
 }
 
 void killProcess() {

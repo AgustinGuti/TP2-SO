@@ -20,6 +20,11 @@ GLOBAL _sys_printProcesses
 GLOBAL _sys_exit
 GLOBAL _sys_getpid
 GLOBAL _sys_yield
+GLOBAL _sys_block
+GLOBAL _sys_semOpen
+GLOBAL _sys_semClose
+GLOBAL _sys_semWait
+GLOBAL _sys_semPost
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -278,6 +283,66 @@ _sys_getpid:
     mov rbp, rsp
     
     mov rax, 21     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_block(int pid);
+_sys_block:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 22     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_semOpen(char *name, int value);
+_sys_semOpen:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 23     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_semClose(sem_t sem);
+_sys_semClose:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 24     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_semWait(sem_t sem);
+_sys_semWait:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 25     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_semPost(sem_t sem);
+_sys_semPost:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 26     ;id 
     int 80h
 
     mov rsp, rbp

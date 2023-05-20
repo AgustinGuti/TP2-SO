@@ -23,5 +23,7 @@ void printProcesses();
 pid_t getpid();
 void yield();
 void exit(int value);
+void blockProcess(int pid);
+void unblockProcess(int pid);
 
 #endif /* SCHEDULER_H */

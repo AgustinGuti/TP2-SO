@@ -1,17 +1,37 @@
 #include <testProcesses.h>
 
+
+int a = 100;
+sem_t sem;
+
 void processA() {
-    for (int i = 0; i < 100; i++){
+    //blockProcess(getpid());
+    sem_t sem = semOpen("test", 1);
+    semWait(sem);
+    if (a >= 100){
         yield();
+        a -= 100;
     }
-    printf("Process A PID: %d\n", 1, getpid());
+    semPost(sem);
+    // for (int i = 0; i < 10; i++){
+    //     yield();
+    // }
+
+    printf("Process A PID: %d A: %d\n", 2, getpid(), a+1);
     exit(0);
 }
 
 void processB() {
-    for (int i = 0; i < 100; i++){
+    sem_t sem = semOpen("test", 1);
+    semWait(sem);
+    if (a >= 100){
         yield();
+        a -= 100;
     }
-    printf("Process B PID: %d\n", 1, getpid());
+    semPost(sem);
+    // for (int i = 0; i < 10; i++){
+    //     yield();
+    // }
+    printf("Process B PID: %d A: %d\n", 2, getpid(), a+1);
     return;
 }

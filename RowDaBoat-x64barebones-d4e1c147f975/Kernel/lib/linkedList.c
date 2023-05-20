@@ -38,7 +38,7 @@ void destroyLinkedList(LinkedList list) {
     free(list);
 }
 
-void insert(struct LinkedListCDT* list, void* data) {
+void insert(LinkedList list, void* data) {
     if (list == NULL)
         return;
 
