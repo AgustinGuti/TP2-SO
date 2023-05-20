@@ -436,7 +436,7 @@ section .data
 	textTest db "ASM RSP: %x", 0
 
 section .bss
-	maxSysCall resb 19
+	maxSysCall resb 22
 	sysCallsPointers resb 256		;Alcanza para 32 sysCalls
 	registers resq 17
 

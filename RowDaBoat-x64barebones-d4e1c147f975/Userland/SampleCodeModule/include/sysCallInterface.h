@@ -22,6 +22,10 @@ uint8_t _sys_getScreenBpp();
 char _sys_getSavedRegisters(uint64_t registers[17]);
 void _sys_formatWrite(int fd, const char *buf, uint64_t count, uint32_t color,uint16_t row, uint16_t col);
 void _sys_drawSprite(uint16_t xTopLeft, uint16_t yTopLeft, uint16_t width, uint16_t height, uint8_t sprite[height][width*_sys_getScreenBpp()/8]);
+void _sys_exit(int status);
+void _sys_yield();
+int _sys_getpid();
+int _sys_fork();
 
 
 #endif

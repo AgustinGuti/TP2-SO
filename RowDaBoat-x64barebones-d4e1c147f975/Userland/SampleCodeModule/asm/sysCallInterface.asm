@@ -17,6 +17,9 @@ GLOBAL _sys_free
 GLOBAL _sys_fork
 GLOBAL _sys_execve
 GLOBAL _sys_printProcesses
+GLOBAL _sys_exit
+GLOBAL _sys_getpid
+GLOBAL _sys_yield
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -239,6 +242,42 @@ _sys_printProcesses:
     mov rbp, rsp
     
     mov rax, 18     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_exit();
+_sys_exit:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 19     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_yield();
+_sys_yield:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 20     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;int sys_getpid();
+_sys_getpid:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 21     ;id 
     int 80h
 
     mov rsp, rbp

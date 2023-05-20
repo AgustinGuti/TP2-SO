@@ -88,6 +88,18 @@ int fork() {
     return -1;
 }
 
+void yield() {
+    triggerTimer();
+}
+
+void exit(int value) {
+    killProcess();
+}
+
+pid_t getpid() {
+    return scheduler->currentProcess->pid;
+}
+
 int execve(void* entryPoint, char * const argv[]){
     return createProcess(argv[0], entryPoint, 1, 1, argv);
 }
@@ -103,7 +115,6 @@ void pushToStack(Process process, uint64_t value) {
 uint64_t popFromStack(Process process) {
     return *(process->stackPointer++);
 }
-
 
 Process getProcess(pid_t pid){
     Process it = iterator(scheduler->processList);
@@ -123,6 +134,10 @@ void printProcesses(){
     Process it = iterator(scheduler->processList);
     int count = 0;
     printf("  Nombre    PID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n", 0);
+    //Empezamos a imprimir desde el primer proceso que no es el kernel
+    while (((Process)getData(it))->pid > 0){ 
+        it = next(it);
+    }
     while (count < getSize(scheduler->processList)){
         if (((Process)getData(it))->pid != KERNEL_PID){
             int nameLenght = strlen(((Process)getData(it))->name);
@@ -135,17 +150,17 @@ void printProcesses(){
             printf("%d       %d          %d         0x%x       0x%x", 5, ((Process)getData(it))->pid, ((Process)getData(it))->priority, ((Process)getData(it))->foreground, ((Process)getData(it))->stackPointer, ((Process)getData(it))->stackBase);
             char state = ((Process)getData(it))->state;
             switch(state){
-                case 0:
+                case READY:
                     printf("    READY\n", 0);
                     break;
-                case 1:
+                case RUNNING:
                     printf("    RUNNING\n", 0);
                     break;
-                case 2:
+                case BLOCKED:
                     printf("    BLOCKED\n", 0);
                     break;
-                case 3:
-                    printf("    ZOMBIE\n", 0);
+                case ZOMBIE:
+                    printf("    KILLED\n", 0);
                     break;
             }
         }
@@ -156,8 +171,8 @@ void printProcesses(){
 
 void killProcess() {
     scheduler->currentProcess->state = ZOMBIE;
-    if (scheduler->currentProcess->pid > 0){
-        Process kernel = getProcess(0);
+    if (scheduler->currentProcess->pid == 0){
+        Process kernel = getProcess(-1);
         kernel->state = READY;
     }
     triggerTimer();

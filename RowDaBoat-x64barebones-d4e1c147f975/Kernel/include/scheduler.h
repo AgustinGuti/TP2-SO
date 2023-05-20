@@ -20,6 +20,8 @@ int fork();
 int execve(void* entryPoint, char * const argv[]);
 pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t foreground, char * argv[]);
 void printProcesses();
-
+pid_t getpid();
+void yield();
+void exit(int value);
 
 #endif /* SCHEDULER_H */

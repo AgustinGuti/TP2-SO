@@ -16,7 +16,7 @@ char time(uint8_t argumentQty, char arguments[argumentQty]);
 char callZeroDivision(uint8_t argumentQty, char arguments[argumentQty]);
 char callInvalidOpcode(uint8_t argumentQty, char arguments[argumentQty]);
 char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty]);
-char exit(uint8_t argumentQty, char arguments[argumentQty]);
+char exitConsole(uint8_t argumentQty, char arguments[argumentQty]);
 char callInforeg(uint8_t argumentQty, char arguments[argumentQty]);
 char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty]);
 char callMalloc(uint8_t argumentQty, char arguments[argumentQty]);
@@ -27,7 +27,7 @@ char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty]);
 #define COMMAND_QTY 15
 
 static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free", "exec", "ps"};
-static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exit,&callHimnoAlegria,&callMalloc, &callFree, &callExec, &callPrintProcesses}; 
+static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exitConsole,&callHimnoAlegria,&callMalloc, &callFree, &callExec, &callPrintProcesses}; 
 static char *commandDescriptions[COMMAND_QTY] = 
         {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
          "Vacia la consola.",
@@ -280,7 +280,7 @@ char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty]){
     return 0;
 }
 
-char exit(uint8_t argumentQty, char arguments[argumentQty]){
+char exitConsole(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
         printf("Argumento invalido para time\n", 0);
     }else{
