@@ -19,6 +19,10 @@
         "string": "c",
         "string_view": "c",
         "linkedlist.h": "c",
-        "typeinfo": "c"
-    }
+        "typeinfo": "c",
+        "lib.h": "c",
+        "buddymemory.h": "c",
+        "videodriver.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
