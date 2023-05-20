@@ -172,6 +172,7 @@ void printProcesses(){
 void blockProcess(int pid) {
     if (pid == scheduler->currentProcess->pid){
         scheduler->currentProcess->state = BLOCKED;
+        scheduler->quantumCounter = scheduler->quantum;
         triggerTimer();
     }
     Process process = getProcess(pid);
