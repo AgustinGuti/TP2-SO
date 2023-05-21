@@ -44,7 +44,7 @@ void initScheduler() {
     for(int i = 0; i < MAX_PRIORITY; i++){
         scheduler->queue[i] = createLinkedList();
     }
-    int kernelPID = createProcess("Kernel", NULL, 1, 1, NULL);
+    int kernelPID = createProcess("Kernel", NULL, 1, 0, NULL);
     scheduler->currentProcess = getProcess(kernelPID);
     scheduler->quantum = BURST_TIME;
     scheduler->quantumCounter = BURST_TIME-1;
@@ -125,15 +125,8 @@ pid_t getpid() {
     return scheduler->currentProcess->pid;
 }
 
-static int first = 1;
 int execve(void* entryPoint, char * const argv[]){
-    if(first){
-        first = 0;
-        return createProcess(argv[0], entryPoint, 3, 1, argv);
-    }else{
-
-    return createProcess(argv[0], entryPoint, 2, 1, argv);
-    }
+    return createProcess(argv[0], entryPoint, MAX_PRIORITY, strToNum(argv[1], 1), argv);
 }
 
 pid_t generatePID() {

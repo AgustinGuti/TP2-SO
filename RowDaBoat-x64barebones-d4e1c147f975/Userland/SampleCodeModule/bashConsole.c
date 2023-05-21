@@ -176,13 +176,22 @@ char startTron(uint8_t argumentQty, char arguments[argumentQty]){
 }
 
 char callExec(uint8_t argumentQty, char arguments[argumentQty]){
-    if(argumentQty == 0){
-        char *args[1] = {"processA"};
+    if(argumentQty <= 1){
+        char foreground[2] = "1";
+        if (argumentQty == 1){
+            if (arguments[0] == '&'){
+                strcpy(foreground, "0");
+            }else{
+                printf("Argumento invalido para exec\n");
+                return 0;
+            }
+        }
+        char *args[2] = {"processA", foreground};
         execve(&processA, args);
-        char *args2[1] = {"processB"};
+        char *args2[2] = {"processB", foreground};
         execve(&processB, args2);
     }else{
-        printf("Argumento invalido para exec\n");
+        printf("Argumentos invalidos para exec\n");
     }
     return 0;
 }

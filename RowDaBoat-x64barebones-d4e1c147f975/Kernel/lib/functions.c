@@ -99,3 +99,23 @@ int strcmp(const char* str1, const char* str2) {
 	for (; *str1 == *str2 && *str1 != '\0'; str1++, str2++);
 	return *str1 - *str2;
 }
+
+int strToNum(char * str, int longitud){
+    int neg = 0;
+
+    if(str[0] == '-'){
+      neg = 1;
+    }
+
+    int num = 0;
+
+    for(int i=neg ; i<longitud ; i++){
+      num = num*10 + str[i] - '0';
+    }
+
+    if(neg){
+      num*=-1;
+    }
+
+    return num;
+}
