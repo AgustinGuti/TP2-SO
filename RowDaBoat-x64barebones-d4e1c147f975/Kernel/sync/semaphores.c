@@ -23,17 +23,19 @@ sem_t semOpen(char *name, int value){
     }
     if (name == NULL || strlen(name) == 0 || value < 0) return NULL;
 
-    sem_t it = iterator(semaphores);
+    IteratorPtr it = iterator(semaphores);
+    sem_t sem = next(it);
     int count = 0;
     int16_t size = getSize(semaphores);
     while (count < size){
-        if (strcmp(((sem_t)getData(it))->name, name) == 0){
-            return ((sem_t)getData(it));
+        if (strcmp(sem->name, name) == 0){
+            return sem;
         }
-        it = next(it);
+        sem = next(it);
         count++;
     }
-    sem_t sem = malloc(sizeof(struct semaphore));
+    freeIterator(it);
+    sem = malloc(sizeof(struct semaphore));
     sem->name = malloc(strlen(name) + 1);
     strcpy(sem->name, name);
     sem->value = value;
@@ -55,8 +57,8 @@ void semClose(sem_t sem){
         int count = 0;
         int16_t size = getSize(semaphores);
         while (count < size){
-            if (((sem_t)getData(it))->id == sem->id){
-                removeItem(semaphores, it);
+            if (it->id == sem->id){
+                remove(semaphores, it);
                 return;
             }
             it = next(it);
@@ -92,7 +94,7 @@ void semPost(sem_t sem){
     if (sem->waiting > 0){
         sem->waiting--;
         pid_t *pid = (pid_t *)get(sem->waiting_list, 0);
-        removeItem(sem->waiting_list, pid);
+        remove(sem->waiting_list, pid);
         unblockProcess(*pid);
         return;
     }
