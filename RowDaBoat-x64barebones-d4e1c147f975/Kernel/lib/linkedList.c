@@ -38,57 +38,61 @@ void destroyLinkedList(LinkedList list) {
     free(list);
 }
 
-void insert(struct LinkedListCDT* list, void* data) {
+//new node is inserted at the end of the list
+void insert(LinkedList list, void* data) {
     if (list == NULL)
         return;
 
-    struct NodeCDT * newNode = (Node)malloc(sizeof(struct NodeCDT));
-    if (newNode == NULL)
+    struct NodeCDT * node = (struct NodeCDT*)malloc(sizeof(struct NodeCDT));
+    if (node == NULL)
         return;
 
-    newNode->data = data;
-    newNode->next = NULL;
+    node->data = data;
+    node->next = NULL;
 
-    if (list->head == NULL) {
-        list->head = newNode;
-        newNode->next = newNode;
+    if (list->size == 0) {
+        list->head = node;
+        list->tail = node;
     } else {
-        newNode->next = list->head->next;
-        list->head->next = newNode;
-        list->head = newNode; 
+        list->tail->next = node;
+        list->tail = node;
     }
 
     list->size++;
 }
 
-void removeItem(LinkedList list, void* data) {
-    if (list == NULL || list->head == NULL)
+//removes the first item in the list that contains data
+void remove(LinkedList list, void* data) {
+    if (list == NULL || list->size == 0)
         return;
 
     struct NodeCDT* current = list->head;
     struct NodeCDT* previous = NULL;
-
+    printf("list size antes: %d\n",1, list->size);
     while (current != NULL) {
         if (current->data == data) {
             if (previous == NULL) {
                 list->head = current->next;
-                if (list->head == NULL)
-                    list->tail = NULL;
             } else {
                 previous->next = current->next;
-                if (current->next == NULL)
-                    list->tail = previous;
             }
 
             free(current);
             list->size--;
+            printf("list size despues: %d\n",1, list->size);
+
             return;
         }
 
         previous = current;
         current = current->next;
     }
+    printf("list size despues: %d\n",1, list->size);
 }
+
+//returns the data of the node at index
+
+
 
 void * get(LinkedList list, int index) {
     if (list == NULL || index < 0 || index >= list->size)
@@ -112,7 +116,7 @@ void * iterator(LinkedList list) {
 }
 
 void * next(void * iterator) {
-    if (iterator == NULL)
+    if (iterator == NULL || !hasNext(iterator))
         return NULL;
 
     struct NodeCDT* node = (struct NodeCDT*)iterator;

@@ -13,7 +13,7 @@ typedef struct LinkedListCDT * LinkedList;
 LinkedList createLinkedList();
 void destroyLinkedList(LinkedList list);
 void insert(LinkedList list, void* data);
-void removeItem(LinkedList list, void* data);
+void remove(LinkedList list, void* data);
 void * get(LinkedList list, int index);
 void * iterator(LinkedList list);
 int hasNext(void * iterator);
