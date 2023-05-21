@@ -9,5 +9,6 @@ void printProcesses();
 int getpid();
 void yield();
 void exit(int value);
+void blockProcess(int pid);
 
 #endif

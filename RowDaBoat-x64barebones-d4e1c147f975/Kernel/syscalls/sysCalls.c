@@ -1,6 +1,7 @@
 #include <sysCalls.h>
 #include <memory.h>
 #include <scheduler.h>
+#include <semaphores.h>
 
 #define OUT_LETTER_COLOR BLACK // Blanco sobre negro
 #define OUT_BACK_COLOR BLACK
@@ -9,7 +10,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 22 // functions quantity in sysCalls[]
+#define READY_CALLS 27 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -35,13 +36,19 @@ void sys_printProcesses();
 void sys_exit(int status);
 void sys_yield();
 pid_t sys_getpid();
+void sys_block(int pid);
+sem_t semOpen(char *name, int value);
+void semClose(sem_t sem);
+void semWait(sem_t sem);
+void semPost(sem_t sem);
 
 static uint64_t sysCalls[] = {(uint64_t)&sys_write, (uint64_t)&sys_read, (uint64_t)&sys_drawSprite, (uint64_t)&sys_getMillis,
                               (uint64_t)&sys_cleanScreen, (uint64_t)&sys_getScreenWidth, (uint64_t)&sys_getScreenHeight,
                               (uint64_t)&sys_beep, (uint64_t)&sys_getTime, (uint64_t)&sys_setFontSize, (uint64_t)&sys_getFontSize,
                               (uint64_t)&sys_formatWrite, (uint64_t)&sys_getScreenBpp, (uint64_t)&sys_getSavedRegisters, (uint64_t)&sys_malloc,
                               (uint64_t)&sys_free, (uint64_t)&sys_fork, (uint64_t)sys_execve, (uint64_t)&sys_printProcesses, (uint64_t)&sys_exit,
-                              (uint64_t)&sys_yield, (uint64_t)&sys_getpid};
+                              (uint64_t)&sys_yield, (uint64_t)&sys_getpid, (uint64_t)&sys_block, (uint64_t)&semOpen, (uint64_t)&semClose,
+                              (uint64_t)&semWait, (uint64_t)&semPost};
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
 extern void _speaker_tune(uint16_t tune);
@@ -214,4 +221,29 @@ void sys_yield()
 pid_t sys_getpid()
 {
     return getpid();
+}
+
+void sys_block(int pid)
+{
+    blockProcess(pid);
+}
+
+sem_t sys_semOpen(char *name, int value)
+{
+    return semOpen(name, value);
+}
+
+void sys_semClose(sem_t sem)
+{
+    semClose(sem);
+}
+
+void sys_semWait(sem_t sem)
+{
+    semWait(sem);
+}
+
+void sys_semPost(sem_t sem)
+{
+    semPost(sem);
 }

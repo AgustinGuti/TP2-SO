@@ -11,5 +11,6 @@ int dec_num_length(int num);
 uint32_t strlen(char *str);
 char getBit(uint16_t value, int n);
 void strcpy(char *dest, char *src);
+int strcmp(const char* str1, const char* str2);
 
 #endif

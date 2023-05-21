@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+typedef struct semaphore* sem_t;
+
 #define STDERR 2
 #define STDOUT 1
 #define STDIN 0
@@ -26,7 +28,15 @@ void _sys_exit(int status);
 void _sys_yield();
 int _sys_getpid();
 int _sys_fork();
-
+void _sys_printProcesses();
+int _sys_execve(void* entryPoint, char * const argv[]);
+void* _sys_malloc(uint64_t size);
+uint64_t _sys_free(void *ptr);
+void _sys_block(int pid);
+sem_t _sys_semOpen(char *name, int value);
+void _sys_semClose(sem_t sem);
+void _sys_semWait(sem_t sem);
+void _sys_semPost(sem_t sem);
 
 #endif
 

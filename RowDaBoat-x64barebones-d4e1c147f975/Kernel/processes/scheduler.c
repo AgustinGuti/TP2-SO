@@ -212,6 +212,21 @@ void printProcesses(){
     }
 }
 
+void blockProcess(int pid) {
+    if (pid == scheduler->currentProcess->pid){
+        scheduler->currentProcess->state = BLOCKED;
+        scheduler->quantumCounter = scheduler->quantum;
+        triggerTimer();
+    }
+    Process process = getProcess(pid);
+    process->state = BLOCKED;
+}
+
+void unblockProcess(int pid) {
+    Process process = getProcess(pid);
+    process->state = READY;
+}
+
 void killProcess() {
     scheduler->currentProcess->state = ZOMBIE;
     if (scheduler->currentProcess->pid == 0){

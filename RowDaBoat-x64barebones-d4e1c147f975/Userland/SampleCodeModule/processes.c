@@ -23,3 +23,7 @@ void yield(){
 void exit(int value){
     _sys_exit(value);
 }
+
+void blockProcess(int pid){
+    _sys_block(pid);
+}
