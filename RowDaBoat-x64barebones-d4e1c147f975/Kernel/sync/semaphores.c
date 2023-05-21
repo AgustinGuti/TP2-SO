@@ -56,7 +56,7 @@ void semClose(sem_t sem){
         int16_t size = getSize(semaphores);
         while (count < size){
             if (((sem_t)getData(it))->id == sem->id){
-                removeItem(semaphores, it);
+                remove(semaphores, it);
                 return;
             }
             it = next(it);
@@ -92,7 +92,7 @@ void semPost(sem_t sem){
     if (sem->waiting > 0){
         sem->waiting--;
         pid_t *pid = (pid_t *)get(sem->waiting_list, 0);
-        removeItem(sem->waiting_list, pid);
+        remove(sem->waiting_list, pid);
         unblockProcess(*pid);
         return;
     }
