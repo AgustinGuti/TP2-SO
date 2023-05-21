@@ -113,18 +113,18 @@ void printTree(MemoryManagerADT buddy, uint8_t order){
     int i;
     uint64_t bit = 0;
     for (i = 0; i < order; i++) {
-        printf("Level %d: ",1, i+1);
+        printf("Level %d: ", i+1);
         while (bit < buddy->neededBlocks && getOrder(bit) == i) {
             if (getBlockState(buddy->memory, bit) == OCCUPIED) {
-                printf("1 ", 0);
+                printf("1 ");
             } else {
-                printf("0 ", 0);
+                printf("0 ");
             }
             bit++;
         }
-        printf("\n", 0);
+        printf("\n");
     }
-    printf("\n", 0);
+    printf("\n");
 }
 
 uint64_t alignMemoryToBlock(uint64_t size){

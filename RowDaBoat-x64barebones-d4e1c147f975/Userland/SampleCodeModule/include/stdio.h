@@ -22,7 +22,7 @@ void clearScreen();
 void backspace();
 void cleanScreen();
 
-void printf(const char* fmt, int argsQty, ...);
+void printf(const char* fmt, ...);
 void printerr(const char* fmt, int argQty, ...);
 int scanf(const char *fmt, int argQty, ...);
 void cleanScreen();

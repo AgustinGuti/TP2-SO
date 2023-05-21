@@ -63,7 +63,7 @@ void tron(){
     
     cleanScreen();
     _sys_setFontSize(3,0);
-    printf("Cargando ...\n",0);
+    printf("Cargando ...\n");
     switch (bpp){       //If a different bpp is used, another function should be used
         case 24:
             buildBackground24Bpp(width, height, gamePixelWidth,gamePixelHeight,topLeftX,topLeftY, bpp);
@@ -73,7 +73,7 @@ void tron(){
     generateRect(SNAKE_WIDTH,SNAKE_WIDTH,COLOR2,bpp,rectSprite2);
     generateRect(SNAKE_WIDTH,SNAKE_WIDTH,COLOR3,bpp,rectSprite3);
 
-    printf("Juego listo, toque espacio para continuar\n",0);
+    printf("Juego listo, toque espacio para continuar\n");
     int points1=0,points2=0;
     int winner;
     int exit=0;

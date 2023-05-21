@@ -34,7 +34,7 @@ void putChar(uint32_t color, uint16_t id);
 
 void printFormatStringLimited(uint32_t color, const char *str, uint32_t count, uint16_t row, uint16_t col);
 
-void printf(const char* fmt, int argQty, ...);
+void printf(const char* fmt, ...);
 
 char getBit(uint16_t value, int n);
 

@@ -11,8 +11,16 @@ void printFD(int fd, const char* fmt, int argQty, va_list valist);
 //Can receive %s, %c, %d, %X, %x
 //%X and %x have the same behaviour
 //Accepts \n as command, (can't escape the \)
-void printf(const char* fmt, int argQty, ...){
+void printf(const char* fmt, ...){
 	va_list valist;
+	int pos = 0;
+	int argQty = 0;
+	while (fmt[pos] != 0){
+		if (fmt[pos] == '%' && fmt[pos+1] != 0){
+			argQty++;
+		}
+		pos++;
+	}
 	va_start(valist, argQty);
 	printFD(STDOUT, fmt, argQty, valist);
 	va_end(valist);

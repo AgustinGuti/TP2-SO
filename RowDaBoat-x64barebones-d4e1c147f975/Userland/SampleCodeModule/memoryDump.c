@@ -17,9 +17,9 @@ void memoryDump(uint64_t direction){
         int cantBytes=32;
         for (int i = 0; i < cantBytes; i++)
         {
-            printf("%x ",1,*(memoryPointer+i));
+            printf("%x ",*(memoryPointer+i));
         }
-        printf("\n",0);
+        printf("\n");
     }else{
         printerr("Direccion de memoria invalida. La direccion maxima es %x \n",1,MAX_MEMORY-32);
     }
@@ -28,10 +28,10 @@ void memoryDump(uint64_t direction){
 void printRegs(){
     char ans = _sys_getSavedRegisters(registers);
     if (ans == 0){
-        printf("No hay registros guardados. Presione LCTRL para guardar los registros\n",0);
+        printf("No hay registros guardados. Presione LCTRL para guardar los registros\n");
     }else{
         for (int i = 0; i < CANT_REGISTERS; i++){
-            printf("%s: 0x%x\n",2,registerNames[i],registers[i]);	
+            printf("%s: 0x%x\n",registerNames[i],registers[i]);	
         }
     }
 }

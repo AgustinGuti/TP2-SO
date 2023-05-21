@@ -155,9 +155,17 @@ void printString(uint32_t color, uint8_t *str){
 
 //Can receive %s, %c, %d, %X, %x
 // %X and %x have the same behaviour
-void printf(const char* fmt, int argQty, ...){
+void printf(const char* fmt, ...){
 	int pos = 0;
 	va_list valist;
+	int argQty = 0;
+	while (fmt[pos] != 0){
+		if (fmt[pos] == '%' && fmt[pos+1] != 0){
+			argQty++;
+		}
+		pos++;
+	}
+	pos = 0;
 	va_start(valist, argQty);
 	int consumedArgs = 0;
 	while (fmt[pos] != 0){

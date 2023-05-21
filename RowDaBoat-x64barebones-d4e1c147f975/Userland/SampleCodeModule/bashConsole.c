@@ -107,19 +107,19 @@ char processCommand(uint8_t *str, int length){
             return (*commands[i])(argQty,arguments);
         }
     }
-    printf("Comando no reconocido\n",0);
+    printf("Comando no reconocido\n");
     return 0;
 }
 
 char setFontSize(uint8_t argQty, char arguments[argQty], uint8_t rewrite){
     if (argQty < 1){
-        printf("Ingrese una fuente entre 1 y 4\n",0);
+        printf("Ingrese una fuente entre 1 y 4\n");
     }else if (argQty > 1){
-        printf("Demasiados argumentos\n",0);
+        printf("Demasiados argumentos\n");
     }else{
         int num = strToNum(arguments, strlen(arguments));
         if (num > 4 || num < 1){
-            printf("Ingrese una fuente entre 1 y 4\n",0);
+            printf("Ingrese una fuente entre 1 y 4\n");
         }else{
             _sys_setFontSize(num, rewrite);
         }
@@ -129,37 +129,37 @@ char setFontSize(uint8_t argQty, char arguments[argQty], uint8_t rewrite){
 
 char help(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty == 0 ) {
-        printf("Los comandos disponibles son:\n",0);
+        printf("Los comandos disponibles son:\n");
         for (int i = 0; i < COMMAND_QTY; i++){
-            printf("%s\n",1,commandNames[i]);
+            printf("%s\n",commandNames[i]);
         }
     }else if (argumentQty > 1){
-        printf("Demasiados argumentos para help\n",0);
+        printf("Demasiados argumentos para help\n");
     }else {
         if(strcmp(arguments, "please") == 0){
-            printf("No.\n", 0);
+            printf("No.\n");
             return 0;
         }else if (strcmp(arguments, "all")== 0){
             for (int i = 0; i < COMMAND_QTY; i++){
-                printf("%s: %s\n\n",2,commandNames[i], commandDescriptions[i]);
+                printf("%s: %s\n\n",commandNames[i], commandDescriptions[i]);
             }
             return 0;
         }else {
             for (int i = 0; i < COMMAND_QTY; i++){
                 if (strcmp(arguments, commandNames[i]) == 0){
-                    printf("%s\n",1,commandDescriptions[i]);
+                    printf("%s\n",commandDescriptions[i]);
                     return 0;
                 }
             }
         }
-        printf("Argumento invalido para help\n", 0);
+        printf("Argumento invalido para help\n");
     }
     return 0;
 }
 
 char clean(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0 ){
-        printf("Argumento invalido para clean\n", 0);
+        printf("Argumento invalido para clean\n");
     }else{
         cleanScreen();
     }
@@ -168,7 +168,7 @@ char clean(uint8_t argumentQty, char arguments[argumentQty]){
 
 char startTron(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
-        printf("Argumento invalido para tron\n", 0);
+        printf("Argumento invalido para tron\n");
     }else{
         tron();
     }
@@ -182,7 +182,7 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty]){
         char *args2[1] = {"processB"};
         execve(&processB, args2);
     }else{
-        printf("Argumento invalido para exec\n", 0);
+        printf("Argumento invalido para exec\n");
     }
     return 0;
 }
@@ -195,10 +195,10 @@ char callFree(uint8_t argumentQty, char arguments[argumentQty]){
             printerr("Numero muy grande. Overflow\n",0);
         }else{
             const freedBytes = free(ptr);
-            printf("%x bytes liberados\n", 1, freedBytes);
+            printf("%x bytes liberados\n", freedBytes);
         }       
     }else{
-        printf("Argumento invalido para free\n", 0);
+        printf("Argumento invalido para free\n");
     }
     return 0;
 }
@@ -212,13 +212,13 @@ char callMalloc(uint8_t argumentQty, char arguments[argumentQty]){
         }else{
             uint64_t * ptr = malloc(size);
             if (ptr == NULL){
-                printf("No se reservo memoria\n",0);
+                printf("No se reservo memoria\n");
             }else {
-                printf("Se reservo memoria en la direccion %x\n",1,ptr);
+                printf("Se reservo memoria en la direccion %x\n",ptr);
             }
         }       
     }else{
-        printf("Argumento invalido para malloc\n", 0);
+        printf("Argumento invalido para malloc\n");
     }
     return 0;
 }
@@ -233,14 +233,14 @@ char callMemoryDump(uint8_t argumentQty, char arguments[argumentQty]){
             memoryDump(direction);
         }       
     }else{
-        printf("Argumento invalido para memory-dump\n", 0);
+        printf("Argumento invalido para memory-dump\n");
     }
     return 0;
 }
 
 char time(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
-        printf("Argumento invalido para time\n", 0);
+        printf("Argumento invalido para time\n");
     }else{
         displayTime();
     }
@@ -249,7 +249,7 @@ char time(uint8_t argumentQty, char arguments[argumentQty]){
 
 char callZeroDivision(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
-        printf("Argumento invalido para time\n", 0);
+        printf("Argumento invalido para time\n");
     }else{
         zeroDivision();
     }
@@ -258,7 +258,7 @@ char callZeroDivision(uint8_t argumentQty, char arguments[argumentQty]){
 
 char callInvalidOpcode(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
-        printf("Argumento invalido para time\n", 0);
+        printf("Argumento invalido para time\n");
     }else{
         invalidOpcode();
     }
@@ -267,7 +267,7 @@ char callInvalidOpcode(uint8_t argumentQty, char arguments[argumentQty]){
 
 char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 1){
-        printf("Argumento invalido para time\n", 0);
+        printf("Argumento invalido para time\n");
     }else{
         setFontSize(argumentQty, arguments, 1);
     }
@@ -276,7 +276,7 @@ char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty]){
 
 char exitConsole(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
-        printf("Argumento invalido para time\n", 0);
+        printf("Argumento invalido para time\n");
     }else{
         return 1;
     }
@@ -285,7 +285,7 @@ char exitConsole(uint8_t argumentQty, char arguments[argumentQty]){
 
 char callInforeg(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
-        printf("Argumento invalido para time\n", 0);
+        printf("Argumento invalido para time\n");
     }else{
         printRegs();
     }
@@ -294,7 +294,7 @@ char callInforeg(uint8_t argumentQty, char arguments[argumentQty]){
 
 char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
-        printf("Argumento invalido para time\n", 0);
+        printf("Argumento invalido para time\n");
     }else{
         himnoAlegria();
     } 
@@ -303,7 +303,7 @@ char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty]){
 
 char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty]){
     if( argumentQty != 0){
-        printf("Argumento invalido para time\n", 0);
+        printf("Argumento invalido para time\n");
     }else{
         printProcesses();
     } 

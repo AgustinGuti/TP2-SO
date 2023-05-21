@@ -184,22 +184,22 @@ void initializeBlock(MemoryBlock *block, void *const startAddress, const uint64_
 
 void printBlocks(MemoryManagerADT const memoryManager)
 {
-	printf("\n", 0);
-	printf("Free blocks:\n", 0);
-	printf("\n", 0);
+	printf("\n");
+	printf("Free blocks:\n");
+	printf("\n");
 	MemoryBlock *currentFreeBlock = memoryManager->firstFreeBlock;
 	while (currentFreeBlock != NULL)
 	{
-		printf("Free Block Start address: %x, size: %x\n", 2, currentFreeBlock->startAddress, currentFreeBlock->size);
+		printf("Free Block Start address: %x, size: %x\n", currentFreeBlock->startAddress, currentFreeBlock->size);
 		currentFreeBlock = currentFreeBlock->nextBlock;
 	}
-	printf("\n", 0);
-	printf("Occupied blocks:\n", 0);
-	printf("\n", 0);
+	printf("\n");
+	printf("Occupied blocks:\n");
+	printf("\n");
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
 	{
-		printf("Occupied Block Start address: %x, size: %x\n", 2, currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
+		printf("Occupied Block Start address: %x, size: %x\n", currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
 	}
 }

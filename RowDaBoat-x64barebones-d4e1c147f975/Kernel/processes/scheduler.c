@@ -26,7 +26,7 @@ typedef struct SchedulerCDT{
 static Scheduler scheduler = NULL;
 static pid_t currentPID = KERNEL_PID;  // Static variable to track the current PID
 
-static Process processList[1];   //  printf("RSP: %x\n",1, stackPointer);
+static Process processList[1];   //  printf("RSP: %x\n", stackPointer);
   //La primera vez que me llama el kernel tengo que guardar su stackPointer en algun lado
 
 Process getNextProcess() ;
@@ -40,7 +40,7 @@ void initScheduler() {
         /*not enough memory to allocate scheduler*/
         return;
     }
-    printf("Scheduler initialized\n",0);
+    printf("Scheduler initialized\n");
     scheduler->processList = createLinkedList();
     int kernelPID = createProcess("Kernel", NULL, 0, 1, NULL);
     scheduler->it = iterator(scheduler->processList);
@@ -61,7 +61,7 @@ void * schedule(void* rsp) {
             }    
             scheduler->currentProcess = getNextProcess();
             if (scheduler->currentProcess != NULL){
-                //printf("Next process: %d\n", 1, scheduler->currentProcess->pid);
+                //printf("Next process: %d\n", scheduler->currentProcess->pid);
                 scheduler->currentProcess->state = RUNNING;
                 return scheduler->currentProcess->stackPointer;
             }      
@@ -133,7 +133,7 @@ Process getProcess(pid_t pid){
 void printProcesses(){
     Process it = iterator(scheduler->processList);
     int count = 0;
-    printf("  Nombre    PID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n", 0);
+    printf("  Nombre    PID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n");
     //Empezamos a imprimir desde el primer proceso que no es el kernel
     while (((Process)getData(it))->pid > 0){ 
         it = next(it);
@@ -141,26 +141,26 @@ void printProcesses(){
     while (count < getSize(scheduler->processList)){
         if (((Process)getData(it))->pid != KERNEL_PID){
             int nameLenght = strlen(((Process)getData(it))->name);
-            printf(" %s  ", 1, ((Process)getData(it))->name);
+            printf(" %s  ", ((Process)getData(it))->name);
             if (nameLenght < 10){
                 for (int i = 0; i < 10 - nameLenght; i++){
-                    printf(" ", 0);
+                    printf(" ");
                 }
             }
-            printf("%d       %d          %d         0x%x       0x%x", 5, ((Process)getData(it))->pid, ((Process)getData(it))->priority, ((Process)getData(it))->foreground, ((Process)getData(it))->stackPointer, ((Process)getData(it))->stackBase);
+            printf("%d       %d          %d         0x%x       0x%x", ((Process)getData(it))->pid, ((Process)getData(it))->priority, ((Process)getData(it))->foreground, ((Process)getData(it))->stackPointer, ((Process)getData(it))->stackBase);
             char state = ((Process)getData(it))->state;
             switch(state){
                 case READY:
-                    printf("    READY\n", 0);
+                    printf("    READY\n");
                     break;
                 case RUNNING:
-                    printf("    RUNNING\n", 0);
+                    printf("    RUNNING\n");
                     break;
                 case BLOCKED:
-                    printf("    BLOCKED\n", 0);
+                    printf("    BLOCKED\n");
                     break;
                 case ZOMBIE:
-                    printf("    KILLED\n", 0);
+                    printf("    KILLED\n");
                     break;
             }
         }

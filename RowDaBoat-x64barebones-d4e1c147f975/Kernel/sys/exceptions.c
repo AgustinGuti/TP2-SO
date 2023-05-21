@@ -43,7 +43,7 @@ static void invalidOpcode(uint64_t *registers){
 
 static void printRegs(uint64_t * registers){
 	for (int i = 0; i < CANT_REGISTERS; i++){
-		printf("%s: 0x%x\n",2,registerNames[i],registers[i]);	
+		printf("%s: 0x%x\n",registerNames[i],registers[i]);	
 	}
 	
 }

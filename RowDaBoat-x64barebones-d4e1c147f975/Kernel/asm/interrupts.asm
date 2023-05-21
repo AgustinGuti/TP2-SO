@@ -31,8 +31,6 @@ EXTERN exceptionDispatcher
 
 EXTERN schedule
 
-EXTERN printf
-
 EXTERN loader
 
 SECTION .text

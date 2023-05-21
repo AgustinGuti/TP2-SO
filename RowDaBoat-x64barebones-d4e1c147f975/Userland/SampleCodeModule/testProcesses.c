@@ -13,7 +13,7 @@ void processA() {
         *a -= 100;
     }
     semPost(sem);
-    printf("Process A PID: %d A: %d\n", 2, getpid(), *a+1);
+    printf("Process A PID: %d A: %d\n", getpid(), *a+1);
     exit(0);
 }
 
@@ -25,6 +25,6 @@ void processB() {
         *a -= 100;
     }
     semPost(sem);
-    printf("Process B PID: %d A: %d\n", 2, getpid(), *a+1);
+    printf("Process B PID: %d A: %d\n", getpid(), *a+1);
     return;
 }

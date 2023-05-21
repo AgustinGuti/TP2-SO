@@ -9,6 +9,6 @@ void displayTime() {
     _sys_getTime(&hour, &min, &seg);
     
     hour += UTC;
-    printf("%x:%x:%x\n", 3, hour, min, seg);
+    printf("%x:%x:%x\n", hour, min, seg);
 }
 
