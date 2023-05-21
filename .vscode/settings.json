@@ -22,7 +22,11 @@
         "typeinfo": "c",
         "lib.h": "c",
         "buddymemory.h": "c",
-        "videodriver.h": "c"
+        "videodriver.h": "c",
+        "test_util.h": "c",
+        "syscall.h": "c",
+        "memory.h": "c",
+        "mymemory.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

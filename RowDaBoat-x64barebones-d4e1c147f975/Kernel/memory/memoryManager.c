@@ -31,7 +31,7 @@ MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const man
 {
 	MemoryManagerADT memoryManager = (MemoryManagerADT)memoryForMemoryManager;
 	MemoryBlock *firstFreeBlock = (MemoryBlock *)(managedMemory);
-	firstFreeBlock->startAddress = managedMemory + BLOCK_STRUCT_SIZE;
+	firstFreeBlock->startAddress = (uint64_t *)((uint64_t)managedMemory + BLOCK_STRUCT_SIZE);
 	firstFreeBlock->size = managedMemorySize;
 	firstFreeBlock->nextBlock = NULL;
 	firstFreeBlock->prevBlock = NULL;
@@ -52,7 +52,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 	{
 		if (currentFreeBlock->size >= (memoryToAllocate + BLOCK_STRUCT_SIZE))
 		{
-			void *allocatedMemorystartAdress = currentFreeBlock->startAddress + currentFreeBlock->size - memoryToAllocate - BLOCK_STRUCT_SIZE;
+			void *allocatedMemorystartAdress = (uint64_t *)((uint64_t)currentFreeBlock->startAddress + currentFreeBlock->size - memoryToAllocate);
 			currentFreeBlock->size -= (memoryToAllocate + BLOCK_STRUCT_SIZE);
 
 			if (currentFreeBlock->size == 0)
@@ -74,7 +74,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 			addBlockToOccupiedList(memoryManager, allocatedMemorystartAdress, memoryToAllocate);
 			printBlocks(memoryManager);
 
-			return (allocatedMemorystartAdress + BLOCK_STRUCT_SIZE);
+			return (uint64_t *)((uint64_t)allocatedMemorystartAdress);
 		}
 		currentFreeBlock = currentFreeBlock->nextBlock;
 	}
@@ -125,7 +125,7 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 		currentBlock = currentBlock->nextBlock;
 
 	// merge newBlock if adjacent
-	if (newBlock->startAddress + newBlock->size + BLOCK_STRUCT_SIZE == currentBlock->startAddress)
+	if ((uint64_t)newBlock->startAddress + newBlock->size + BLOCK_STRUCT_SIZE == (uint64_t)currentBlock->startAddress)
 	{
 		newBlock->size += (currentBlock->size + BLOCK_STRUCT_SIZE);
 		newBlock->nextBlock = currentBlock->nextBlock;
@@ -137,7 +137,7 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 		currentBlock = NULL;
 		return;
 	}
-	if (currentBlock->prevBlock != NULL && currentBlock->prevBlock->startAddress + currentBlock->prevBlock->size + BLOCK_STRUCT_SIZE == newBlock->startAddress)
+	if (currentBlock->prevBlock != NULL && (uint64_t)currentBlock->prevBlock->startAddress + currentBlock->prevBlock->size + BLOCK_STRUCT_SIZE == (uint64_t)newBlock->startAddress)
 	{
 		currentBlock->prevBlock->size += (newBlock->size + BLOCK_STRUCT_SIZE);
 		newBlock = NULL;
