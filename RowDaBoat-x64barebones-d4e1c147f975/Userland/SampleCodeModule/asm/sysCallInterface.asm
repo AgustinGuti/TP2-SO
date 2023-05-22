@@ -11,6 +11,7 @@ GLOBAL _sys_setFontSize
 GLOBAL _sys_getFontSize
 GLOBAL _sys_formatWrite
 GLOBAL _sys_getScreenBpp
+GLOBAL _sys_getMemoryStatus
 GLOBAL _sys_getSavedRegisters
 GLOBAL _sys_malloc
 GLOBAL _sys_free
@@ -343,6 +344,18 @@ _sys_semPost:
     mov rbp, rsp
     
     mov rax, 26     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;uint64_t * sys_getMemoryStatus();
+_sys_getMemoryStatus:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 27     ;id 
     int 80h
 
     mov rsp, rbp

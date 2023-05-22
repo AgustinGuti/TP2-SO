@@ -56,9 +56,8 @@ int main()
 	load_idt();
 	saveRegisters();
 	restoreStack();
-	printf("Needed space: %x\n", calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE));
 	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t *)(MEMORY_INITIAL_DIRECTION - 1));
-	printf("Memory manager initialized\n");
+	setTotalMemory(MEMORY_TO_MAP_SIZE);
 	initScheduler();
 
 	createProcess("shell", sampleCodeModuleAddress, 1, 1, NULL);

@@ -23,11 +23,12 @@ char callMalloc(uint8_t argumentQty, char arguments[argumentQty]);
 char callFree(uint8_t argumentQty, char arguments[argumentQty]);
 char callExec(uint8_t argumentQty, char arguments[argumentQty]);
 char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty]);
+char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty]);
 
-#define COMMAND_QTY 15
+#define COMMAND_QTY 16
 
-static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free", "exec", "ps"};
-static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exitConsole,&callHimnoAlegria,&callMalloc, &callFree, &callExec, &callPrintProcesses}; 
+static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free", "exec", "ps", "mem-status"};
+static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exitConsole,&callHimnoAlegria,&callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus}; 
 static char *commandDescriptions[COMMAND_QTY] = 
         {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
          "Vacia la consola.",
@@ -230,6 +231,23 @@ char callMalloc(uint8_t argumentQty, char arguments[argumentQty]){
         }       
     }else{
         printf("Argumento invalido para malloc\n");
+    }
+    return 0;
+}
+
+char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty]){
+    if( argumentQty != 0){
+        printf("Argumento invalido para get-memory-status\n");
+    }else{
+        uint64_t * memStatus = getMemoryStatus();
+        if(memStatus == NULL){
+            printf("No se pudo obtener el estado de la memoria\n");
+            return 1;
+        }   
+        printf("Memoria total: %x\n", memStatus[0]);
+        printf("Memoria reservada: %x\n", memStatus[1]);
+        printf("Memoria libre: %x\n", memStatus[2]);
+        free(memStatus);
     }
     return 0;
 }
