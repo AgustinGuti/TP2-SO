@@ -1,8 +1,7 @@
 include ./include/Makefile.inc
-
 SOURCES := $(wildcard *.c)
 OBJECTS := $(SOURCES:.c=.o)
-TARGET  := MemoryManagerTest
+TARGET  := testingMain
 
 all: $(TARGET)
 

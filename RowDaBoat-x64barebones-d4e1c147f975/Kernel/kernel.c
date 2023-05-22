@@ -61,7 +61,7 @@ int main()
 
 	createProcess("shell", sampleCodeModuleAddress, 1, 1, NULL);
 	triggerTimer();
-	//((EntryPoint)sampleCodeModuleAddress)();
-	//drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
+	// ((EntryPoint)sampleCodeModuleAddress)();
+	drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
 	return 0;
 }
