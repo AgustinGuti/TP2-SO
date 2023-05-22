@@ -6,7 +6,6 @@
 #define OCCUPIED 1
 
 #define MEMORY_MANAGER_STRUCT_SIZE 16
-#define BLOCK_STRUCT_SIZE 32
 
 typedef struct MemoryBlock
 {

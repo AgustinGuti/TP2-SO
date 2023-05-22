@@ -3,9 +3,12 @@
 
 int main(int argc, char *argv[])
 {
-
-  char *memory = "1000000000";
-  uint64_t returnValue = test_mm(1, &memory);
+  if (argc != 2)
+  {
+    printf("Invalid amount of parameters\n");
+    return -1;
+  }
+  uint64_t returnValue = test_mm(1, &argv[1]);
   printf("test_mm returned: %d\n", returnValue);
   return 0;
 }

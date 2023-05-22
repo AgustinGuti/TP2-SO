@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #define MIN_BLOCK_SIZE 32
+#define BLOCK_STRUCT_SIZE 32
 
 #define MANAGED_MEMORY_SIZE 0x10000
 

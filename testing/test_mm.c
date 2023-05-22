@@ -35,15 +35,15 @@ uint64_t test_mm(uint64_t argc, char *argv[])
 
     uint64_t memoryManagerSize = calculateRequiredMemoryManagerSize(max_memory);
     void *memoryManager = malloc(memoryManagerSize);
-    void *managedMemory = malloc(max_memory + 32);
+    void *managedMemory = malloc(max_memory + BLOCK_STRUCT_SIZE);
     MemoryManagerADT memoryManagerADT = createMemoryManager(max_memory, managedMemory, memoryManager, memoryManager + memoryManagerSize);
     rq = 0;
-    total = 32;
+    total = BLOCK_STRUCT_SIZE;
 
     // Request as many blocks as we can
     while (rq < MAX_BLOCKS && total < max_memory)
     {
-      int uniform = max_memory - total - 1 - 32;
+      int uniform = max_memory - total - 1 - BLOCK_STRUCT_SIZE;
       if (uniform <= 0)
       {
         break;
