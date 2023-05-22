@@ -2,6 +2,15 @@
 #include <functions.h>
 #include <linkedList.h>
 
+struct semaphore {
+    char *name;
+    int value;
+    int id;
+    int waiting;
+    pid_t *waiting_list;
+};
+
+
 typedef struct semaphore* sem_t;
 
 // Crea o abre un semáforo y lo identifica con el nombre name.

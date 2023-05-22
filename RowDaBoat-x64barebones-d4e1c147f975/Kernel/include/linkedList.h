@@ -7,7 +7,7 @@
 
 typedef struct NodeCTD * Node;
 typedef struct LinkedListCDT * LinkedList;
-typedef struct Iterator* IteratorPtr;
+typedef struct IteratorCDT* IteratorPtr;
 
 
 // Function declarations
@@ -21,6 +21,6 @@ int hasNext(IteratorPtr iterator);
 void * next(IteratorPtr iterator);
 int getSize(LinkedList list);
 void freeIterator(IteratorPtr iterator);
-
+void headToBack(LinkedList list);
 
 #endif /* LINKED_LIST_H */

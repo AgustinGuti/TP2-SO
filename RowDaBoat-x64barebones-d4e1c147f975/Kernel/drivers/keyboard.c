@@ -1,4 +1,6 @@
 #include <keyboard.h>
+#include <semaphores.h>
+#include <videoDriver.h>
 
 extern void _hlt();
 extern char has_key();
@@ -158,25 +160,34 @@ char isKeyMake(unsigned char data)
 static uint16_t buffer[BUFFER_SIZE];
 static uint32_t occupiedBuffer = 0;
 
+sem_t bufferSem = NULL;
+
 void keyboard_handler(uint8_t event)
 {
+    //printf("Keyboard handler\n");
+   // printf("Buffer: %d\n", occupiedBuffer);
+    if (bufferSem == NULL){
+        bufferSem = semOpen("bufferSem", 0);
+    }
     int key = getKeyMake(event);
     if (key != -1)
     {
-        switch (key)
-        {
-        case TAB:
-            buffer[occupiedBuffer++] = ' ';
-            buffer[occupiedBuffer++] = ' ';
-            buffer[occupiedBuffer++] = ' ';
-            break;
-        case NEWLINE: // Enter
-            buffer[occupiedBuffer++] = NEWLINE;
-            break;
-        default:
-            buffer[occupiedBuffer++] = key;
-            break;
+        switch (key){
+            case TAB:
+                buffer[occupiedBuffer++] = ' ';
+                buffer[occupiedBuffer++] = ' ';
+                buffer[occupiedBuffer++] = ' ';
+                break;
+            case NEWLINE: // Enter
+                buffer[occupiedBuffer++] = NEWLINE;
+                break;
+            default:
+                buffer[occupiedBuffer++] = key;
+                break;
         }
+      //  if(occupiedBuffer == 1){
+      //      semPost(bufferSem);
+     //   }
     }
 }
 
@@ -189,15 +200,25 @@ int getBufferOcupied()
 // Puts count chars from the buffer on out, or occupiedBuffer chars if its less. Returns amount of chars read
 int getBuffer(int *out, uint32_t count)
 {
+    if (bufferSem == NULL){
+        bufferSem = semOpen("bufferSem", 0);
+    }
     int i = 0;
     for (i = 0; i < occupiedBuffer && i < count; i++)
-    {
+    {   
+       // printf("Waiting for buffer %d\n", bufferSem->value);
+     //   if(occupiedBuffer == 0){
+       //     semWait(bufferSem);
+     //   }
         out[i] = buffer[i];
+       // removeFromBuffer(1);
     }
+   // printf("End of buffer %d\n", bufferSem->value);
     return i;
 }
 
 // Removes the first count chars from the buffer
+//TODO redo this
 void removeFromBuffer(uint32_t count)
 {
     int i;

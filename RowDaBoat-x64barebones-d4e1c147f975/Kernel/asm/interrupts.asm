@@ -274,9 +274,11 @@ _irq00Handler:
 	mov rdi, 0 ; handler del timer tick
 	call irqDispatcher
 
+	cli
 	mov rdi, rsp
 	call schedule
 	mov rsp, rax
+	sti
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h

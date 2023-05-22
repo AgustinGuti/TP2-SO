@@ -1,149 +1,161 @@
-#include "linkedList.h"
-#include <videoDriver.h>
+#include <linkedList.h>
 
-// Structure representing a node in the linked list
-typedef struct NodeCDT {
+// Node structure
+typedef struct NodeCTD {
     void* data;
-    struct NodeCDT* next;
-}NodeCDT;
+    struct NodeCTD* prev;
+    struct NodeCTD* next;
+} NodeCTD;
 
-// Structure representing the linked list
+// Linked list structure
 typedef struct LinkedListCDT {
-    struct NodeCDT* head;
-    struct NodeCDT* tail;
-    uint8_t size;
-}LinkedListCDT;
+    NodeCTD* head;
+    NodeCTD* tail;
+    int size;
+} LinkedListCDT;
 
-struct Iterator {
-    struct NodeCDT* current;
-};
+// Iterator structure
+typedef struct IteratorCDT {
+    NodeCTD* current;
+} IteratorCDT;
 
+
+// Function to create an empty linked list
 LinkedList createLinkedList() {
-    struct LinkedListCDT * list = (LinkedList)malloc(sizeof(struct LinkedListCDT));
-    if (list != NULL) {
-        list->head = NULL;
-        list->tail = NULL;
-        list->size = 0;
-    }
+    LinkedList list = (LinkedList)malloc(sizeof(LinkedListCDT));
+    list->head = NULL;
+    list->tail = NULL;
+    list->size = 0;
     return list;
 }
 
+// Function to destroy a linked list and free the memory
 void destroyLinkedList(LinkedList list) {
-    if (list == NULL)
-        return;
-
-    struct NodeCDT * current = list->head;
+    NodeCTD* current = list->head;
     while (current != NULL) {
-        Node next = current->next;
+        NodeCTD* next = current->next;
         free(current);
         current = next;
     }
-
     free(list);
 }
 
-//new node is inserted at the end of the list
+// Function to insert an element at the end of the linked list
 void insert(LinkedList list, void* data) {
-    if (list == NULL)
-        return;
+    NodeCTD* newNode = (NodeCTD*)malloc(sizeof(NodeCTD));
+    newNode->data = data;
+    newNode->prev = list->tail;
+    newNode->next = NULL;
+    if (list->tail != NULL)
+        list->tail->next = newNode;
 
-    struct NodeCDT * node = (struct NodeCDT*)malloc(sizeof(struct NodeCDT));
-    if (node == NULL)
-        return;
+    list->tail = newNode;
 
-    node->data = data;
-    node->next = NULL;
+    if (list->head == NULL)
+        list->head = newNode;
 
-    if (list->size == 0) {
-        list->head = node;
-        list->tail = node;
-    } else {
-        list->tail->next = node;
-        list->tail = node;
-    }
 
     list->size++;
 }
 
-//removes the first item in the list that contains data
+// Function to remove an element from the linked list
 void remove(LinkedList list, void* data) {
-    if (list == NULL || list->size == 0)
-        return;
-
-    struct NodeCDT* current = list->head;
-    struct NodeCDT* previous = NULL;
-  //  printf("list size antes: %d\n",list->size);
+    NodeCTD* current = list->head;
     while (current != NULL) {
         if (current->data == data) {
-            if (previous == NULL) {
+            if (current == list->head)
                 list->head = current->next;
-            } else {
-                previous->next = current->next;
-            }
+
+            if (current == list->tail)
+                list->tail = current->prev;
+
+            if (current->prev != NULL)
+                current->prev->next = current->next;
+
+            if (current->next != NULL)
+                current->next->prev = current->prev;
 
             free(current);
             list->size--;
-            //printf("list size despues: %d\n",list->size);
-
             return;
         }
-
-        previous = current;
         current = current->next;
     }
-  //  printf("list size despues: %d\n",list->size);
 }
 
-//returns the data of the node at index
-void * get(LinkedList list, int index) {
-    if (list == NULL || index < 0 || index >= list->size)
+// Function to get an element at a specific index
+void* get(LinkedList list, int index) {
+    if (index < 0 || index >= list->size)
         return NULL;
 
-    struct NodeCDT* current = list->head;
-    int i = 0;
-    while (i < index) {
+    NodeCTD* current = list->head;
+    for (int i = 0; i < index; i++)
         current = current->next;
-        i++;
-    }
 
     return current->data;
 }
 
+void printList(LinkedList list){
+    printf("Size of list: %d\n", list->size);
+    printf("printList\n");
+    Node current = list->head;
+    printf("list->head: %x\n", list->head);
+    while (current != NULL)
+    {
+        printf("Current: %x\n", current);
+        printf("Current->data: %x\n", current->data);
+        printf("Current->next: %x\n", current->next);
+        current = current->next;
+    }
+    
+    return;
+}
+
+// Function to create an iterator for the linked list
 IteratorPtr iterator(LinkedList list) {
-    if (list == NULL)
-        return NULL;
-
-    IteratorPtr iterator = (IteratorPtr)malloc(sizeof(struct Iterator));
-    if (iterator == NULL)
-        return NULL;
-
+    IteratorPtr iterator = (IteratorPtr)malloc(sizeof(IteratorCDT));
+   // printList(list);
     iterator->current = list->head;
     return iterator;
 }
+// Function to check if there are more elements in the iterator
+int hasNext(IteratorPtr iterator) {
+    return (iterator->current != NULL);
+}
 
+// Function to get the next element from the iterator
 void* next(IteratorPtr iterator) {
-    if (iterator == NULL || !hasNext(iterator))
+    if (!hasNext(iterator))
         return NULL;
 
-    struct NodeCDT* node = iterator->current;
-    iterator->current = node->next;
-    return node->data;
+    // printf("iterator: %x\n", iterator);
+    // printf("data: %x\n", iterator->current);
+    void* data = iterator->current->data;
+    //printf("next\n");
+    iterator->current = iterator->current->next;
+    //printf("next\n");
+    return data;
 }
 
-int hasNext(IteratorPtr iterator) {
-    if (iterator == NULL)
-        return 0;
-
-    return iterator->current != NULL;
+// Function to get the size of the linked list
+int getSize(LinkedList list) {
+    return list->size;
 }
 
+// Function to free the memory of an iterator
 void freeIterator(IteratorPtr iterator) {
     free(iterator);
 }
 
-int getSize(LinkedList list) {
-    if (list == NULL)
-        return -1;
-
-    return list->size;
+// Function to move the head of the linked list to the back
+void headToBack(LinkedList list) {
+    if (list->head != NULL && list->head != list->tail) {
+        NodeCTD* newTail = list->head;
+        list->head = list->head->next;
+        list->head->prev = NULL;
+        list->tail->next = newTail;
+        newTail->prev = list->tail;
+        newTail->next = NULL;
+        list->tail = newTail;
+    }
 }

@@ -27,7 +27,11 @@
         "syscall.h": "c",
         "memory.h": "c",
         "mymemory.h": "c",
-        "testprocesses.h": "c"
+        "testprocesses.h": "c",
+        "algorithm": "c",
+        "semaphores.h": "c",
+        "syscallinterface.h": "c",
+        "stddef.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

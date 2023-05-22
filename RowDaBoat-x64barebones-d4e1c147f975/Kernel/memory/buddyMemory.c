@@ -164,9 +164,27 @@ void* allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit){
     return (void*) (buddy->initialDirection + getBlockStart(buddy, bit));
 }
 
+void printMemoryState(){
+
+}
+
 void* allocMemory(MemoryManagerADT buddy, uint64_t size) {
     void* res= allocMemoryRec(buddy, size, 0);
-    //printTree(buddy, 6);
+
+//    // printf("Allocated %d bytes at 0x%x\n", size, res);
+//     long bit = getBlockIndex(buddy, res);
+//     if (bit < 0) {
+//         return 0;
+//     }
+//     // Traverse up the tree until we find a block that has a set bit (i.e., allocated memory)
+//     while (bit > 0  && getBlockState(buddy->memory, bit) == 0) {
+//         bit = PARENT(bit);
+//     }
+
+//     uint64_t block_size = getBlockSize(buddy, bit);
+
+//     printf("Allocated between %x and %x\n", getBlockStart(buddy, bit), getBlockStart(buddy, bit) + block_size - 1);
+//    // printTree(buddy, 6);
     return res;
 }
 
@@ -176,6 +194,7 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr) {
     }
     // Get the index of the block that contains the memory pointed to by address
     long bit = getBlockIndex(buddy, ptr);
+    printf("Freeing %d bytes at 0x%x\n", getBlockSize(buddy, bit), ptr);
     if (bit < 0) {
         return 0;
     }
@@ -193,7 +212,6 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr) {
         bit = PARENT(bit);
         freeBlock(buddy->memory, bit);
     }
-
     //printTree(buddy, 6);
     // Return the amount of bytes freed
     return block_size;

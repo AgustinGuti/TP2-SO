@@ -27,5 +27,7 @@ void yield();
 void exit(int value);
 void blockProcess(int pid);
 void unblockProcess(int pid);
+int getProcessState(int pid);
+
 
 #endif /* SCHEDULER_H */

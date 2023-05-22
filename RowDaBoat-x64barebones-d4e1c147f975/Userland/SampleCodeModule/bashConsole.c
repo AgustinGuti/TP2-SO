@@ -49,7 +49,7 @@ int startConsole(){
    
     printText(LINE_INDICATOR);
     while (exit == 0){
-		int readQty = scanf("%1024s",1, printBuf);
+		int readQty = scanf("%1s",1, printBuf);
 		if (readQty > 0){
             for (int i = 0; i < readQty; i++){  
                 if ((commandBufferPos > 0) || (commandBufferPos == 0 && printBuf[i] != BACKSPACE) ){
@@ -187,9 +187,11 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty]){
             }
         }
         char *args[2] = {"processA", foreground};
-        execve(&processA, args);
+        for (int i = 0; i < 45; i++){
+            execve(&processA, args);
+        }
         char *args2[2] = {"processB", foreground};
-        execve(&processB, args2);
+      //  execve(&processB, args2);
     }else{
         printf("Argumentos invalidos para exec\n");
     }
