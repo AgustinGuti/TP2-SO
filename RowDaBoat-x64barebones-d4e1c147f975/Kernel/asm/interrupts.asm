@@ -46,6 +46,9 @@ GLOBAL haveSaved
 
 GLOBAL restoreStack
 
+GLOBAL enterCritical
+GLOBAL leaveCritical
+
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 
@@ -216,6 +219,23 @@ _cli:
 
 _sti:
 	sti
+	ret
+
+enterCritical:
+	push rax
+	.loop:
+	mov rax, 1
+	xchg rax, [critical]
+	cmp rax, 0
+	jne .loop
+	pop rax
+	ret
+
+leaveCritical:
+	push rax
+	mov rax, 0
+	mov [critical], rax
+	pop rax
 	ret
 
 picMasterMask:
@@ -535,6 +555,7 @@ restoreStack:		;restores the first 3 entries of the stack
 section .data
 	haveSaved dq 0
 	isStackSaved dq 0
+	critical dq 0
 	textTest db "Interrupt", 0
 
 section .bss

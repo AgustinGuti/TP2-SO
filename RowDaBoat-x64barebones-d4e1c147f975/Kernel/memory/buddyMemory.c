@@ -138,7 +138,7 @@ uint64_t alignMemoryToBlock(uint64_t size){
     return alignedSize;
 }
 
-void* allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit){
+void* allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit, uint64_t *allocatedMemorySize){
     uint64_t block_size = getBlockSize(buddy, bit);
     if (block_size < size) {
         return NULL;
@@ -161,6 +161,9 @@ void* allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit){
         return NULL;
     }
     occupyBlock(buddy->memory, bit);
+    if (allocatedMemorySize != NULL){
+        *allocatedMemorySize = block_size;
+    }
     return (void*) (buddy->initialDirection + getBlockStart(buddy, bit));
 }
 
@@ -168,8 +171,8 @@ void printMemoryState(){
 
 }
 
-void* allocMemory(MemoryManagerADT buddy, uint64_t size) {
-    void* res= allocMemoryRec(buddy, size, 0);
+void* allocMemory(MemoryManagerADT buddy, uint64_t size, uint64_t *allocatedMemorySize) {
+    void* res= allocMemoryRec(buddy, size, 0, allocatedMemorySize);
 
 //    // printf("Allocated %d bytes at 0x%x\n", size, res);
 //     long bit = getBlockIndex(buddy, res);

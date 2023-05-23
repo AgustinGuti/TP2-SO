@@ -57,7 +57,6 @@ int main()
 	saveRegisters();
 	restoreStack();
 	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t *)(MEMORY_INITIAL_DIRECTION - 1));
-	setTotalMemory(MEMORY_TO_MAP_SIZE);
 	initScheduler();
 	char *argv[] = {"shell", NULL};
 	createProcess("shell", sampleCodeModuleAddress, 1, 1, argv);

@@ -134,8 +134,8 @@ int fork() {
 }
 
 void yield() {
-    scheduler->skipQuantum = 1;
-    printf("Yield\n");
+    scheduler->quantumCounter = scheduler->quantum;
+    headToBack(scheduler->queue[scheduler->currentProcess->priority]);
     triggerTimer();
 }
 
@@ -266,7 +266,9 @@ void blockProcess(int pid) {
     Process process = getProcess(pid);
     process->state = BLOCKED;
     if (pid == scheduler->currentProcess->pid){
-        yield();
+        scheduler->skipQuantum = 1;
+        headToBack(scheduler->queue[scheduler->currentProcess->priority]);
+        triggerTimer();    
     }
 }
 
@@ -274,7 +276,7 @@ void unblockProcess(int pid) {
     Process process = getProcess(pid);
     process->state = READY;
     if (scheduler->currentProcess->pid == EMPTY_PID){
-        yield();
+        yield();   
     }
 }
 

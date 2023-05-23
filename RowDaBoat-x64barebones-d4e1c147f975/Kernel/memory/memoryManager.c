@@ -45,7 +45,7 @@ uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap)
 	return MEMORY_MANAGER_STRUCT_SIZE;
 }
 
-void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToAllocate)
+void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToAllocate, uint64_t *allocatedMemorySize)
 {
 	MemoryBlock *currentFreeBlock = memoryManager->firstFreeBlock;
 	while (currentFreeBlock != NULL)
@@ -74,6 +74,9 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 			addBlockToOccupiedList(memoryManager, allocatedMemorystartAdress, memoryToAllocate);
 
 			//printBlocks(memoryManager);
+			if (allocatedMemorySize != NULL){
+				*allocatedMemorySize = memoryToAllocate + BLOCK_STRUCT_SIZE;
+			}
 			return (uint64_t *)((uint64_t)allocatedMemorystartAdress);
 		}
 		currentFreeBlock = currentFreeBlock->nextBlock;
