@@ -382,3 +382,8 @@ cd Toolchain/
 make all
 cd ..
 make all
+ls
+cd root/
+ls
+gdb
+gdb

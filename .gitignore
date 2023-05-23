@@ -1,3 +1,7 @@
+.gdbinit
+.gdb*
+.bash_history
+
 # Prerequisites
 *.d
 
