@@ -2,9 +2,11 @@
 #include <interrupts.h>
 #include <linkedList.h>
 
+
 //Estructura de un semáforo
 static struct semaphoresCDT {
-    sem_t *semaphores;
+    LinkedList semaphores;
+    IteratorPtr it;
 } semaphoresCDT;
 
 typedef struct semaphoresCDT * Semaphores;
@@ -21,20 +23,19 @@ sem_t semOpen(char *name, int value){
     if (semaphores == NULL){
         semaphores = malloc(sizeof(struct semaphoresCDT));
         semaphores->semaphores = createLinkedList();
+        semaphores->it = iterator(semaphores->semaphores);
     }
 
-    IteratorPtr it = iterator(semaphores->semaphores);
+    resetIterator(semaphores->it, semaphores->semaphores);
     sem_t sem;
-    while (hasNext(it)){
-        sem = next(it);
+    while (hasNext(semaphores->it)){
+        sem = next(semaphores->it);
         if (strcmp(sem->name, name) == 0){
-            freeIterator(it);
             printf("Already exists semaphore %s with value %d\n", sem->name, sem->value);
             return sem;
         }
     }
-    freeIterator(it);
-    sem = malloc(sizeof(struct semaphore));
+    sem = malloc(sizeof(struct semaphoreCDT));
     sem->name = malloc(strlen(name) + 1);
     strcpy(sem->name, name);
     sem->value = value;
@@ -60,6 +61,7 @@ void semClose(sem_t sem){
                 return;
             }
         }
+        freeIterator(it);
     }
     return;
 }
@@ -68,26 +70,18 @@ void semClose(sem_t sem){
 // Si el valor del semáforo es cero, el proceso que llama queda bloqueado.
 void semWait(sem_t sem){
     if (sem == NULL) return;
-   // printf("----------------------------------------------------------------------ENTERING WAIT\n");
     enterCritical();
     if (sem->value > 0){
         sem->value--;
-   //     printf("---------------------------------EXITING WAIT\n");
         leaveCritical();
         return;
     }
-   // printf("Blocking %d\n", getpid());
     pid_t *pid = malloc(sizeof(pid_t));
     *pid = getpid();
     sem->waiting++;
-    //printf("Waiting %d\n", sem->waiting);
     insert(sem->waiting_list, pid);
-    //printf("Blocking %d\n", *pid);
-    blockProcess(*pid);
-    free(pid);
-   // printf("-------------------------------EXITING WAIT\n");
-   // triggerTimer();
     leaveCritical();
+    blockProcess(*pid);
     return;
 }
 
@@ -96,20 +90,16 @@ void semWait(sem_t sem){
 void semPost(sem_t sem){
     if (sem == NULL) return;
     enterCritical();
-   // printf("---------------------------------------------------------------------ENTERING POST\n");
     if (sem->waiting > 0){
         sem->waiting--;
         pid_t *pid = (pid_t *)get(sem->waiting_list, 0);
-     //   printf("Unblocking %d\n", *pid);
         remove(sem->waiting_list, pid);
-        unblockProcess(*pid);
-     //   printf("---------------------------------EXITING POST\n");
         leaveCritical();
-       // triggerTimer();
+        unblockProcess(*pid);
+     //   free(pid);
         return;
     }
     sem->value++;
     leaveCritical();
-  //  printf("--------------------------------EXITING POST\n");
     return;
 }

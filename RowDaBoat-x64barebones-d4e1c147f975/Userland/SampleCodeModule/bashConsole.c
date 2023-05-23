@@ -26,6 +26,7 @@ char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty]);
 char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty]);
 char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
 char callKill(uint8_t argumentQty, char arguments[argumentQty]);
+char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
 char callNice(uint8_t argumentQty, char arguments[argumentQty]);
 
 #define COMMAND_QTY 19
@@ -248,6 +249,7 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
         for (int i = 0; i < 3; i++)
         {
             execve(&processA, args);
+            // yield();
         }
     }
     else
