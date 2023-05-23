@@ -412,7 +412,15 @@ char callNice(uint8_t argumentQty, char arguments[argumentQty])
         arg2[j] = 0;
         int pid = strToNum(arg1, strlen(arg1));
         int priority = strToNum(arg2, strlen(arg2));
-        _sys_nice(pid, priority);
+        int returnValue = _sys_nice(pid, priority);
+        if (returnValue < 0)
+        {
+            printf("Error al cambiar la prioridad\n");
+        }
+        else
+        {
+            printf("Prioridad del proceso con pid %d cambiada a %d\n", pid, returnValue);
+        }
     }
     return 0;
 }
