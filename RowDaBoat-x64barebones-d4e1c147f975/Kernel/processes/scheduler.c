@@ -135,7 +135,6 @@ int fork() {
 
 void yield() {
     scheduler->skipQuantum = 1;
-    printf("Yield\n");
     triggerTimer();
 }
 

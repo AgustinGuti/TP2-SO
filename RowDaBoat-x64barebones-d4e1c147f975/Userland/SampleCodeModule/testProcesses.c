@@ -6,6 +6,7 @@ sem_t sem;
 
 void processA() {
     while(1){
+        printf("A");
         yield();
     }
     return;
