@@ -2,6 +2,7 @@
 #define _KEYBOARD_H_
 
 #include <stdint.h>
+#include "scheduler.h"
 
 #define BACKSPACE   0x08
 #define NEWLINE     0x0A

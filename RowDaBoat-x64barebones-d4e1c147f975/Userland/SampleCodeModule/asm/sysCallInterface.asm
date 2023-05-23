@@ -26,6 +26,7 @@ GLOBAL _sys_semOpen
 GLOBAL _sys_semClose
 GLOBAL _sys_semWait
 GLOBAL _sys_semPost
+GLOBAL _sys_kill
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -356,6 +357,18 @@ _sys_getMemoryStatus:
     mov rbp, rsp
     
     mov rax, 27     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_kill(int pid);
+_sys_kill:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 28     ;id 
     int 80h
 
     mov rsp, rbp

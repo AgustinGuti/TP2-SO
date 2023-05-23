@@ -27,3 +27,7 @@ void exit(int value){
 void blockProcess(int pid){
     _sys_block(pid);
 }
+
+void kill(int pid){
+    _sys_kill(pid);
+}
