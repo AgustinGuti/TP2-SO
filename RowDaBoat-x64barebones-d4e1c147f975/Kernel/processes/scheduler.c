@@ -22,6 +22,7 @@ typedef struct SchedulerCDT{
     LinkedList deleted;
     Process currentProcess;
     Process empty;
+    IteratorPtr it[MAX_PRIORITY];
     int quantum;
     int quantumCounter;
     char skipQuantum;
@@ -43,43 +44,33 @@ void testList();
 static char ready = 0;
 
 void initScheduler() {
-   // printf("Initializing scheduler\n");
     scheduler = (Scheduler) malloc(sizeof(SchedulerCDT));
-   // printf("Scheduler: %x\n", scheduler);
     if( scheduler == NULL){
         printf("Not enough memory to allocate scheduler\n");
         /*not enough memory to allocate scheduler*/
         return;
     }
-   // printf("Scheduler created\n");
     for(int i = 0; i < MAX_PRIORITY; i++){
-        printf("Creating queue %d\n", i);
         scheduler->queue[i] = createLinkedList();
+        scheduler->it[i] = iterator(scheduler->queue[i]);
     }
-   // testList();
-    printf("Queues created\n");
-   // scheduler->deleted = createLinkedList();
-    int kernelPID = createProcess("Kernel", NULL, 1, 0, NULL);
-    printf("Kernel PID: %d\n", kernelPID);
-    int emptyPID = createProcess("Empty", &emptyProcess, 1, 0, NULL);
-    printf("Empty PID: %d\n", emptyPID);
+    char *argv[2] = {"Kernel", NULL};
+    int kernelPID = createProcess("Kernel", NULL, 1, 0, argv);
+    argv[0] = "Empty";
+    int emptyPID = createProcess("Empty", &emptyProcess, 1, 0, argv);
+
     scheduler->currentProcess = getProcess(kernelPID);
-    printf("Current process: %x\n", scheduler->currentProcess);
     scheduler->quantum = BURST_TIME;
     scheduler->quantumCounter = BURST_TIME-1;
     ready = 1;
-    printf("Scheduler initialized\n");
 }
 
 
 void * schedule(void* rsp) {
-  //  printf("Scheduling\n");
-  //  printf("RSP: %x\n", rsp);
     if (scheduler != NULL && ready){
         scheduler->quantumCounter++;
         if(scheduler->quantumCounter >= scheduler->quantum || scheduler->skipQuantum){
             //if process used all its quantum, its priotity is lowered
-            //printf("Quantum counter: %d\n", scheduler->quantumCounter);
             if (scheduler->quantumCounter >= scheduler->quantum){
                 if (scheduler->currentProcess->priority > 0){
                     remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
@@ -103,39 +94,31 @@ void * schedule(void* rsp) {
             if (scheduler->currentProcess->state == RUNNING){
                 scheduler->currentProcess->state = READY;
             }
-            // printProcesses();
-           // printf("Current process: %d\n", scheduler->currentProcess->pid);
             scheduler->currentProcess = getNextProcess();
             if (scheduler->currentProcess == NULL){
+                printf("No process to run\n");
                 return rsp;
             }
-           // printf("Next process: %d\n", scheduler->currentProcess->pid);
             scheduler->currentProcess->state = RUNNING;
             return scheduler->currentProcess->stackPointer;
         }
     }
- //   printf("No process to run\n");
     return rsp;
 }
 
 Process getNextProcess() {
     int currentPriority = MAX_PRIORITY - 1;
-  //  printf("Getting next process\n");
     while(currentPriority >= 0){
-        IteratorPtr it = iterator(scheduler->queue[currentPriority]);
-      //  printf("Current priority: %d\n", currentPriority);
-        while(hasNext(it)){
-            Process proc = next(it);
+        resetIterator(scheduler->it[currentPriority], scheduler->queue[currentPriority]);
+        while(hasNext(scheduler->it[currentPriority])){
+            Process proc = next(scheduler->it[currentPriority]);
             if (proc->state == READY){
-                freeIterator(it);
                 return proc;
             }
         }
         currentPriority--;
-        freeIterator(it);
     }
-   // printf("No process to run\n");
-    return NULL;
+    return scheduler->empty;
 }
 
 void emptyProcess(){
@@ -149,13 +132,13 @@ int fork() {
 }
 
 void yield() {
-    //scheduler->quantumCounter = BURST_TIME;
-     scheduler->skipQuantum = 1;
-   // triggerTimer();
+    //scheduler->skipQuantum = 1;
+    scheduler->quantumCounter = scheduler->quantum;
+    triggerTimer();
 }
 
 void exit(int value) {
-    killProcess();
+    killProcess(scheduler->currentProcess->pid);
 }
 
 pid_t getpid() {
@@ -181,39 +164,44 @@ uint64_t popFromStack(Process process) {
 
 Process getProcess(pid_t pid){
     int currentPriority = MAX_PRIORITY - 1;
-    //printf("Getting process %d\n", pid);
     while (currentPriority >= 0){
-        //printf("Current priority: %d\n", currentPriority);
         IteratorPtr it = iterator(scheduler->queue[currentPriority]);
-        //printf("Iterator created %x\n", it);
-        //printf("Has next: %d\n", hasNext(it));
         while(hasNext(it)){
-            //printf("Has next 2\n");
             Process proc = next(it);
-            //printf("Process: %s\n", proc->name);
             if (proc->pid == pid){
-                //printf("Process found %s\n", proc->name);
                 freeIterator(it);
-                //printf("Process found 2%s\n", proc->name);
                 return proc;
             }
         }
         currentPriority--;
         freeIterator(it);
     }
-    //printf("Process not found\n");
     return NULL;
 }
+
+// Process getProcess(pid_t pid) {
+//     int currentPriority = MAX_PRIORITY - 1;
+//     while(currentPriority >= 0){
+//         resetIterator(scheduler->it[currentPriority], scheduler->queue[currentPriority]);
+//         while(hasNext(scheduler->it[currentPriority])){
+//             Process proc = next(scheduler->it[currentPriority]);
+//             if (proc->pid == pid){
+//                 return proc;
+//             }
+//         }
+//         currentPriority--;
+//     }
+//     return NULL;
+// }
 
 //Tenemos que usar una carpeta tipo /proc, o alcanza con esto?
 void printProcesses(){
     int currentPriority = MAX_PRIORITY - 1;
     printf("  Nombre    PID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n");
     while(currentPriority >= 0){
-       // printf("Priority: %d\n", currentPriority);
-        IteratorPtr it = iterator(scheduler->queue[currentPriority--]);
-        Process proc = next(it);
-        while (proc != NULL){
+        resetIterator(scheduler->it[currentPriority], scheduler->queue[currentPriority]);
+        while(hasNext(scheduler->it[currentPriority])){
+            Process proc = next(scheduler->it[currentPriority]);
             if (proc->pid != KERNEL_PID){
                 int nameLenght = strlen(proc->name);
                 printf(" %s  ", proc->name);
@@ -239,9 +227,8 @@ void printProcesses(){
                         break;
                 }
             }
-            proc = next(it);
         }
-        freeIterator(it);
+        currentPriority--;
     }
 }
 
@@ -268,26 +255,22 @@ int getProcessState(int pid) {
     return process->state;
 }
 
-void killProcess() {
-    printf("Killing process %s\n", scheduler->currentProcess->name);
-    if (scheduler->currentProcess->pid == 0){
-        Process kernel = getProcess(-1);
-        kernel->state = READY;
-        printf("Kernel ready\n");
-    }
-  //  printProcesses();
+void killProcess(pid_t pid) {
     // insert(scheduler->deleted, scheduler->currentProcess);
     // remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-    printf("Process killed\n");
+    free(scheduler->currentProcess->stack);
     scheduler->currentProcess->state = ZOMBIE;
     yield();
-  //  scheduler->quantumCounter = scheduler->quantum;
-    triggerTimer();
 }
 
 void startWrapper(void* entryPoint, char argc, char * argv[]) {
     int ret = ((int (*)(int, char *[]))entryPoint)(argc, argv);
-    killProcess();
+    if (scheduler->currentProcess->pid == 0){
+        Process kernel = getProcess(KERNEL_PID);
+        kernel->state = READY;
+        printf("Kernel ready\n");
+    }
+    killProcess(scheduler->currentProcess->pid);
 }
 
 void testList(){
@@ -351,12 +334,15 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
     process->priority = priority -1;
     process->foreground = foreground;
     int argc = 0;
-    while(argv[argc] != NULL){
-        argc++;
+    if (argv != NULL){
+        while(argv[argc] != NULL){
+            argc++;
+        }
     }
     
     //Process stack is the top of the stack, stack base is process->stack + STACK_SIZE
     process->stack = (uint64_t*) malloc(STACK_SIZE);
+    memset(process->stack, 0, STACK_SIZE);
     if(process->stack == NULL){
         /*not enough memory for process->stack*/
         return NULL;
@@ -385,13 +371,12 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
         scheduler->empty = process;
         return EMPTY_PID;
     }
-    insert(scheduler->queue[process->priority], process);
-    printf("Process %s created with pid %d at %x\n", process->name, process->pid, process);
     if (entryPoint == NULL){
         process->state = BLOCKED;
     }else{
         process->state = READY;
     }
+    insert(scheduler->queue[process->priority], process);
     return process->pid;
 }
 

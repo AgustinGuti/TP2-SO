@@ -7,16 +7,21 @@
 
 static void zeroDivision(uint64_t *registers);
 static void invalidOpcode(uint64_t *registers);
+static void other(uint64_t *registers);
 static void printRegs(uint64_t *registers);
 
 static const char* registerNames[CANT_REGISTERS] = {
     "RAX", "RBX", "RCX", "RDX", "RSI", "RDI", "RBP", "R8 ", "R9 ", "R10", "R11", "R12", "R13", "R14", "R15","RSP","RIP"
 };
 
-static const uint64_t (*exceptions[])() = {&zeroDivision, 0,0,0,0,0,&invalidOpcode};
+static const uint64_t (*exceptions[])() = {&zeroDivision, &other,&other,&other,&other,&other,&invalidOpcode};
 
 void exceptionDispatcher(int exception, uint64_t registers[CANT_REGISTERS]) {
+	printf("Exception: %d\n", exception);	
 	(*exceptions[exception])(registers);
+	if (exception > 6){
+		other(registers);
+	}
 }
 
 static void zeroDivision(uint64_t *registers) {
@@ -38,6 +43,17 @@ static void invalidOpcode(uint64_t *registers){
 	newline();
 	printRegs(registers);
 	newline();
+	_sti();
+}
+
+static void other(uint64_t *registers){
+	newline();
+	startPage();
+	cleanScreen();
+	printString(0xFF0000,"Other exception");
+	newline();
+	printRegs(registers);
+	newline();	
 	_sti();
 }
 

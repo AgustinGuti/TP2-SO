@@ -68,7 +68,6 @@ void semClose(sem_t sem){
 // Si el valor del semáforo es cero, el proceso que llama queda bloqueado.
 void semWait(sem_t sem){
     if (sem == NULL) return;
-    _cli();
    // printf("----------------------------------------------------------------------ENTERING WAIT\n");
     if (sem->value > 0){
         sem->value--;
@@ -86,7 +85,6 @@ void semWait(sem_t sem){
     blockProcess(*pid);
     free(pid);
    // printf("-------------------------------EXITING WAIT\n");
-    _sti();
    // triggerTimer();
     return;
 }
@@ -95,7 +93,6 @@ void semWait(sem_t sem){
 // Si hay procesos bloqueados en el semáforo, desbloquea a uno de ellos.
 void semPost(sem_t sem){
     if (sem == NULL) return;
-    _cli();
    // printf("---------------------------------------------------------------------ENTERING POST\n");
     if (sem->waiting > 0){
         sem->waiting--;
@@ -110,6 +107,5 @@ void semPost(sem_t sem){
     }
     sem->value++;
   //  printf("--------------------------------EXITING POST\n");
-    _sti();
     return;
 }

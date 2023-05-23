@@ -13,7 +13,27 @@ GLOBAL _irq04Handler
 GLOBAL _irq05Handler
 
 GLOBAL _exception0Handler
+GLOBAL _exception1Handler
+GLOBAL _exception2Handler
+GLOBAL _exception3Handler
+GLOBAL _exception4Handler
+GLOBAL _exception5Handler
 GLOBAL _exception6Handler
+GLOBAL _exception7Handler
+GLOBAL _exception8Handler
+GLOBAL _exception9Handler
+GLOBAL _exception10Handler
+GLOBAL _exception11Handler
+GLOBAL _exception12Handler
+GLOBAL _exception13Handler
+GLOBAL _exception14Handler
+GLOBAL _exception15Handler
+GLOBAL _exception16Handler
+GLOBAL _exception17Handler
+GLOBAL _exception18Handler
+GLOBAL _exception19Handler
+GLOBAL _exception20Handler
+
 
 GLOBAL _setupSysCalls
 GLOBAL _sysCallHandler
@@ -32,6 +52,8 @@ EXTERN exceptionDispatcher
 EXTERN schedule
 
 EXTERN loader
+
+EXTERN printf
 
 SECTION .text
 
@@ -144,8 +166,10 @@ SECTION .text
 	mov [registers+8*16], rax
 
 	;Check if RIP (rdx) is greater than 0x400000, then continue. If it is not, the exception came from kernel space and we can't recover, enter a halt loop
-	cmp rdx, 0x400000	; start of userland
-	jge .retKernel
+	
+	;cmp rdx, 0x400000	; start of userland
+	;jge .retKernel
+	jmp .retKernel
 
 .loop:
 	call haltcpu
@@ -271,14 +295,15 @@ _setupSysCalls:
 _irq00Handler:
 	pushState
 
+;	mov rdi, textTest
+;	call printf
+
 	mov rdi, 0 ; handler del timer tick
 	call irqDispatcher
 
-	cli
 	mov rdi, rsp
 	call schedule
 	mov rsp, rax
-	sti
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
@@ -345,9 +370,86 @@ _irq05Handler:
 _exception0Handler:
 	exceptionHandler 0
 
+;Debug Exception
+_exception1Handler:
+	exceptionHandler 1
+
+;Non Maskable Interrupt Exception
+_exception2Handler:
+	exceptionHandler 2
+
+;Breakpoint Exception
+_exception3Handler:
+	exceptionHandler 3
+
+;Overflow Exception
+_exception4Handler:
+	exceptionHandler 4
+
+;Bound Range Exceeded Exception
+_exception5Handler:
+	exceptionHandler 5
+
 ;Invalid Opcode Exception
 _exception6Handler:
 	exceptionHandler 6
+
+_exception7Handler:
+	exceptionHandler 7
+
+;Device Not Available Exception
+_exception8Handler:
+	exceptionHandler 8
+
+;Double Fault Exception
+_exception9Handler:
+	exceptionHandler 9
+
+;Coprocessor Segment Overrun Exception
+_exception10Handler:
+	exceptionHandler 10
+
+;Invalid TSS Exception
+_exception11Handler:
+	exceptionHandler 11
+
+;Segment Not Present Exception
+
+_exception12Handler:
+	exceptionHandler 12
+
+;Stack Fault Exception
+_exception13Handler:
+	exceptionHandler 13
+
+;General Protection Exception
+_exception14Handler:
+	exceptionHandler 14
+
+;Page Fault Exception
+_exception15Handler:
+	exceptionHandler 15
+
+;Intel Reserved Exception
+_exception16Handler:
+	exceptionHandler 16
+
+;Floating Point Error Exception
+_exception17Handler:
+	exceptionHandler 17
+
+;Alignment Check Exception
+_exception18Handler:
+	exceptionHandler 18
+
+;Machine Check Exception
+_exception19Handler:
+	exceptionHandler 19
+
+;SIMD Floating Point Exception
+_exception20Handler:
+	exceptionHandler 20
+
 
 haltcpu:
 	cli
@@ -433,7 +535,7 @@ restoreStack:		;restores the first 3 entries of the stack
 section .data
 	haveSaved dq 0
 	isStackSaved dq 0
-	textTest db "ASM RSP: %x", 0
+	textTest db "Interrupt", 0
 
 section .bss
 	maxSysCall resb 26

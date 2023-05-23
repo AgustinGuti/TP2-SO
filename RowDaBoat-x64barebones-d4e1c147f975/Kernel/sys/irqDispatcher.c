@@ -15,9 +15,8 @@ void irqDispatcher(uint64_t irq, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint6
 	(*interrupts[irq])(rsi,rdx,rcx,r8,r9);
 }
 
-void  int_20(void * rbp) {
+void  int_20() {
 	timer_handler();
-//	return schedule(rbp);
 }
 
 void int_21(uint8_t event){

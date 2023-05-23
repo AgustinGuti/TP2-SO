@@ -59,8 +59,8 @@ int main()
 	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t *)(MEMORY_INITIAL_DIRECTION - 1));
 	setTotalMemory(MEMORY_TO_MAP_SIZE);
 	initScheduler();
-
-	createProcess("shell", sampleCodeModuleAddress, 1, 1, NULL);
+	char *argv[] = {"shell", NULL};
+	createProcess("shell", sampleCodeModuleAddress, 1, 1, argv);
 	triggerTimer();
 	// ((EntryPoint)sampleCodeModuleAddress)();
 	drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully

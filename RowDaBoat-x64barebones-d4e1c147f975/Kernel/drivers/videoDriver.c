@@ -205,7 +205,6 @@ void printf(const char* fmt, ...){
 }
 
 void putChar(uint32_t color, uint16_t id){
-	_cli();
 	if (id < FIRST_CHAR || id > FIRST_CHAR + CHAR_QTY){	//Only mapped ASCII
 		if (id != NEWLINE && id != BACKSPACE){			//Also accepts NEWLINE and BACKSPACE
 			return;
@@ -271,7 +270,6 @@ void putChar(uint32_t color, uint16_t id){
 			currentCharOffset -=pitch*CHAR_HEIGHT*fontSize;			
 			break;
 	}
-	_sti();
 }
 
 void printFormatStringLimited(uint32_t color, const char *str, uint32_t count, uint16_t row, uint16_t col){

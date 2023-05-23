@@ -187,12 +187,10 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty]){
                 return 0;
             }
         }
-        char *args[2] = {"processA", foreground};
-        for (int i = 0; i < 45; i++){
+        char *args[3] = {"processA", foreground, NULL};
+        for (int i = 0; i < 5; i++){
             execve(&processA, args);
         }
-        char *args2[2] = {"processB", foreground};
-      //  execve(&processB, args2);
     }else{
         printf("Argumentos invalidos para exec\n");
     }
