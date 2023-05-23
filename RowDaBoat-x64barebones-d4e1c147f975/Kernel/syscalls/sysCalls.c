@@ -10,7 +10,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 29 // functions quantity in sysCalls[]
+#define READY_CALLS 30 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -31,7 +31,7 @@ char sys_getSavedRegisters(uint64_t registers[REGISTER_QTY]);
 void *sys_malloc(uint64_t size);
 uint64_t sys_free(void *ptr);
 int sys_fork();
-int sys_execve(void* entryPoint, char * const argv[]);
+int sys_execve(void *entryPoint, char *const argv[]);
 void sys_printProcesses();
 void sys_exit(int status);
 void sys_yield();
@@ -41,16 +41,42 @@ sem_t semOpen(char *name, int value);
 void semClose(sem_t sem);
 void semWait(sem_t sem);
 void semPost(sem_t sem);
-uint64_t * sys_getMemoryStatus();
+uint64_t *sys_getMemoryStatus();
 void sys_kill(int pid);
+int sys_nice(pid_t pid, int priority);
 
-static uint64_t sysCalls[] = {(uint64_t)&sys_write, (uint64_t)&sys_read, (uint64_t)&sys_drawSprite, (uint64_t)&sys_getMillis,
-                              (uint64_t)&sys_cleanScreen, (uint64_t)&sys_getScreenWidth, (uint64_t)&sys_getScreenHeight,
-                              (uint64_t)&sys_beep, (uint64_t)&sys_getTime, (uint64_t)&sys_setFontSize, (uint64_t)&sys_getFontSize,
-                              (uint64_t)&sys_formatWrite, (uint64_t)&sys_getScreenBpp, (uint64_t)&sys_getSavedRegisters, (uint64_t)&sys_malloc,
-                              (uint64_t)&sys_free, (uint64_t)&sys_fork, (uint64_t)sys_execve, (uint64_t)&sys_printProcesses, (uint64_t)&sys_exit,
-                              (uint64_t)&sys_yield, (uint64_t)&sys_getpid, (uint64_t)&sys_block, (uint64_t)&semOpen, (uint64_t)&semClose,
-                              (uint64_t)&semWait, (uint64_t)&semPost, (uint64_t)&sys_getMemoryStatus, (uint64_t)&sys_kill};
+static uint64_t sysCalls[] = {
+    (uint64_t)&sys_write,
+    (uint64_t)&sys_read,
+    (uint64_t)&sys_drawSprite,
+    (uint64_t)&sys_getMillis,
+    (uint64_t)&sys_cleanScreen,
+    (uint64_t)&sys_getScreenWidth,
+    (uint64_t)&sys_getScreenHeight,
+    (uint64_t)&sys_beep,
+    (uint64_t)&sys_getTime,
+    (uint64_t)&sys_setFontSize,
+    (uint64_t)&sys_getFontSize,
+    (uint64_t)&sys_formatWrite,
+    (uint64_t)&sys_getScreenBpp,
+    (uint64_t)&sys_getSavedRegisters,
+    (uint64_t)&sys_malloc,
+    (uint64_t)&sys_free,
+    (uint64_t)&sys_fork,
+    (uint64_t)sys_execve,
+    (uint64_t)&sys_printProcesses,
+    (uint64_t)&sys_exit,
+    (uint64_t)&sys_yield,
+    (uint64_t)&sys_getpid,
+    (uint64_t)&sys_block,
+    (uint64_t)&semOpen,
+    (uint64_t)&semClose,
+    (uint64_t)&semWait,
+    (uint64_t)&semPost,
+    (uint64_t)&sys_getMemoryStatus,
+    (uint64_t)&sys_kill,
+    (uint64_t)&sys_nice,
+};
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
 extern void _speaker_tune(uint16_t tune);
@@ -61,21 +87,23 @@ extern uint64_t savedRegisters[REGISTER_QTY];
 extern char haveSaved;
 extern void saveCurrentRegs();
 
-void setupSysCalls(){
+void setupSysCalls()
+{
     _setupSysCalls(READY_CALLS, sysCalls);
 }
 
-
-void sys_write(int fd, const char *buf, uint64_t count){
-    switch (fd){
-        case STDOUT:
-            printStringLimited(0xFFFFFF,buf,count);
-            break;
-        case STDERR:
-            printStringLimited(0xFF0000,buf,count);
-            break;
-        default:
-            break;
+void sys_write(int fd, const char *buf, uint64_t count)
+{
+    switch (fd)
+    {
+    case STDOUT:
+        printStringLimited(0xFFFFFF, buf, count);
+        break;
+    case STDERR:
+        printStringLimited(0xFF0000, buf, count);
+        break;
+    default:
+        break;
     }
 }
 
@@ -102,7 +130,8 @@ void *sys_malloc(uint64_t size)
 
 uint64_t sys_free(void *ptr)
 {
-    if (ptr != NULL){
+    if (ptr != NULL)
+    {
         return free(ptr);
     }
     return 0;
@@ -113,15 +142,18 @@ int sys_fork()
     return fork();
 }
 
-int sys_execve(void* entryPoint, char * const argv[]){
+int sys_execve(void *entryPoint, char *const argv[])
+{
     return execve(entryPoint, argv);
 }
 
-void sys_kill(int pid){
+void sys_kill(int pid)
+{
     killProcess(pid);
 }
 
-uint64_t * sys_getMemoryStatus(){
+uint64_t *sys_getMemoryStatus()
+{
     return getMemoryStatus();
 }
 
@@ -256,4 +288,9 @@ void sys_semWait(sem_t sem)
 void sys_semPost(sem_t sem)
 {
     semPost(sem);
+}
+
+int sys_nice(pid_t pid, int priority)
+{
+    return nice(pid, priority);
 }

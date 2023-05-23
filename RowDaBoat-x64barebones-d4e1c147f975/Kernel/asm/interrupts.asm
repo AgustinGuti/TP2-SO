@@ -559,7 +559,7 @@ section .data
 	textTest db "Interrupt", 0
 
 section .bss
-	maxSysCall resb 26
+	maxSysCall resb 30
 	sysCallsPointers resb 256		;Alcanza para 32 sysCalls
 	registers resq 17
 
