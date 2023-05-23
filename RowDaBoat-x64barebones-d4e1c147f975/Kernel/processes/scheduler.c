@@ -23,6 +23,7 @@ typedef struct SchedulerCDT{
     Process currentProcess;
     Process empty;
     IteratorPtr it[MAX_PRIORITY];
+    IteratorPtr itDeleted;
     int quantum;
     int quantumCounter;
     char skipQuantum;
@@ -54,11 +55,12 @@ void initScheduler() {
         scheduler->queue[i] = createLinkedList();
         scheduler->it[i] = iterator(scheduler->queue[i]);
     }
+    scheduler->deleted = createLinkedList();
+    scheduler->itDeleted = iterator(scheduler->deleted);
     char *argv[2] = {"Kernel", NULL};
     int kernelPID = createProcess("Kernel", NULL, 1, 0, argv);
     argv[0] = "Empty";
     int emptyPID = createProcess("Empty", &emptyProcess, 1, 0, argv);
-
     scheduler->currentProcess = getProcess(kernelPID);
     scheduler->quantum = BURST_TIME;
     scheduler->quantumCounter = BURST_TIME-1;
@@ -132,8 +134,8 @@ int fork() {
 }
 
 void yield() {
-    //scheduler->skipQuantum = 1;
-    scheduler->quantumCounter = scheduler->quantum;
+    scheduler->skipQuantum = 1;
+    printf("Yield\n");
     triggerTimer();
 }
 
@@ -142,7 +144,6 @@ void exit(int value) {
 }
 
 pid_t getpid() {
-  //  printf("PID: %d\n", scheduler->currentProcess->pid);
     return scheduler->currentProcess->pid;
 }
 
@@ -230,14 +231,42 @@ void printProcesses(){
         }
         currentPriority--;
     }
+    resetIterator(scheduler->itDeleted, scheduler->deleted);
+    while(hasNext(scheduler->itDeleted)){
+        Process proc = next(scheduler->itDeleted);
+        if (proc->pid != KERNEL_PID){
+            int nameLenght = strlen(proc->name);
+            printf(" %s  ", proc->name);
+            if (nameLenght < 10){
+                for (int i = 0; i < 10 - nameLenght; i++){
+                    printf(" ");
+                }
+            }
+            printf("%d       %d          %d         0x%x       0x%x", proc->pid, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
+            char state = proc->state;
+            switch(state){
+                case READY:
+                    printf("    READY\n");
+                    break;
+                case RUNNING:
+                    printf("    RUNNING\n");
+                    break;
+                case BLOCKED:
+                    printf("    BLOCKED\n");
+                    break;
+                case ZOMBIE:
+                    printf("    KILLED\n");
+                    break;
+            }
+        }
+    }
 }
 
 void blockProcess(int pid) {
     Process process = getProcess(pid);
     process->state = BLOCKED;
     if (pid == scheduler->currentProcess->pid){
-        scheduler->quantumCounter = scheduler->quantum;
-        triggerTimer();
+        yield();
     }
 }
 
@@ -245,8 +274,7 @@ void unblockProcess(int pid) {
     Process process = getProcess(pid);
     process->state = READY;
     if (scheduler->currentProcess->pid == EMPTY_PID){
-        scheduler->quantumCounter = scheduler->quantum;
-        triggerTimer();
+        yield();
     }
 }
 
@@ -256,8 +284,8 @@ int getProcessState(int pid) {
 }
 
 void killProcess(pid_t pid) {
-    // insert(scheduler->deleted, scheduler->currentProcess);
-    // remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+    insert(scheduler->deleted, scheduler->currentProcess);
+    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
     free(scheduler->currentProcess->stack);
     scheduler->currentProcess->state = ZOMBIE;
     yield();
