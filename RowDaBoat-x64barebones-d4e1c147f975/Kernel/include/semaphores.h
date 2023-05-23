@@ -2,16 +2,17 @@
 #include <functions.h>
 #include <linkedList.h>
 
-struct semaphore {
+
+typedef struct semaphoreCDT {
     char *name;
     int value;
     int id;
     int waiting;
-    pid_t *waiting_list;
-};
+    LinkedList waiting_list;
+}semaphoreCDT;
 
 
-typedef struct semaphore* sem_t;
+typedef struct semaphoreCDT* sem_t;
 
 // Crea o abre un semáforo y lo identifica con el nombre name.
 // Si no existe un semáforo con ese nombre, lo crea con valor value.

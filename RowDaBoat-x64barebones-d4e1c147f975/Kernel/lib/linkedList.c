@@ -54,7 +54,6 @@ void insert(LinkedList list, void* data) {
     if (list->head == NULL)
         list->head = newNode;
 
-
     list->size++;
 }
 

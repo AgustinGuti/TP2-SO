@@ -69,27 +69,22 @@ void initScheduler() {
 
 
 void * schedule(void* rsp) {
+    //printf("RSP: %x\n", rsp);
     if (scheduler != NULL && ready){
         scheduler->quantumCounter++;
         if(scheduler->quantumCounter >= scheduler->quantum || scheduler->skipQuantum){
-            //if process used all its quantum, its priotity is lowered
-            if (scheduler->skipQuantum){
-                if (scheduler->currentProcess->priority < MAX_PRIORITY - 1  && scheduler->currentProcess->state != ZOMBIE){
-                    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+            //if process skipped quantum, its priority is raised 
+        
+            if (scheduler->currentProcess->state != ZOMBIE){
+                remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                if (scheduler->currentProcess->priority > 0 && scheduler->quantumCounter >= scheduler->quantum){
                     scheduler->currentProcess->priority--;
-                    insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                }else{
-                    moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                }
-            }else{ //if process skipped quantum, its priority is raised
-                if (scheduler->currentProcess->priority > 0 && scheduler->currentProcess->state != ZOMBIE){
-                    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                }else if (scheduler->currentProcess->priority < MAX_PRIORITY - 1 && scheduler->skipQuantum){
                     scheduler->currentProcess->priority++;
-                    insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                }else{
-                    moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
+                insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);  
             }
+                
             scheduler->skipQuantum = 0;
             scheduler->quantumCounter = 0;
             scheduler->currentProcess->stackPointer = rsp;
@@ -114,7 +109,7 @@ Process getNextProcess() {
         resetIterator(scheduler->it[currentPriority], scheduler->queue[currentPriority]);
         while(hasNext(scheduler->it[currentPriority])){
             Process proc = next(scheduler->it[currentPriority]);
-            if (proc->state == READY){
+            if (proc->state == READY && proc->pid != EMPTY_PID){
                 return proc;
             }
         }
@@ -282,6 +277,7 @@ void blockProcessFromProcess(Process process) {
         scheduler->skipQuantum = 1;
         triggerTimer();    
     }
+    return;
 }
 
 void unblockProcess(int pid) {
@@ -302,6 +298,7 @@ int getProcessState(int pid) {
 }
 
 void killProcess(pid_t pid) {
+    printf("Killing process %d\n", pid);
     Process process = getProcess(pid);
     insert(scheduler->deleted, process);
     remove(process->priority, process);
@@ -319,50 +316,6 @@ void startWrapper(void* entryPoint, char argc, char * argv[]) {
     }
     killProcess(scheduler->currentProcess->pid);
 }
-
-void testList(){
-    LinkedList list = createLinkedList();
-
-    // Insert elements into the list
-    int max = 100;
-    int nums[max];
-    for (int i = 0; i < max; i++) {
-        nums[i] = i;
-        insert(list, &nums[i]);
-    }
-
-    // Get the size of the list
-    printf("List size: %d\n", getSize(list));
-
-    // Iterate over the list and print the elements
-    IteratorPtr it = iterator(list);
-    while (hasNext(it)) {
-        int* data = (int*)next(it);
-        printf("Element: %d\n", *data);
-    }
-    freeIterator(it);
-
-    // Remove an element from the list
-    remove(list, &nums[1]);
-
-    // Get an element at index
-    int* element = (int*)get(list, 1);
-    if (element != NULL)
-        printf("Element at index 1: %d\n", *element);
-
-    // Iterate over the updated list
-    it = iterator(list);
-    while (hasNext(it)) {
-        int* data = (int*)next(it);
-        printf("Updated Element: %d\n", *data);
-    }
-    freeIterator(it);
-
-    // Destroy the list and free the memory
-    destroyLinkedList(list);
-    printf("List destroyed\n");
-}
-
 
 pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t foreground, char * argv[]) {
 
@@ -424,6 +377,7 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
         process->state = READY;
     }
     insert(scheduler->queue[process->priority], process);
+    yield();
     return process->pid;
 }
 
