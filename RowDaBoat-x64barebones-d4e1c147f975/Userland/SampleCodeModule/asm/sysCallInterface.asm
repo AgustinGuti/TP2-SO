@@ -27,6 +27,7 @@ GLOBAL _sys_semClose
 GLOBAL _sys_semWait
 GLOBAL _sys_semPost
 GLOBAL _sys_kill
+GLOBAL _sys_nice
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -369,6 +370,18 @@ _sys_kill:
     mov rbp, rsp
     
     mov rax, 28     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_nice(int pid, int priority);
+_sys_nice:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 29     ;id 
     int 80h
 
     mov rsp, rbp

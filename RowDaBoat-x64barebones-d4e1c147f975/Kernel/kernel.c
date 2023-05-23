@@ -49,7 +49,7 @@ extern void saveRegisters();
 extern void restoreStack();
 
 #define MEMORY_INITIAL_DIRECTION 0x600000
-#define MEMORY_TO_MAP_SIZE 0x8000000 
+#define MEMORY_TO_MAP_SIZE 0x8000000
 
 int main()
 {
@@ -59,7 +59,7 @@ int main()
 	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t *)(MEMORY_INITIAL_DIRECTION - 1));
 	initScheduler();
 	char *argv[] = {"shell", NULL};
-	createProcess("shell", sampleCodeModuleAddress, 1, 1, argv);
+	createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv);
 	triggerTimer();
 	// ((EntryPoint)sampleCodeModuleAddress)();
 	drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
