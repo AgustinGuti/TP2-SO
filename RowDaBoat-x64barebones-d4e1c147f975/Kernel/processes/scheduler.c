@@ -234,19 +234,24 @@ void printProcesses(){
 
 void blockProcess(int pid) {
     Process process = getProcess(pid);
-    process->state = BLOCKED;
-    if (pid == scheduler->currentProcess->pid){
-        scheduler->quantumCounter = scheduler->quantum;
-        triggerTimer();
+    if(process->state == READY){
+        process->state = BLOCKED;
     }
+    else if(process->state == RUNNING){
+        process->state = BLOCKED;
+        yield();
+    }
+    else if(process->state == BLOCKED){
+        unblockProcess(pid);
+    }
+    return;
 }
 
 void unblockProcess(int pid) {
     Process process = getProcess(pid);
     process->state = READY;
     if (scheduler->currentProcess->pid == EMPTY_PID){
-        scheduler->quantumCounter = scheduler->quantum;
-        triggerTimer();
+        yield();
     }
 }
 

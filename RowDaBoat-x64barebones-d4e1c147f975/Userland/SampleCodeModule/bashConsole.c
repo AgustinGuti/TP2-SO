@@ -24,11 +24,12 @@ char callFree(uint8_t argumentQty, char arguments[argumentQty]);
 char callExec(uint8_t argumentQty, char arguments[argumentQty]);
 char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty]);
 char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty]);
+char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
 
-#define COMMAND_QTY 16
+#define COMMAND_QTY 17
 
-static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free", "exec", "ps", "mem-status"};
-static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exitConsole,&callHimnoAlegria,&callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus}; 
+static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free", "exec", "ps", "mem-status", "block"};
+static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exitConsole,&callHimnoAlegria,&callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock}; 
 static char *commandDescriptions[COMMAND_QTY] = 
         {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
          "Vacia la consola.",
@@ -188,9 +189,9 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty]){
             }
         }
         char *args[3] = {"processA", foreground, NULL};
-        for (int i = 0; i < 5; i++){
-            execve(&processA, args);
-        }
+        execve(&processA, args);
+        // char *argsB[3] = {"processB", foreground, NULL};
+        // execve(&processB, argsB);
     }else{
         printf("Argumentos invalidos para exec\n");
     }
@@ -246,6 +247,16 @@ char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty]){
         printf("Memoria reservada: %x\n", memStatus[1]);
         printf("Memoria libre: %x\n", memStatus[2]);
         free(memStatus);
+    }
+    return 0;
+}
+
+char callBlock(uint8_t argumentQty, char arguments[argumentQty]){
+    if( argumentQty != 1){
+        printf("Argumento invalido para block. Debe recibir el PID del proceso a bloquear.\n");
+    }else{
+        int num = strToNum(arguments, strlen(arguments));
+        blockProcess(num);
     }
     return 0;
 }

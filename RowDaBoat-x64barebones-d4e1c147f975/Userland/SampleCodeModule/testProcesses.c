@@ -5,6 +5,14 @@ int a[1] = {100};
 sem_t sem;
 
 void processA() {
-    
+    while(1){
+        yield();
+    }
+    return;
+}
+
+void processB() {
+    printf("B");
+    blockProcess(1);
     return;
 }
