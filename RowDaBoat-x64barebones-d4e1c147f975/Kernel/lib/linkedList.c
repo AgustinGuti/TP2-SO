@@ -114,10 +114,14 @@ void printList(LinkedList list){
 // Function to create an iterator for the linked list
 IteratorPtr iterator(LinkedList list) {
     IteratorPtr iterator = (IteratorPtr)malloc(sizeof(IteratorCDT));
-   // printList(list);
     iterator->current = list->head;
     return iterator;
 }
+
+void resetIterator(IteratorPtr iterator, LinkedList list) {
+    iterator->current = list->head;
+}
+
 // Function to check if there are more elements in the iterator
 int hasNext(IteratorPtr iterator) {
     return (iterator->current != NULL);
@@ -128,12 +132,8 @@ void* next(IteratorPtr iterator) {
     if (!hasNext(iterator))
         return NULL;
 
-    // printf("iterator: %x\n", iterator);
-    // printf("data: %x\n", iterator->current);
     void* data = iterator->current->data;
-    //printf("next\n");
     iterator->current = iterator->current->next;
-    //printf("next\n");
     return data;
 }
 

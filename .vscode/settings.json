@@ -31,7 +31,9 @@
         "algorithm": "c",
         "semaphores.h": "c",
         "syscallinterface.h": "c",
-        "stddef.h": "c"
+        "stddef.h": "c",
+        "idtloader.h": "c",
+        "syscalls.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
