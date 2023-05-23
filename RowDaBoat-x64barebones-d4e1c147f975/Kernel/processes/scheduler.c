@@ -74,7 +74,6 @@ void * schedule(void* rsp) {
         scheduler->quantumCounter++;
         if(scheduler->quantumCounter >= scheduler->quantum || scheduler->skipQuantum){
             //if process skipped quantum, its priority is raised 
-        
             if (scheduler->currentProcess->state != ZOMBIE){
                 remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 if (scheduler->currentProcess->priority > 0 && scheduler->quantumCounter >= scheduler->quantum){
@@ -298,10 +297,9 @@ int getProcessState(int pid) {
 }
 
 void killProcess(pid_t pid) {
-    printf("Killing process %d\n", pid);
     Process process = getProcess(pid);
     insert(scheduler->deleted, process);
-    remove(process->priority, process);
+    remove(scheduler->queue[process->priority], process);
     free(process->stack);
     process->state = ZOMBIE;
     yield();
@@ -377,7 +375,6 @@ pid_t createProcess(char* name, void* entryPoint, uint8_t priority, uint8_t fore
         process->state = READY;
     }
     insert(scheduler->queue[process->priority], process);
-    yield();
     return process->pid;
 }
 
