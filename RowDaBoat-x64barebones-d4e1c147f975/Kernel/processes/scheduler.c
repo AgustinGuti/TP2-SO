@@ -73,21 +73,21 @@ void * schedule(void* rsp) {
         scheduler->quantumCounter++;
         if(scheduler->quantumCounter >= scheduler->quantum || scheduler->skipQuantum){
             //if process used all its quantum, its priotity is lowered
-            if (scheduler->quantumCounter >= scheduler->quantum){
-                if (scheduler->currentProcess->priority > 0){
+            if (scheduler->skipQuantum){
+                if (scheduler->currentProcess->priority < MAX_PRIORITY - 1  && scheduler->currentProcess->state != ZOMBIE){
                     remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                     scheduler->currentProcess->priority--;
                     insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }else{
-                    headToBack(scheduler->queue[scheduler->currentProcess->priority]);
+                    moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
             }else{ //if process skipped quantum, its priority is raised
-                if (scheduler->currentProcess->priority < MAX_PRIORITY - 1){
+                if (scheduler->currentProcess->priority > 0 && scheduler->currentProcess->state != ZOMBIE){
                     remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                     scheduler->currentProcess->priority++;
                     insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }else{
-                    headToBack(scheduler->queue[scheduler->currentProcess->priority]);
+                    moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
             }
             scheduler->skipQuantum = 0;
@@ -135,7 +135,6 @@ int fork() {
 
 void yield() {
     scheduler->quantumCounter = scheduler->quantum;
-    headToBack(scheduler->queue[scheduler->currentProcess->priority]);
     triggerTimer();
 }
 
@@ -266,10 +265,12 @@ void blockProcess(int pid) {
     Process process = getProcess(pid);
     process->state = BLOCKED;
     if (pid == scheduler->currentProcess->pid){
-        scheduler->skipQuantum = 1;
-        headToBack(scheduler->queue[scheduler->currentProcess->priority]);
-        triggerTimer();    
+        yield();
     }
+    else if(process->state == BLOCKED){
+        unblockProcess(pid);
+    }
+    return;
 }
 
 void unblockProcess(int pid) {
@@ -286,8 +287,8 @@ int getProcessState(int pid) {
 }
 
 void killProcess(pid_t pid) {
-    insert(scheduler->deleted, scheduler->currentProcess);
-    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+    insert(scheduler->deleted, getProcess(pid));
+    remove(scheduler->queue[getProcess(pid)->priority], getProcess(pid));
     free(scheduler->currentProcess->stack);
     scheduler->currentProcess->state = ZOMBIE;
     yield();

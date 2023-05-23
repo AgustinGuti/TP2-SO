@@ -23,5 +23,6 @@ int getSize(LinkedList list);
 void freeIterator(IteratorPtr iterator);
 void headToBack(LinkedList list);
 void resetIterator(IteratorPtr iterator, LinkedList list);
+void moveToBack(LinkedList list, void* data);
 
 #endif /* LINKED_LIST_H */

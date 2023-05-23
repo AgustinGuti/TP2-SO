@@ -147,6 +147,32 @@ void freeIterator(IteratorPtr iterator) {
     free(iterator);
 }
 
+void moveToBack(LinkedList list, void* data){
+    NodeCTD* current = list->head;
+    while (current != NULL) {
+        if (current->data == data) {
+            if (current == list->head)
+                list->head = current->next;
+
+            if (current == list->tail)
+                list->tail = current->prev;
+
+            if (current->prev != NULL)
+                current->prev->next = current->next;
+
+            if (current->next != NULL)
+                current->next->prev = current->prev;
+
+            current->prev = list->tail;
+            current->next = NULL;
+            list->tail->next = current;
+            list->tail = current;
+            return;
+        }
+        current = current->next;
+    }
+}
+
 // Function to move the head of the linked list to the back
 void headToBack(LinkedList list) {
     if (list->head != NULL && list->head != list->tail) {
