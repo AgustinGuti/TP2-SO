@@ -25,11 +25,12 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty]);
 char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty]);
 char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty]);
 char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
+char callKill(uint8_t argumentQty, char arguments[argumentQty]);
 
-#define COMMAND_QTY 17
+#define COMMAND_QTY 18
 
-static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free", "exec", "ps", "mem-status", "block"};
-static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exitConsole,&callHimnoAlegria,&callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock}; 
+static char *commandNames[COMMAND_QTY] = {"help","clear","tron","memory-dump","time","zero-division","invalid-opcode","set-font-size","inforeg","exit","himno-alegria","malloc", "free", "exec", "ps", "mem-status", "block", "kill"};
+static char (*commands[])(uint8_t, char *) = {&help,&clean,&tron,&callMemoryDump,&time,&callZeroDivision,&callInvalidOpcode,&callSetFontSize,&callInforeg,&exitConsole,&callHimnoAlegria,&callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill}; 
 static char *commandDescriptions[COMMAND_QTY] = 
         {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
          "Vacia la consola.",
@@ -230,6 +231,16 @@ char callMalloc(uint8_t argumentQty, char arguments[argumentQty]){
         }       
     }else{
         printf("Argumento invalido para malloc\n");
+    }
+    return 0;
+}
+
+char callKill(uint8_t argumentQty, char arguments[argumentQty]){
+    if(argumentQty != 1){
+        printf("Argumento invalido para kill\n");
+    }else{
+        int pid = strToNum(arguments, strlen(arguments));
+        kill(pid); 
     }
     return 0;
 }

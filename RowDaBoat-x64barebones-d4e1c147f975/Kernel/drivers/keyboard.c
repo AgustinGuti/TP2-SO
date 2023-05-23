@@ -17,6 +17,7 @@ extern char get_key();
 #define END 267
 #define PAGE_DOWN 268
 #define INSERT 269
+#define CTRL_C 270
 #define DELETE 127
 
 #define LSHIFT_BREAK 0xAA
@@ -124,6 +125,9 @@ uint16_t getKeyMake(uint8_t event)
                     {
                         return shiftKeyMapping[event];
                     }
+                    if(isCtrDown && key == 'c'){
+                        return CTRL_C;
+                    }
                     return keyMapping[event];
                 }
                 return -1;
@@ -179,6 +183,10 @@ void keyboard_handler(uint8_t event)
                 buffer[occupiedBuffer++] = ' ';
                 break;
             case NEWLINE: // Enter
+                buffer[occupiedBuffer++] = NEWLINE;
+                break;
+            case CTRL_C:
+                killProcess(getpid());
                 buffer[occupiedBuffer++] = NEWLINE;
                 break;
             default:

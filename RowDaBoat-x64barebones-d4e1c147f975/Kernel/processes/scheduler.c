@@ -261,23 +261,35 @@ void printProcesses(){
     }
 }
 
+void blockHandler(int pid) {
+    Process process = getProcess(pid);
+    if(process->state == READY || process->state == RUNNING ) {
+        blockProcessFromProcess(process);
+    }
+    else if (process->state == BLOCKED) {
+        unblockProcessFromProcess(process);
+    }
+}
+
 void blockProcess(int pid) {
     Process process = getProcess(pid);
-    if(process->state == READY){
-        process->state = BLOCKED;
+    blockProcessFromProcess(process);
+}
+
+void blockProcessFromProcess(Process process) {
+    process->state = BLOCKED;
+    if (process->pid == scheduler->currentProcess->pid){
+        scheduler->skipQuantum = 1;
+        triggerTimer();    
     }
-    else if(process->state == RUNNING){
-        process->state = BLOCKED;
-        yield();
-    }
-    else if(process->state == BLOCKED){
-        unblockProcess(pid);
-    }
-    return;
 }
 
 void unblockProcess(int pid) {
     Process process = getProcess(pid);
+    unblockProcessFromProcess(process);
+}
+
+void unblockProcessFromProcess(Process process) {
     process->state = READY;
     if (scheduler->currentProcess->pid == EMPTY_PID){
         yield();
@@ -290,10 +302,11 @@ int getProcessState(int pid) {
 }
 
 void killProcess(pid_t pid) {
-    insert(scheduler->deleted, scheduler->currentProcess);
-    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-    free(scheduler->currentProcess->stack);
-    scheduler->currentProcess->state = ZOMBIE;
+    Process process = getProcess(pid);
+    insert(scheduler->deleted, process);
+    remove(process->priority, process);
+    free(process->stack);
+    process->state = ZOMBIE;
     yield();
 }
 

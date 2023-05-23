@@ -9,6 +9,7 @@ void processA() {
         printf("A");
         yield();
     }
+    
     return;
 }
 
