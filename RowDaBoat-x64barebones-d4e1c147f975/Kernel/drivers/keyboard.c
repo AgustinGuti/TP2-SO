@@ -171,7 +171,7 @@ void keyboard_handler(uint8_t event)
     //printf("Keyboard handler\n");
    // printf("Buffer: %d\n", occupiedBuffer);
     if (bufferSem == NULL){
-        bufferSem = semOpen("bufferSem", 0);
+    //    bufferSem = semOpen("bufferSem", 0);
     }
     int key = getKeyMake(event);
     if (key != -1)
@@ -209,7 +209,7 @@ int getBufferOcupied()
 int getBuffer(int *out, uint32_t count)
 {
     if (bufferSem == NULL){
-        bufferSem = semOpen("bufferSem", 0);
+      //  bufferSem = semOpen("bufferSem", 0);
     }
     int i = 0;
     for (i = 0; i < occupiedBuffer && i < count; i++)

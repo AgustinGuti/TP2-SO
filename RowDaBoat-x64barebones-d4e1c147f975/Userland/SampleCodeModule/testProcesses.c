@@ -3,17 +3,20 @@
 int a = 100;
 sem_t sem;
 
-void processA() {
+int processA() {
     if (sem == NULL) {
         sem = semOpen("sem", 1);
     }
     semWait(sem);
+ //   printf("Yielding %d\n", getpid());
     if (a >= 100){
-    //    yield();
+        yield();
         a -= 100;
     }
+  //  printf("Resuming %d\n", getpid());
     semPost(sem);
+ //   printf("posted %d\n", getpid());
     semClose(sem);
     printf("Process A - PID: %d : %d\n", getpid(), a + 1);
-    return;
+    return 0;
 }

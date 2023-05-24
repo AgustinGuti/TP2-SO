@@ -4,6 +4,6 @@
 #include <stddef.h>
 
 
-void processA();
+int processA();
 
 void processB();

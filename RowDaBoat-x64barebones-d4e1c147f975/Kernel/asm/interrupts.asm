@@ -170,9 +170,12 @@ SECTION .text
 
 	;Check if RIP (rdx) is greater than 0x400000, then continue. If it is not, the exception came from kernel space and we can't recover, enter a halt loop
 	
-	;cmp rdx, 0x400000	; start of userland
-	;jge .retKernel
-	jmp .retKernel
+	cmp rdx, 0x400000	; start of userland
+	jge .retKernel
+
+	mov rdi, exceptionText
+	mov rsi, %1 ; exception number
+	call printf
 
 .loop:
 	call haltcpu
@@ -314,9 +317,6 @@ _setupSysCalls:
 ;8254 Timer (Timer Tick)
 _irq00Handler:
 	pushState
-
-;	mov rdi, textTest
-;	call printf
 
 	mov rdi, 0 ; handler del timer tick
 	call irqDispatcher
@@ -557,6 +557,7 @@ section .data
 	isStackSaved dq 0
 	critical dq 0
 	textTest db "Interrupt", 0
+	exceptionText db "Kernel exception %d", 0
 
 section .bss
 	maxSysCall resb 30

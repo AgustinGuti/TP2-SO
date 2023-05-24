@@ -283,10 +283,10 @@ char callFree(uint8_t argumentQty, char arguments[argumentQty])
 
 char callMalloc(uint8_t argumentQty, char arguments[argumentQty])
 {
-    if (argumentQty == 1 && isHexaNumber(arguments))
+    if (argumentQty == 1 && isHexaNumber(arguments+1))
     {
         char flag = 0;
-        uint64_t size = hexaStrToNum(arguments, strlen(arguments), &flag);
+        uint64_t size = hexaStrToNum(arguments+1, strlen(arguments+1), &flag);
         if (flag == 1)
         {
             printerr("Numero muy grande. Overflow\n", 0);

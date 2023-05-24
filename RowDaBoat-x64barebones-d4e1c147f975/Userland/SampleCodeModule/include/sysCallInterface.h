@@ -38,5 +38,7 @@ void _sys_semClose(sem_t sem);
 void _sys_semWait(sem_t sem);
 void _sys_semPost(sem_t sem);
 int _sys_nice(int pid, int priority);
+uint64_t * sys_getMemoryStatus();
+
 
 #endif

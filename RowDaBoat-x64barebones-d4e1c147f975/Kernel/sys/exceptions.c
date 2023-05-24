@@ -18,7 +18,9 @@ static const uint64_t (*exceptions[])() = {&zeroDivision, &other,&other,&other,&
 
 void exceptionDispatcher(int exception, uint64_t registers[CANT_REGISTERS]) {
 	printf("Exception: %d\n", exception);	
+	while (1){};
 	(*exceptions[exception])(registers);
+	
 	if (exception > 6){
 		other(registers);
 	}
@@ -32,7 +34,7 @@ static void zeroDivision(uint64_t *registers) {
 	newline();
 	printRegs(registers);
 	newline();
-	_sti();
+	//_sti();
 }
 
 static void invalidOpcode(uint64_t *registers){
@@ -43,7 +45,7 @@ static void invalidOpcode(uint64_t *registers){
 	newline();
 	printRegs(registers);
 	newline();
-	_sti();
+	//_sti();
 }
 
 static void other(uint64_t *registers){
@@ -54,7 +56,7 @@ static void other(uint64_t *registers){
 	newline();
 	printRegs(registers);
 	newline();	
-	_sti();
+	//_sti();
 }
 
 static void printRegs(uint64_t * registers){
