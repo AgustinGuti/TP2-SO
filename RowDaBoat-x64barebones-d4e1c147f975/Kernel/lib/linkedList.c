@@ -1,20 +1,5 @@
 #include <linkedList.h>
 
-// Node structure
-typedef struct NodeCTD
-{
-    void *data;
-    struct NodeCTD *prev;
-    struct NodeCTD *next;
-} NodeCTD;
-
-// Linked list structure
-typedef struct LinkedListCDT
-{
-    NodeCTD *head;
-    NodeCTD *tail;
-    int size;
-} LinkedListCDT;
 
 // Iterator structure
 typedef struct IteratorCDT

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stddef.h>
 
 #define LINE_INDICATOR "$> "
 
@@ -84,6 +85,7 @@ void printText(char *string){
 
 void putCharFD(char character, int fd){
 	char aux[] = {character};
+	// printf("to write: %c\n", character);
 	_sys_write(fd,aux, 1);
 }
 
@@ -94,11 +96,10 @@ void putChar(char character){
 uint8_t getChar() {
 	uint16_t buf[1];
 	uint8_t c = _sys_read(0, buf, 1);
-	if (buf[0] > UINT8_MAX){
-		printerr("Error al leer el caracter", 0);
-	}
-	if ( c != 1 ){
-		printerr("Error al leer el caracter", 0);
+	if (buf[0] > UINT8_MAX || c != 1){
+		//printerr("Error al leer el caracter", 0);
+		//return EOF;
+		return NULL;
 	}
 	return buf[0];
 }

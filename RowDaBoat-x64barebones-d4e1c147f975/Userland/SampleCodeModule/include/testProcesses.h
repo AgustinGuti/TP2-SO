@@ -7,3 +7,5 @@
 void processA();
 
 void processB();
+
+void cat();

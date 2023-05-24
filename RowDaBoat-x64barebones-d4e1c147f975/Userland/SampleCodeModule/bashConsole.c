@@ -28,11 +28,12 @@ char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
 char callKill(uint8_t argumentQty, char arguments[argumentQty]);
 char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
 char callNice(uint8_t argumentQty, char arguments[argumentQty]);
+char callCat(uint8_t argumentQty, char arguments[argumentQty]);
 
-#define COMMAND_QTY 19
+#define COMMAND_QTY 20
 
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice};
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "cat"};
+static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callCat};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -473,6 +474,13 @@ char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty])
     {
         setFontSize(argumentQty, arguments, 1);
     }
+    return 0;
+}
+
+char callCat(uint8_t argumentQty, char arguments[argumentQty]){
+    // char foreground = 1;
+    // char *args[3] = {"cat", foreground, NULL};
+    // execve(&cat, args);
     return 0;
 }
 

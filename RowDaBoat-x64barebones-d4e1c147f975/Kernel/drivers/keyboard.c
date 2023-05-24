@@ -187,6 +187,8 @@ void keyboard_handler(uint8_t event)
                 break;
             case CTRL_C:
                 killProcess(getpid());
+                buffer[occupiedBuffer++] = '^';
+                buffer[occupiedBuffer++] = 'c';
                 buffer[occupiedBuffer++] = NEWLINE;
                 break;
             default:
