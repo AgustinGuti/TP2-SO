@@ -1,20 +1,5 @@
 #include <linkedList.h>
 
-// Node structure
-typedef struct NodeCTD
-{
-    void *data;
-    struct NodeCTD *prev;
-    struct NodeCTD *next;
-} NodeCTD;
-
-// Linked list structure
-typedef struct LinkedListCDT
-{
-    NodeCTD *head;
-    NodeCTD *tail;
-    int size;
-} LinkedListCDT;
 
 // Iterator structure
 typedef struct IteratorCDT
@@ -26,6 +11,10 @@ typedef struct IteratorCDT
 LinkedList createLinkedList()
 {
     LinkedList list = (LinkedList)malloc(sizeof(LinkedListCDT));
+    if (list == NULL){
+        printerr("Error: malloc failed in insert\n");
+        return;
+    }
     list->head = NULL;
     list->tail = NULL;
     list->size = 0;
@@ -48,7 +37,11 @@ void destroyLinkedList(LinkedList list)
 // Function to insert an element at the end of the linked list
 void insert(LinkedList list, void *data)
 {
-    NodeCTD *newNode = (NodeCTD *)malloc(sizeof(NodeCTD));
+    NodeCTD *newNode = (NodeCTD *)malloc(sizeof(NodeCTD)*2);
+    if (newNode == NULL){
+        printerr("Error: malloc failed in insert\n");
+        return;
+    }
     newNode->data = data;
     newNode->prev = list->tail;
     newNode->next = NULL;
@@ -124,6 +117,10 @@ void printList(LinkedList list)
 IteratorPtr iterator(LinkedList list)
 {
     IteratorPtr iterator = (IteratorPtr)malloc(sizeof(IteratorCDT));
+    if (iterator == NULL){
+        printerr("Error: malloc failed in insert\n");
+        return;
+    }
     iterator->current = list->head;
     return iterator;
 }

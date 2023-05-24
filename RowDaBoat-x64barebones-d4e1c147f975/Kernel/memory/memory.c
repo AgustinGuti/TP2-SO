@@ -20,6 +20,8 @@ void *malloc(uint64_t size)
     void * res = allocMemory(myMemoryManager, size, &allocatedMemory);
     if( res != NULL){
         occupiedMem += allocatedMemory;
+    }else {
+        printerr("Malloc failed\n");
     }
     return res;
 }

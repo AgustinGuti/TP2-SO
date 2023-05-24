@@ -4,6 +4,20 @@
 #include <stdint.h>
 #include "memory.h"
 
+typedef struct NodeCTD
+{
+    void *data;
+    struct NodeCTD *prev;
+    struct NodeCTD *next;
+} NodeCTD;
+
+// Linked list structure
+typedef struct LinkedListCDT
+{
+    NodeCTD *head;
+    NodeCTD *tail;
+    int size;
+} LinkedListCDT;
 
 typedef struct NodeCTD * Node;
 typedef struct LinkedListCDT * LinkedList;

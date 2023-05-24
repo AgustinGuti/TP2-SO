@@ -144,17 +144,18 @@ void* allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit, uint64
         return NULL;
     }
     if (block_size >= 2 * size && RIGHT(bit) < buddy->neededBlocks && !(getBlockState(buddy->memory, bit) == OCCUPIED && getBlockState(buddy->memory, RIGHT(bit)) == FREE && getBlockState(buddy->memory, LEFT(bit)) == FREE)){ //RIGHT is further than LEFT
-        void* left = allocMemoryRec(buddy, size, LEFT(bit));
+
+        void* left = allocMemoryRec(buddy, size, LEFT(bit), allocatedMemorySize);
         if (left != NULL){
             occupyBlock(buddy->memory, bit);
             return left;
         }
-
-        void* right = allocMemoryRec(buddy, size, RIGHT(bit));
+        void* right = allocMemoryRec(buddy, size, RIGHT(bit), allocatedMemorySize);
         if (right != NULL) {
             occupyBlock(buddy->memory, bit);
             return right;
         }
+
         return NULL;
     }
     if (getBlockState(buddy->memory, bit) == OCCUPIED){
@@ -174,7 +175,7 @@ void printMemoryState(){
 void* allocMemory(MemoryManagerADT buddy, uint64_t size, uint64_t *allocatedMemorySize) {
     void* res= allocMemoryRec(buddy, size, 0, allocatedMemorySize);
 
-//    // printf("Allocated %d bytes at 0x%x\n", size, res);
+   // printf("Allocated %d bytes at 0x%x\n", size, res);
 //     long bit = getBlockIndex(buddy, res);
 //     if (bit < 0) {
 //         return 0;
@@ -197,7 +198,6 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr) {
     }
     // Get the index of the block that contains the memory pointed to by address
     long bit = getBlockIndex(buddy, ptr);
-    printf("Freeing %d bytes at 0x%x\n", getBlockSize(buddy, bit), ptr);
     if (bit < 0) {
         return 0;
     }
@@ -217,5 +217,7 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr) {
     }
     //printTree(buddy, 6);
     // Return the amount of bytes freed
+  //  printf("Freeing %d bytes at 0x%x\n", block_size, ptr);
+
     return block_size;
 }

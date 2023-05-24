@@ -15,7 +15,7 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void *const sampleCodeModuleAddress = (void *)0x400000; // IMPORTANT moved the entry point to make space for the video driver buffer (6 extra Mb needed)
+static void *const sampleCodeModuleAddress = (void *)0x400000;
 static void *const sampleDataModuleAddress = (void *)0x500000;
 
 typedef int (*EntryPoint)();
@@ -49,18 +49,18 @@ extern void saveRegisters();
 extern void restoreStack();
 
 #define MEMORY_INITIAL_DIRECTION 0x600000
-#define MEMORY_TO_MAP_SIZE 0x8000000
-#define MEMORY_TO_MAP_SIZE 0x8000000
+#define MEMORY_TO_MAP_SIZE 0xF00000
 
 int main()
 {
 	load_idt();
 	saveRegisters();
 	restoreStack();
-	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t)MEMORY_INITIAL_DIRECTION - 1 - calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), (uint64_t *)(MEMORY_INITIAL_DIRECTION - 1));
+	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE) + 1, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
 	initScheduler();
-	char *argv[] = {"shell", NULL};
-	createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv);
+	char *argv[] = {"shell", 1, NULL};
+	// createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv, &startWrapper);
+	execve(sampleCodeModuleAddress, argv);
 	triggerTimer();
 	// ((EntryPoint)sampleCodeModuleAddress)();
 	drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully

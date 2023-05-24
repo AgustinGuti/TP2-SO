@@ -155,9 +155,49 @@ void printString(uint32_t color, uint8_t *str){
 
 //Can receive %s, %c, %d, %X, %x
 // %X and %x have the same behaviour
-void printf(const char* fmt, ...){
+void printFormatString(uint32_t color, va_list valist, uint32_t argQty, const char *fmt){
 	int pos = 0;
+	int consumedArgs = 0;
+	while (fmt[pos] != 0){
+		//If all arguments are consumed it stops searching (va_arg has undefined behaviour)
+		if (fmt[pos] != '%' || consumedArgs == argQty){
+			putChar(color,fmt[pos]);
+		}else{
+			consumedArgs++;
+			pos++;
+			char type = fmt[pos];
+			if (type == 's'){
+				printString(color,va_arg(valist, int));
+			}else if (type == 'c'){
+				putChar(color,va_arg(valist, int));
+			}else if (type == 'd'){
+				int num = va_arg(valist, int);
+				int numLength = dec_num_length(num);
+				char aux[numLength+1];
+				dec_to_str(aux, num);
+				printString(color,aux);
+			}else if (type == 'X' || type == 'x'){
+				int num = va_arg(valist, int);
+				int numLength = hex_num_length(num);
+				char aux[numLength+1];
+				hex_to_str(aux, num);
+				printString(color,aux);
+			}
+			else{		//If it is an unrecognized format, it prints it literally
+				consumedArgs--;		
+				putChar(color,'%');
+				putChar(color,type);
+			}
+		}
+		pos++;
+	}
+}
+
+//Can receive %s, %c, %d, %X, %x
+// %X and %x have the same behaviour
+void printf(const char* fmt, ...){
 	va_list valist;
+	int pos = 0;
 	int argQty = 0;
 	while (fmt[pos] != 0){
 		if (fmt[pos] == '%' && fmt[pos+1] != 0){
@@ -165,42 +205,26 @@ void printf(const char* fmt, ...){
 		}
 		pos++;
 	}
-	pos = 0;
-	va_start(valist, argQty);
-	int consumedArgs = 0;
+	va_start(valist, fmt);
+	printFormatString(0xFFFFFF, valist, argQty, fmt);
+	va_end(valist);
+
+}
+
+//Can receive %s, %c, %d, %X, %x
+// %X and %x have the same behaviour
+void printerr(const char* fmt, ...){
+	va_list valist;
+	int pos = 0;
+	int argQty = 0;
 	while (fmt[pos] != 0){
-		//If all arguments are consumed it stops searching (va_arg has undefined behaviour)
-		if (fmt[pos] != '%' || consumedArgs == argQty){
-			putChar(0xFFFFFF,fmt[pos]);
-		}else{
-			consumedArgs++;
-			pos++;
-			char type = fmt[pos];
-			if (type == 's'){
-				printString(0xFFFFFF,va_arg(valist, int));
-			}else if (type == 'c'){
-				putChar(0xFFFFFF,va_arg(valist, int));
-			}else if (type == 'd'){
-				int num = va_arg(valist, int);
-				int numLength = dec_num_length(num);
-				char aux[numLength+1];
-				dec_to_str(aux, num);
-				printString(0xFFFFFF,aux);
-			}else if (type == 'X' || type == 'x'){
-				int num = va_arg(valist, int);
-				int numLength = hex_num_length(num);
-				char aux[numLength+1];
-				hex_to_str(aux, num);
-				printString(0xFFFFFF,aux);
-			}
-			else{		//If it is an unrecognized format, it prints it literally
-				consumedArgs--;		
-				putChar(0xFFFFFF,'%');
-				putChar(0xFFFFFF,type);
-			}
+		if (fmt[pos] == '%' && fmt[pos+1] != 0){
+			argQty++;
 		}
 		pos++;
 	}
+	va_start(valist, fmt);
+	printFormatString(0xFF0000, valist, argQty, fmt);
 	va_end(valist);
 }
 
