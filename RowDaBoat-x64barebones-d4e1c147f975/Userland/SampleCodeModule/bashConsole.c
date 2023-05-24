@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <processes.h>
 #include <testProcesses.h>
+#include <tests.h>
+#include <memory.h>
 
 extern void zeroDivision();
 extern void displayTime();
@@ -28,12 +30,12 @@ char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
 char callKill(uint8_t argumentQty, char arguments[argumentQty]);
 char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
 char callNice(uint8_t argumentQty, char arguments[argumentQty]);
-char callCat(uint8_t argumentQty, char arguments[argumentQty]);
+char callFork(uint8_t argumentQty, char arguments[argumentQty]);
+char callTestMM(uint8_t argumentQty, char arguments[argumentQty]);
+#define COMMAND_QTY 21
 
-#define COMMAND_QTY 20
-
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "cat"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callCat};
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm"};
+static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -425,6 +427,47 @@ char callNice(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
+char callFork(uint8_t argumentQty, char arguments[argumentQty])
+{
+    if (argumentQty != 0)
+    {
+        printf("Argumento invalido para fork\n");
+    }
+    else
+    {
+        fork();
+        // int pid = fork();
+        // if (pid == -1)
+        // {
+        //     printf("Error al crear el proceso hijo\n");
+        // }
+        // else if (pid == 0)
+        // {
+        //     printf("Soy el proceso hijo\n");
+        // }
+        // else
+        // {
+        //     printf("Soy el proceso padre. Mi pid es %d y el de mi hijo es %d\n", getpid(), pid);
+        // }
+    }
+    return 0;
+}
+
+char callTestMM(uint8_t argumentQty, char arguments[argumentQty])
+{
+    if (argumentQty != 1)
+    {
+        printf("Argumento invalido para test-mm\n");
+    }
+    else
+    {
+        uint64_t memorySize = strToNum(arguments + 1, strlen(arguments + 1));
+        // printf("%s\n", arguments + 1);
+        // test_mm(memorySize);
+    }
+    return 0;
+}
+
 char time(uint8_t argumentQty, char arguments[argumentQty])
 {
     if (argumentQty != 0)
@@ -477,12 +520,6 @@ char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callCat(uint8_t argumentQty, char arguments[argumentQty]){
-    // char foreground = 1;
-    // char *args[3] = {"cat", foreground, NULL};
-    // execve(&cat, args);
-    return 0;
-}
 
 char exitConsole(uint8_t argumentQty, char arguments[argumentQty])
 {
