@@ -102,7 +102,6 @@ void printList(LinkedList list)
     printf("Size of list: %d\n", list->size);
     printf("printList\n");
     Node current = list->head;
-    printf("list->head: %x\n", list->head);
     while (current != NULL)
     {
         printf("Current: %x\n", current);

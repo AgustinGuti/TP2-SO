@@ -15,6 +15,7 @@ typedef struct semaphoreCDT {
     int id;
     int waiting;
     LinkedList waiting_list;
+    int attached;
 }semaphoreCDT;
 
 
@@ -46,6 +47,7 @@ sem_t semOpen(char *name, int value){
         printf("Checking semaphore %s\n", sem->name);
         if (strcmp(sem->name, name) == 0){
             printf("Already exists semaphore %s with value %d\n", sem->name, sem->value);
+            sem->attached++;
             leaveCritical();
             return sem;
         }
@@ -59,6 +61,7 @@ sem_t semOpen(char *name, int value){
     newSem->waiting = 0;
     //printf("Creating semaphore %s with id %d\n", sem->name, sem->id);
     newSem->waiting_list = createLinkedList();
+    newSem->attached = 1;
     insert(semaphores->semaphores, newSem);
     leaveCritical();
     return newSem;
@@ -70,17 +73,13 @@ sem_t semOpen(char *name, int value){
 void semClose(sem_t sem){
     if (sem == NULL) return;
     enterCritical();
-    if (sem->waiting == 0){
-        resetIterator(semaphores->it);
-        while (hasNext(semaphores->it)){
-            sem_t currSem = next(semaphores->it);
-            if (currSem->id == sem->id){
-                remove(semaphores->semaphores, currSem);
-                free(currSem->name);
-                leaveCritical();
-                return;
-            }
-        }
+    if (sem->attached == 1){
+        remove(semaphores->semaphores, sem);
+        free(sem->name);
+        leaveCritical();
+        return;
+    } else {
+        sem->attached--;
     }
     leaveCritical();
     return;
@@ -100,9 +99,8 @@ void semWait(sem_t sem){
     *pid = getpid();
     sem->waiting++;
     insert(sem->waiting_list, pid);
-   // blockProcess(*pid);
     leaveCritical();
-   // triggerTimer();
+    blockProcess(*pid);
     return;
 }
 
@@ -115,8 +113,8 @@ void semPost(sem_t sem){
         sem->waiting--;
         pid_t *pid = (pid_t *)get(sem->waiting_list, 0);
         remove(sem->waiting_list, pid);
-     //   unblockProcess(*pid);
-       // free(pid);
+        unblockProcess(*pid);
+        free(pid);
         leaveCritical();
         return;
     }

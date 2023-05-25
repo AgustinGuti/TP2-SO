@@ -97,6 +97,10 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     return process;
 }
 
+void freeStack(Process process)
+{
+    free(process->stack);
+}
 
 pid_t generatePID()
 {

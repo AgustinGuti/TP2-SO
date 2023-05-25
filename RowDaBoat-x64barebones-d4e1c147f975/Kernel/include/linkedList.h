@@ -38,5 +38,6 @@ void freeIterator(Iterator iterator);
 void headToBack(LinkedList list);
 void resetIterator(Iterator iterator);
 void moveToBack(LinkedList list, void* data);
+void printList(LinkedList list);
 
 #endif /* LINKED_LIST_H */

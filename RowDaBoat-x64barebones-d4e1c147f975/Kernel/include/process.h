@@ -32,7 +32,8 @@ typedef struct ProcessCDT *Process;
 
 int fork();
 Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper);
-void killProcess(pid_t pid);
+//void killProcess(pid_t pid);
 void emptyProcess();
+void freeStack(Process process);
 
 #endif

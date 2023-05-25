@@ -16,7 +16,6 @@ MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const man
 
 void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToAllocate);
 
-uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree);
 
 uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap);
 
