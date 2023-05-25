@@ -6,7 +6,7 @@
 //Estructura de un semáforo
 static struct semaphoresCDT {
     LinkedList semaphores;
-    IteratorPtr it;
+    Iterator it;
 } semaphoresCDT;
 
 typedef struct semaphoreCDT {
@@ -38,7 +38,7 @@ sem_t semOpen(char *name, int value){
         semaphores->it = iterator(semaphores->semaphores);
     }
 
-    resetIterator(semaphores->it, semaphores->semaphores);
+    resetIterator(semaphores->it);
     sem_t sem;
     printf("Searching for semaphore %s\n", name);
     while (hasNext(semaphores->it)){
@@ -71,7 +71,7 @@ void semClose(sem_t sem){
     if (sem == NULL) return;
     enterCritical();
     if (sem->waiting == 0){
-        resetIterator(semaphores->it, semaphores->semaphores);
+        resetIterator(semaphores->it);
         while (hasNext(semaphores->it)){
             sem_t currSem = next(semaphores->it);
             if (currSem->id == sem->id){

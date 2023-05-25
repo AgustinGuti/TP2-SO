@@ -7,8 +7,8 @@ typedef struct SchedulerCDT
     LinkedList deleted;
     Process currentProcess;
     Process empty;
-    IteratorPtr it[MAX_PRIORITY];
-    IteratorPtr itDeleted;
+    Iterator it[MAX_PRIORITY];
+    Iterator itDeleted;
     int quantum;
     int quantumCounter;
     char skipQuantum;
@@ -67,16 +67,21 @@ void *schedule(void *rsp)
             // if process skipped quantum, its priority is raised
             if (scheduler->currentProcess->state != ZOMBIE && scheduler->currentProcess->pid != EMPTY_PID)
             {
-                remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 if (scheduler->currentProcess->priority > 0 && scheduler->quantumCounter >= scheduler->quantum)
                 {   
+                    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                     scheduler->currentProcess->priority--;
+                    insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
                 else if (scheduler->currentProcess->priority < MAX_PRIORITY - 1 && scheduler->skipQuantum)
                 {
+                    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                     scheduler->currentProcess->priority++;
+                    insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
-                insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                else {
+                    moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                }
             }
 
             scheduler->skipQuantum = 0;
@@ -104,7 +109,7 @@ Process getNextProcess()
     int currentPriority = MAX_PRIORITY - 1;
     while (currentPriority >= 0)
     {
-        resetIterator(scheduler->it[currentPriority], scheduler->queue[currentPriority]);
+        resetIterator(scheduler->it[currentPriority]);
         while (hasNext(scheduler->it[currentPriority]))
         {
             Process proc = next(scheduler->it[currentPriority]);
@@ -115,6 +120,8 @@ Process getNextProcess()
         }
         currentPriority--;
     }
+    printList(scheduler->queue[0]);
+    printf("No process to run\n");
     return scheduler->empty;
 }
 
@@ -148,7 +155,7 @@ pid_t getpid()
 //     int currentPriority = MAX_PRIORITY - 1;
 //     while (currentPriority >= 0)
 //     {
-//         IteratorPtr it = iterator(scheduler->queue[currentPriority]);
+//         Iterator it = iterator(scheduler->queue[currentPriority]);
 //         while (hasNext(it))
 //         {
 //             Process proc = next(it);
@@ -169,7 +176,7 @@ pid_t getpid()
 Process getProcess(pid_t pid) {
     int currentPriority = MAX_PRIORITY - 1;
     while(currentPriority >= 0){
-        resetIterator(scheduler->it[currentPriority], scheduler->queue[currentPriority]);
+        resetIterator(scheduler->it[currentPriority]);
         while(hasNext(scheduler->it[currentPriority])){
             Process proc = next(scheduler->it[currentPriority]);
             if (proc->pid == pid){
@@ -198,21 +205,6 @@ int nice(pid_t pid, int priority)
     return priority;
 }
 
-// void printList(LinkedList list)
-// {
-//     printf("printList\n");
-//     Node current = list->head;
-//     printf("list->head: %x\n", list->head);
-//     while (current != NULL)
-//     {
-//         printf("Current: %x\n", current);
-//         printf("Current->data: %x\n", current->data);
-//         printf("Current->next: %x\n", current->next);
-//         current = current->next;
-//     }
-
-//     return;
-// }
 
 // Tenemos que usar una carpeta tipo /proc, o alcanza con esto?
 void printProcesses()
@@ -221,7 +213,7 @@ void printProcesses()
     printf("  Nombre    PID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n");
     while (currentPriority >= 0)
     {
-        resetIterator(scheduler->it[currentPriority], scheduler->queue[currentPriority]);
+        resetIterator(scheduler->it[currentPriority]);
         while (hasNext(scheduler->it[currentPriority]))
         {
             Process proc = next(scheduler->it[currentPriority]);
@@ -257,7 +249,7 @@ void printProcesses()
         }
         currentPriority--;
     }
-    resetIterator(scheduler->itDeleted, scheduler->deleted);
+    resetIterator(scheduler->itDeleted);
     while (hasNext(scheduler->itDeleted))
     {
         Process proc = next(scheduler->itDeleted);

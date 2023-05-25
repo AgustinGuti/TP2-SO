@@ -11,7 +11,7 @@ int processA() {
 //     semWait(sem);
 //  //   printf("Yielding %d\n", getpid());
 //     if (a >= 100){
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 5; i++){
             printf("Process A - PID: %d : %d\n", getpid(), a + 1);
             yield();
         }

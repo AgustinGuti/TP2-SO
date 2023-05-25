@@ -3,15 +3,6 @@
 #include <linkedList.h>
 
 
-typedef struct semaphoreCDT {
-    char *name;
-    int value;
-    int id;
-    int waiting;
-    LinkedList waiting_list;
-}semaphoreCDT;
-
-
 typedef struct semaphoreCDT* sem_t;
 
 // Crea o abre un semáforo y lo identifica con el nombre name.

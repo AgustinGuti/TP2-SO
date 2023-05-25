@@ -4,6 +4,7 @@
 // Iterator structure
 typedef struct IteratorCDT
 {
+    LinkedList list;
     NodeCTD *current;
 } IteratorCDT;
 
@@ -114,30 +115,31 @@ void printList(LinkedList list)
 }
 
 // Function to create an iterator for the linked list
-IteratorPtr iterator(LinkedList list)
+Iterator iterator(LinkedList list)
 {
-    IteratorPtr iterator = (IteratorPtr)malloc(sizeof(IteratorCDT));
+    Iterator iterator = (Iterator)malloc(sizeof(IteratorCDT));
     if (iterator == NULL){
         printerr("Error: malloc failed in insert\n");
         return;
     }
+    iterator->list = list;
     iterator->current = list->head;
     return iterator;
 }
 
-void resetIterator(IteratorPtr iterator, LinkedList list)
+void resetIterator(Iterator iterator)
 {
-    iterator->current = list->head;
+    iterator->current = iterator->list->head;
 }
 
 // Function to check if there are more elements in the iterator
-int hasNext(IteratorPtr iterator)
+int hasNext(Iterator iterator)
 {
     return (iterator->current != NULL);
 }
 
 // Function to get the next element from the iterator
-void *next(IteratorPtr iterator)
+void *next(Iterator iterator)
 {
     if (!hasNext(iterator))
         return NULL;
@@ -154,7 +156,7 @@ int getSize(LinkedList list)
 }
 
 // Function to free the memory of an iterator
-void freeIterator(IteratorPtr iterator)
+void freeIterator(Iterator iterator)
 {
     free(iterator);
 }
@@ -166,6 +168,9 @@ void moveToBack(LinkedList list, void *data)
     {
         if (current->data == data)
         {
+            if (current == list->head && current == list->tail)
+                return;
+
             if (current == list->head)
                 list->head = current->next;
 

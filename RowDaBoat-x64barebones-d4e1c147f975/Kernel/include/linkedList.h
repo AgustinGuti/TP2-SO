@@ -21,7 +21,7 @@ typedef struct LinkedListCDT
 
 typedef struct NodeCTD * Node;
 typedef struct LinkedListCDT * LinkedList;
-typedef struct IteratorCDT* IteratorPtr;
+typedef struct IteratorCDT* Iterator;
 
 
 // Function declarations
@@ -30,13 +30,13 @@ void destroyLinkedList(LinkedList list);
 void insert(LinkedList list, void* data);
 void remove(LinkedList list, void* data);
 void * get(LinkedList list, int index);
-IteratorPtr iterator(LinkedList list);
-int hasNext(IteratorPtr iterator);
-void * next(IteratorPtr iterator);
+Iterator iterator(LinkedList list);
+int hasNext(Iterator iterator);
+void * next(Iterator iterator);
 int getSize(LinkedList list);
-void freeIterator(IteratorPtr iterator);
+void freeIterator(Iterator iterator);
 void headToBack(LinkedList list);
-void resetIterator(IteratorPtr iterator, LinkedList list);
+void resetIterator(Iterator iterator);
 void moveToBack(LinkedList list, void* data);
 
 #endif /* LINKED_LIST_H */
