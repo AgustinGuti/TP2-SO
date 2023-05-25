@@ -115,7 +115,7 @@ int sys_read(int fd, const uint16_t *buf, uint32_t count)
     {
     case STDIN:
         ans = getBuffer(buf, count); // read from buffer
-        removeFromBuffer(ans);       // remove read chars from buffer
+       // removeFromBuffer(ans);       // remove read chars from buffer
         break;
     default:
         break;

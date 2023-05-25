@@ -206,7 +206,7 @@ void printProcesses()
         resetIterator(scheduler->it[currentPriority]);
         while (hasNext(scheduler->it[currentPriority]))
         {
-            Process proc = next(scheduler->it[currentPriority]);          
+            Process proc = next(scheduler->it[currentPriority]); 
             if (proc->pid != KERNEL_PID)
             {
                 int nameLenght = strlen(proc->name);

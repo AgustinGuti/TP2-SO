@@ -109,9 +109,9 @@ void semPost(sem_t sem){
         sem->waiting--;
         pid_t *pid = (pid_t *)get(sem->waiting_list, 0);
         remove(sem->waiting_list, pid);
+        leaveCritical();
         unblockProcess(*pid);
         free(pid);
-        leaveCritical();
         return;
     }
     sem->value++;

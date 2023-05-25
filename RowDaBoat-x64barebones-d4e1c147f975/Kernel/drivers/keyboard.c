@@ -84,7 +84,7 @@ char isSpecialKeyMake(uint16_t data)
 }
 
 // Return ASCII code of char received, or -1 if a char wasn't received
-uint16_t getKeyMake(uint8_t event)
+int getKeyMake(uint8_t event)
 {
     uint16_t specialEvent = 0;
     switch (event)
@@ -171,7 +171,7 @@ void keyboard_handler(uint8_t event)
     //printf("Keyboard handler\n");
    // printf("Buffer: %d\n", occupiedBuffer);
     if (bufferSem == NULL){
-    //    bufferSem = semOpen("bufferSem", 0);
+        bufferSem = semOpen("keyboardReadingSem", 0);
     }
     int key = getKeyMake(event);
     if (key != -1)
@@ -195,9 +195,7 @@ void keyboard_handler(uint8_t event)
                 buffer[occupiedBuffer++] = key;
                 break;
         }
-      //  if(occupiedBuffer == 1){
-      //      semPost(bufferSem);
-     //   }
+        semPost(bufferSem);
     }
 }
 
@@ -211,17 +209,14 @@ int getBufferOcupied()
 int getBuffer(int *out, uint32_t count)
 {
     if (bufferSem == NULL){
-      //  bufferSem = semOpen("bufferSem", 0);
+        bufferSem = semOpen("keyboardReadingSem", 0);
     }
     int i = 0;
-    for (i = 0; i < occupiedBuffer && i < count; i++)
+    for (i = 0; i < count; i++)
     {   
-       // printf("Waiting for buffer %d\n", bufferSem->value);
-     //   if(occupiedBuffer == 0){
-       //     semWait(bufferSem);
-     //   }
+        semWait(bufferSem);
         out[i] = buffer[i];
-       // removeFromBuffer(1);
+        removeFromBuffer(1);
     }
    // printf("End of buffer %d\n", bufferSem->value);
     return i;
