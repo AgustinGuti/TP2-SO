@@ -1,12 +1,30 @@
 #include <linkedList.h>
 
+#define MAX_FREE_NODES 100
 
 // Iterator structure
+typedef struct NodeCTD
+{
+    void *data;
+    struct NodeCTD *prev;
+    struct NodeCTD *next;
+} NodeCTD;
+typedef struct LinkedListCDT
+{
+    NodeCTD *head;
+    NodeCTD *tail;
+    int size;
+    NodeCTD *free[MAX_FREE_NODES];
+    uint16_t freeNodes;
+} LinkedListCDT;
 typedef struct IteratorCDT
 {
     LinkedList list;
     NodeCTD *current;
 } IteratorCDT;
+
+
+// Linked list structure
 
 // Function to create an empty linked list
 LinkedList createLinkedList()
@@ -19,6 +37,7 @@ LinkedList createLinkedList()
     list->head = NULL;
     list->tail = NULL;
     list->size = 0;
+    list->freeNodes = 0;
     return list;
 }
 
@@ -32,13 +51,34 @@ void destroyLinkedList(LinkedList list)
         free(current);
         current = next;
     }
+    while(list->freeNodes > 0){
+        int idx = 0;
+        while(list->free[idx] == NULL){
+            idx++;
+        }
+        free(list->free[idx]);
+        list->free[idx] = NULL;
+        list->freeNodes--;
+    }
+    
     free(list);
 }
 
 // Function to insert an element at the end of the linked list
 void insert(LinkedList list, void *data)
 {
-    NodeCTD *newNode = (NodeCTD *)malloc(sizeof(NodeCTD)*2);
+    Node newNode = NULL;
+    if (list->freeNodes){
+        int idx = 0;
+        while(list->free[idx] == NULL){
+            idx++;
+        }
+        newNode = list->free[idx];
+        list->free[idx] = NULL;
+        list->freeNodes--;
+    }else{
+        newNode = (NodeCTD *)malloc(sizeof(NodeCTD));
+    }
     if (newNode == NULL){
         printerr("Error: malloc failed in insert\n");
         return;
@@ -76,7 +116,16 @@ void remove(LinkedList list, void *data)
             if (current->next != NULL)
                 current->next->prev = current->prev;
 
-            free(current);
+            if (list->freeNodes < MAX_FREE_NODES){
+                int idx = 0;
+                while (list->free[idx] != NULL){
+                    idx++;
+                }                
+                list->free[idx] = current;
+                list->freeNodes++;
+            }else{
+                free(current);
+            }
             list->size--;
             return;
         }
