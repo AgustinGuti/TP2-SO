@@ -33,7 +33,6 @@ sem_t semOpen(char *name, int value){
 
     enterCritical();
     if (semaphores == NULL){
-        printf("Creating semaphores\n");
         semaphores = malloc(sizeof(struct semaphoresCDT));
         semaphores->semaphores = createLinkedList();
         semaphores->it = iterator(semaphores->semaphores);
@@ -41,12 +40,9 @@ sem_t semOpen(char *name, int value){
 
     resetIterator(semaphores->it);
     sem_t sem;
-    printf("Searching for semaphore %s\n", name);
     while (hasNext(semaphores->it)){
         sem = next(semaphores->it);
-        printf("Checking semaphore %s\n", sem->name);
         if (strcmp(sem->name, name) == 0){
-            printf("Already exists semaphore %s with value %d\n", sem->name, sem->value);
             sem->attached++;
             leaveCritical();
             return sem;
