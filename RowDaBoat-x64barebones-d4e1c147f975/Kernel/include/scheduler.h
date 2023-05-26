@@ -27,5 +27,6 @@ void unblockProcess(pid_t pid);
 int getProcessState(pid_t pid);
 int nice(pid_t pid, int priority);
 void startWrapper(void *entryPoint, char argc, char *argv[]);
+pid_t waitpid(pid_t pid);
 
 #endif /* SCHEDULER_H */

@@ -249,9 +249,11 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
             }
         }
         char *args[3] = {"processA", foreground, NULL};
+        pid_t pidA;
         for (int i = 0; i < 5; i++)
         {
-            execve(&processA, args);
+            pidA = execve(&processA, args);
+            waitpid(pidA);
         }
     }
     else

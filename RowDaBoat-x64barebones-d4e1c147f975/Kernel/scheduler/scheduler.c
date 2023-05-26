@@ -49,10 +49,10 @@ void initScheduler()
     scheduler->itProcessesToFree = iterator(scheduler->processesToFree);
     char *argv[2] = {"Kernel", NULL};
     // int kernelPID = createProcess("Kernel", NULL, 1, 0, argv);
-    scheduler->currentProcess = createProcess("Kernel", NULL, 1, 0, argv, &startWrapper);
+    scheduler->currentProcess = createProcess("Kernel", NULL, 1, 0, argv, &startWrapper, getpid());
     insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
     argv[0] = "Empty";
-    scheduler->empty = createProcess("Empty", &emptyProcess, 1, 0, argv, &startWrapper);
+    scheduler->empty = createProcess("Empty", &emptyProcess, 1, 0, argv, &startWrapper, getpid());
     // scheduler->currentProcess = getProcess(kernelPID);
     scheduler->quantum = BURST_TIME;
     scheduler->quantumCounter = BURST_TIME - 1;
@@ -142,7 +142,7 @@ Process getNextProcess()
 
 pid_t execve(void *entryPoint, char *const argv[])
 {
-    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, strToNum(argv[1], 1), &argv[2] , &startWrapper);
+    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, strToNum(argv[1], 1), &argv[2] , &startWrapper, getpid());
     insert(scheduler->queue[process->priority], process);
     return process->pid;
 }
@@ -206,7 +206,7 @@ int nice(pid_t pid, int priority)
 void printProcesses()
 {
     int currentPriority = MAX_PRIORITY - 1;
-    printf("  Nombre    PID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n");
+    printf(" Nombre    PID  ParentPID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n");
     while (currentPriority >= 0)
     {
         resetIterator(scheduler->it[currentPriority]);
@@ -224,7 +224,7 @@ void printProcesses()
                         printf(" ");
                     }
                 }
-                printf("%d       %d          %d         0x%x       0x%x", proc->pid, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
+                printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
                 char state = proc->state;
                 switch (state)
                 {
@@ -260,7 +260,7 @@ void printProcesses()
                     printf(" ");
                 }
             }
-            printf("%d       %d          %d         0x%x       0x%x", proc->pid, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
+            printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
             char state = proc->state;
             switch (state)
             {
@@ -331,8 +331,13 @@ void killProcess(pid_t pid)
     Process process = getProcess(pid);
     if (process != NULL)
     {
-        //printf("Killing process %d\n", process->pid);
+        Process parent = getProcess(process->parentPID);
+        if(parent->waitingForPID == process->pid){
+            parent->waitingForPID = -1;
+            semPost(parent->waitingSem);
+        }
         process->state = ZOMBIE;
+        semClose(process->waitingSem);
         insert(scheduler->deleted, process);
         remove(scheduler->queue[process->priority], process);
         if (process->pid == scheduler->currentProcess->pid)
@@ -360,3 +365,24 @@ void startWrapper(void *entryPoint, char argc, char *argv[])
     //printf("Process %d finished with return value %d\n", scheduler->currentProcess->pid, ret);
     killProcess(scheduler->currentProcess->pid);
 }
+
+pid_t waitpid(pid_t pid)
+{
+    Process process = getProcess(pid);
+    if (process == NULL)
+    {
+        return -1;
+    }
+    if (process->state == ZOMBIE)
+    {
+        return pid;
+    }
+    Process parent = scheduler->currentProcess;
+    parent->waitingForPID = pid;
+    if(parent->waitingSem == NULL){
+        parent->waitingSem = semOpen(NULL, 0);
+    }
+    semWait(parent->waitingSem);
+    return pid;
+}
+

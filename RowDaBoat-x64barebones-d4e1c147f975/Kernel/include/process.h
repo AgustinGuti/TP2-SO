@@ -31,13 +31,16 @@ typedef struct ProcessCDT
     uint64_t *stackPointer;
     uint8_t foreground;
     int fds[MAX_FDS];
+    pid_t parentPID;
+    pid_t waitingForPID;
+    sem_t waitingSem;
 } ProcessCDT;
 
 
 typedef struct ProcessCDT *Process;
 
 int fork();
-Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper);
+Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID);
 //void killProcess(pid_t pid);
 void emptyProcess();
 void freeStack(Process process);

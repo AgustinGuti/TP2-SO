@@ -2,10 +2,12 @@
 #include <sysCallInterface.h>
 #include <semaphores.h>
 #include <stddef.h>
-
+#include <processes.h>
 
 int processA();
 
 void processB();
+
+void processC();
 
 void cat();
