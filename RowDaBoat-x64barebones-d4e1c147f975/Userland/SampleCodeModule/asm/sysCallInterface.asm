@@ -28,6 +28,7 @@ GLOBAL _sys_semWait
 GLOBAL _sys_semPost
 GLOBAL _sys_kill
 GLOBAL _sys_nice
+GLOBAL _sys_waitpid
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -382,6 +383,18 @@ _sys_nice:
     mov rbp, rsp
     
     mov rax, 29     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void sys_waitpid(pid_t pid)
+_sys_waitpid:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 30     ;id 
     int 80h
 
     mov rsp, rbp

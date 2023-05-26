@@ -1,5 +1,8 @@
 #include <memoryManager.h>
 
+#define MAX_MEMORY 0x1000000000     //64 GB mapped in pure64
+
+
 #include <lib.h>
 #include <math.h>
 #include <videoDriver.h>
@@ -20,26 +23,26 @@
 
 // estructura para representar el buddy allocator
 typedef struct MemoryManagerCDT {
-    uint64_t initialDirection;
+    void * initialDirection;
     uint32_t size; // tamaño de la memoria total
     uint32_t neededBlocks;
     // uint64_t memory[neededBlocks/64]
-    uint64_t *memory;  //0 representa que está libre, 1 que está ocupado, es un arreglo que ocupa desde su posicion hasta el final de la posicion asignada al buddy
+    uint8_t *memory;  //0 representa que está libre, 1 que está ocupado, es un arreglo que ocupa desde su posicion hasta el final de la posicion asignada al buddy
 } MemoryManagerCDT;
 
 uint64_t alignMemoryToBlock(uint64_t size);
 
 
-uint8_t getBlockState(uint64_t *memory, uint64_t bit) {
-    return (memory[bit/64] >> (bit%64)) & 1;
+uint8_t getBlockState(uint8_t *memory, uint64_t bit) {
+    return (memory[bit/8] >> (bit%8)) & 1;
 }
 
-void occupyBlock(uint64_t *memory, uint64_t bit) {
-    memory[bit/64] |= 1UL << (bit%64);
+void occupyBlock(uint8_t *memory, uint64_t bit) {
+    memory[bit/8] |= 1UL << (bit%8);
 }
 
-void freeBlock(uint64_t *memory, uint64_t bit) {
-    memory[bit/64] &= ~(1UL << (bit%64));
+void freeBlock(uint8_t *memory, uint64_t bit) {
+    memory[bit/8] &= ~(1UL << (bit%8));
 }
 
 uint8_t getOrder(uint64_t bit){
@@ -57,24 +60,24 @@ uint64_t getBlockSize(MemoryManagerADT buddy, uint64_t bit) {
     return block_size;
 }
 
-uint64_t getBlockStart(MemoryManagerADT buddy, uint64_t bit) {
+void* getBlockStart(MemoryManagerADT buddy, uint64_t bit) {
     uint64_t order = getOrder(bit);
     uint64_t block_size = buddy->size >> order;
-    uint64_t block_start = block_size * ((bit + 1) - (1 << order));
+    void * block_start = block_size * ((bit + 1) - (1 << order));
     return block_start;
 }
 
 long getBlockIndex(MemoryManagerADT  buddy, void* address) {
     uint64_t bit = 0;
-    uint64_t currentAddress = buddy->initialDirection;
+    void* currentAddress = buddy->initialDirection;
     uint64_t block_size = buddy->size;
-    uint64_t block_start = 0;
+    void* block_start = 0;
     if (address < (void*) currentAddress || address >= (void*) (currentAddress + buddy->size)) {
         return -1;
     }
-    while (block_size > 0) {
+    while (block_size > MIN_BLOCK_SIZE) {
         block_size = block_size >> 1;   // block_size /= 2
-        if (address >= (void*) (currentAddress + block_start + block_size)) {
+        if (address >= (void*) ((uint64_t)currentAddress + (uint64_t)block_start + block_size)) {
             block_start += block_size;
             bit = RIGHT(bit);
         } else {
@@ -89,22 +92,27 @@ uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap){
     uint64_t buddySize = 0;
     uint64_t memoryToMapAligned = alignMemoryToBlock(memoryToMap);
     uint64_t memoryToMapInBlocks = (memoryToMapAligned / MIN_BLOCK_SIZE) * 2 - 1;
-    uint64_t memoryToMapInBytes = ((memoryToMapInBlocks / 64) + 1) * 8 ;
+    uint64_t memoryToMapInBytes = (memoryToMapInBlocks / 8) ;
     buddySize = memoryToMapInBytes + BUDDY_STRUCT_SIZE;
     return buddySize;
 }
+
 
 MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const managedMemory,  void *const  memoryForMemoryManager, void *const memoryForManagerEnd) {
     uint64_t memoryToMapAligned = alignMemoryToBlock(managedMemorySize);
     if (memoryForManagerEnd - memoryForMemoryManager < calculateRequiredMemoryManagerSize(memoryToMapAligned)){
         return NULL;
     }
+    if (memoryToMapAligned + managedMemory > MAX_MEMORY || memoryToMapAligned + managedMemory < managedMemory){
+        printerr("No se puede mapear mas de 64 GB de memoria");
+        return NULL;
+    }
     MemoryManagerADT buddy = (MemoryManagerADT)memoryForMemoryManager;
-    buddy->size = managedMemorySize;
+    buddy->size = memoryToMapAligned;
     buddy->neededBlocks = (memoryToMapAligned/MIN_BLOCK_SIZE) * 2 - 1; //Suma de potencias de 2 hasta size es 2**(size+1) - 1
     buddy->initialDirection = managedMemory;
-    buddy->memory = (uint64_t*) (memoryForMemoryManager + BUDDY_STRUCT_SIZE);
-    memset(buddy->memory, 0, (buddy->neededBlocks+1)/64);
+    buddy->memory = (uint8_t*) (memoryForMemoryManager + BUDDY_STRUCT_SIZE);
+    memset(buddy->memory, 0, (buddy->neededBlocks)/8);
     return buddy;
 }
 
@@ -128,10 +136,9 @@ void printTree(MemoryManagerADT buddy, uint8_t order){
 }
 
 uint64_t alignMemoryToBlock(uint64_t size){
-    // Aligns the size to the next power of 2
-    
+    // Aligns the size to the previous power of 2
     uint64_t alignedSize = MIN_BLOCK_SIZE;
-    while (alignedSize <= size) {
+    while (alignedSize <= size && alignedSize <= UINT64_MAX/2) {
         alignedSize *= 2;
     }
     alignedSize /= 2;
@@ -165,7 +172,7 @@ void* allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit, uint64
     if (allocatedMemorySize != NULL){
         *allocatedMemorySize = block_size;
     }
-    return (void*) (buddy->initialDirection + getBlockStart(buddy, bit));
+    return (void*) ((uint64_t)buddy->initialDirection + (uint64_t)getBlockStart(buddy, bit));
 }
 
 void printMemoryState(){
@@ -173,23 +180,22 @@ void printMemoryState(){
 }
 
 void* allocMemory(MemoryManagerADT buddy, uint64_t size, uint64_t *allocatedMemorySize) {
-    ///TODO check this, but I think size is in bytes and we are allocating in bits
-    void* res= allocMemoryRec(buddy, size*8, 0, allocatedMemorySize);
+    void* res= allocMemoryRec(buddy, size, 0, allocatedMemorySize);
 
-//    printf("Allocated %x bytes at 0x%x\n", size, res);
-//     long bit = getBlockIndex(buddy, res);
-//     if (bit < 0) {
-//         return 0;
-//     }
-//     // Traverse up the tree until we find a block that has a set bit (i.e., allocated memory)
-//     while (bit > 0  && getBlockState(buddy->memory, bit) == 0) {
-//         bit = PARENT(bit);
-//     }
+    // printf("Allocated %x bytes at 0x%x\n", size, res);
+    // long bit = getBlockIndex(buddy, res);
+    // if (bit < 0) {
+    //     return 0;
+    // }
+    // // Traverse up the tree until we find a block that has a set bit (i.e., allocated memory)
+    // while (bit > 0  && getBlockState(buddy->memory, bit) == 0) {
+    //     bit = PARENT(bit);
+    // }
 
-//     uint64_t block_size = getBlockSize(buddy, bit);
+    // uint64_t block_size = getBlockSize(buddy, bit);
 
-//     printf("Allocated between %x and %x\n", getBlockStart(buddy, bit), getBlockStart(buddy, bit) + block_size - 1);
-   // printTree(buddy, 6);
+    // printf("Allocated between %x and %x\n", getBlockStart(buddy, bit), getBlockStart(buddy, bit) + block_size - 1);
+    //printTree(buddy, 6);
     return res;
 }
 

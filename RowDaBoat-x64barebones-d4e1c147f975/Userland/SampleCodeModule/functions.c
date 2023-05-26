@@ -24,16 +24,22 @@ void hexToStr(char * char_num, long num){
 }
 
 void decToStr(char * char_num, int num){
-	  int digits = decNumLength(num);
-    if(num < 0){
-      num*=-1;
-    }
+  int digits = decNumLength(num);
+  int isNegative = 0;
+  if (num < 0)
+  {
+    num *= -1;
+    char_num[0] = '-';
+    isNegative = 1;
+  }
 
-    for(int i=digits-1 ; i>=0 ; --i){
-      char_num[i] = num%10 + '0';
-      num/=10;
-    }
-	  char_num[digits] = 0;
+
+  for (int i = digits + isNegative - 1; i >= isNegative; --i)
+  {
+    char_num[i] = num % 10 + '0';
+    num /= 10;
+  }
+  char_num[digits+isNegative] = 0;
 }
 
 int hexNumLength(long num){

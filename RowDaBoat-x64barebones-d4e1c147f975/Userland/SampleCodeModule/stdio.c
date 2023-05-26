@@ -219,6 +219,9 @@ void formatPrint(const char* fmt,  uint32_t color, uint16_t row, uint16_t col, i
 			}else if (type == 'd'){
 				int num = va_arg(valist, int);
 				int numLength = decNumLength(num);
+				if (num < 0){
+					numLength++;
+				}
 				char aux[numLength+1];
 				decToStr(aux, num);
 				for(int i = 0; aux[i] != 0; i++) {

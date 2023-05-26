@@ -249,9 +249,11 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
             }
         }
         char *args[3] = {"processA", foreground, NULL};
+        pid_t pidA;
         for (int i = 0; i < 5; i++)
         {
-            execve(&processA, args);
+            pidA = execve(&processA, args);
+            waitpid(pidA);
         }
     }
     else
@@ -455,14 +457,40 @@ char callFork(uint8_t argumentQty, char arguments[argumentQty])
 
 char callTestMM(uint8_t argumentQty, char arguments[argumentQty])
 {
-    if (argumentQty != 1)
+    if (argumentQty != 2)
     {
         printf("Argumento invalido para test-mm\n");
     }
     else
     {
-        uint64_t memorySize = strToNum(arguments + 1, strlen(arguments + 1));
+        // uint64_t memorySize = strToNum(arguments + 1, strlen(arguments + 1));
         test_mm(memorySize);
+        // char *arg1 = malloc(5);
+        // int i = 1;
+        // while (arguments[i] == ' ')
+        // {
+        //     i++;
+        // }
+        // int j = 0;
+        // while (arguments[i] != ' ' && i < 4)
+        // {
+        //     arg1[j] = arguments[i];
+        //     i++;
+        //     j++;
+        // }
+        // arg1[i] = 0;
+        // i++;
+        // char *arg2 = malloc(5);
+        // j = 0;
+        // while (arguments[i] != ' ' && j < 4)
+        // {
+        //     arg2[j] = arguments[i];
+        //     i++;
+        //     j++;
+        // }
+        // arg2[j] = 0;
+        // char *argv[2] = {arg1, arg2};
+        // test_sync(argumentQty, argv);
     }
     return 0;
 }

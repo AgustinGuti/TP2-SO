@@ -19,12 +19,10 @@ enum
     R15
 };
 
-
-
 static pid_t currentPID = KERNEL_PID; // Static variable to track the current PID
 
 
-Process initProcess(char *name, uint8_t priority, uint8_t foreground){
+Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t parentPID){
     Process process = (Process)malloc(sizeof(ProcessCDT));
     if (process == NULL)
     {
@@ -41,6 +39,9 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground){
     strcpy(process->name, name);
     process->priority = priority - 1;
     process->foreground = foreground;
+    process->parentPID = parentPID;
+    process->waitingForPID = -1;
+    process->waitingSem = NULL;
     // Process stack is the top of the stack, stack base is process->stack + STACK_SIZE
     process->stack = (uint64_t *)malloc(STACK_SIZE*sizeof(process->stack[0]));
     //memset(process->stack, 0, STACK_SIZE);
@@ -59,9 +60,9 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground){
     return process;
 }
 
-Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper)
+Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID)
 {
-    Process process = initProcess(name, priority, foreground);
+    Process process = initProcess(name, priority, foreground, parentPID);
     int argc = 0;
     if (argv != NULL)
     {
@@ -69,7 +70,25 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         {
             argc++;
         }
+    }    
+    char **argvAux = (char **)malloc((argc + 1) * sizeof(char *));
+    if (argvAux == NULL)
+    {
+        /*not enough memory for argvAux*/
+        return NULL;
     }
+    for (int i = 0; i < argc; i++)
+    {
+        argvAux[i] = (char *)malloc(strlen(argv[i]) + 1);
+        if (argvAux[i] == NULL)
+        {
+            /*not enough memory for argvAux[i]*/
+            return NULL;
+        }
+        strcpy(argvAux[i], argv[i]);
+    }
+    argvAux[argc] = NULL;    
+
     pushToStack(process, 0x0);                // ss
     pushToStack(process, process->stackBase); // stackPointer
     pushToStack(process, 0x202);              // rflags
@@ -88,7 +107,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         }
         else if (i == RDX)
         {
-            pushToStack(process, argv);
+            pushToStack(process, argvAux);
         }
         else
         {
@@ -128,7 +147,7 @@ uint64_t popFromStack(Process process)
 
 Process dupProcess(Process parentProcess)
 {
-    Process process = initProcess(parentProcess->name, parentProcess->priority+1, parentProcess->foreground);
+    Process process = initProcess(parentProcess->name, parentProcess->priority+1, parentProcess->foreground, parentProcess->pid);
 
     for (int i = 0; i < 15; i++){
         printf("Parent stack %d: %x\n", i, parentProcess->stack[STACK_SIZE-i-1]);

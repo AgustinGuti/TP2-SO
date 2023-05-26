@@ -5,17 +5,16 @@
 
 //Estructura de un semáforo
 static struct semaphoresCDT {
-    LinkedList semaphores;
+    LinkedList semaphoresList;
     Iterator it;
 } semaphoresCDT;
 
 typedef struct semaphoreCDT {
     char *name;
     int value;
-    int id;
-    int waiting;
-    LinkedList waiting_list;
-    int attached;
+    LinkedList waitingList;
+    LinkedList connectedProcesses;
+    Iterator itConnectedProcesses;
 }semaphoreCDT;
 
 
@@ -23,9 +22,8 @@ typedef struct semaphoresCDT * Semaphores;
 
 static Semaphores semaphores = NULL;
 
-static uint32_t currentSemIds = 0;
-
 // Crea o abre un semáforo y lo identifica con el nombre name.
+// Si name es NULL, crea un semáforo anónimo
 // Si no existe un semáforo con ese nombre, lo crea con valor value.
 // Si ya existe un semáforo con ese nombre, lo abre e ignora el valor value.
 sem_t semOpen(char *name, int value){
@@ -34,8 +32,8 @@ sem_t semOpen(char *name, int value){
     enterCritical();
     if (semaphores == NULL){
         semaphores = malloc(sizeof(struct semaphoresCDT));
-        semaphores->semaphores = createLinkedList();
-        semaphores->it = iterator(semaphores->semaphores);
+        semaphores->semaphoresList = createLinkedList();
+        semaphores->it = iterator(semaphores->semaphoresList);
     }
     resetIterator(semaphores->it);
     char * newName = NULL;
@@ -43,7 +41,16 @@ sem_t semOpen(char *name, int value){
         while (hasNext(semaphores->it)){
             sem_t sem = next(semaphores->it);
             if (strcmp(sem->name, name) == 0){
-                sem->attached++;
+                resetIterator(sem->itConnectedProcesses);
+                while(hasNext(sem->itConnectedProcesses)){
+                    Process proc = next(sem->itConnectedProcesses);
+                    if (proc->pid == getpid()){
+                        return sem;
+                    }
+                }
+                pid_t *pid = malloc(sizeof(pid_t));
+                *pid = getpid();
+                insert(sem->connectedProcesses, pid);
                 leaveCritical();
                 return sem;
             }
@@ -55,13 +62,16 @@ sem_t semOpen(char *name, int value){
     sem_t newSem = malloc(sizeof(struct semaphoreCDT));
     newSem->name = newName;
     newSem->value = value;
-    newSem->id = currentSemIds++;
-    newSem->waiting = 0;
     //printf("Creating semaphore %s with id %d\n", sem->name, sem->id);
-    newSem->waiting_list = createLinkedList();
-    newSem->attached = 1;
+    newSem->waitingList = createLinkedList();
+    newSem->connectedProcesses = createLinkedList();
+    newSem->itConnectedProcesses = iterator(newSem->connectedProcesses);
+    pid_t *pid = malloc(sizeof(pid_t));
+    *pid = getpid();
+    insert(newSem->connectedProcesses, pid);
+
     if (name != NULL){
-        insert(semaphores->semaphores, newSem);
+        insert(semaphores->semaphoresList, newSem);
     }
     leaveCritical();
     return newSem;
@@ -73,16 +83,25 @@ sem_t semOpen(char *name, int value){
 void semClose(sem_t sem){
     if (sem == NULL) return;
     enterCritical();
-    if (sem->attached == 1){
+    if (getSize(sem->connectedProcesses) == 1){
         if (sem->name != NULL){
             free(sem->name);
         }
-        destroyLinkedList(sem->waiting_list);
-        remove(semaphores->semaphores, sem);
+        destroyLinkedList(sem->waitingList);
+        freeIterator(sem->itConnectedProcesses);
+        destroyLinkedList(sem->connectedProcesses);
+        remove(semaphores->semaphoresList, sem);
         leaveCritical();
         return;
     } else {
-        sem->attached--;
+        resetIterator(sem->itConnectedProcesses);
+        while(hasNext(sem->itConnectedProcesses)){
+            Process proc = next(sem->itConnectedProcesses);
+            if (proc->pid == getpid()){
+                remove(sem->connectedProcesses, proc);
+                free(proc);
+            }
+        }
     }
     leaveCritical();
     return;
@@ -98,13 +117,11 @@ void semWait(sem_t sem){
         leaveCritical();
         return;
     }
-    pid_t pid[1] = {getpid()};
-   // pid_t *pid = malloc(sizeof(pid_t));
-   // *pid = getpid();
-    sem->waiting++;
-    insert(sem->waiting_list, pid);
+    pid_t *pid = malloc(sizeof(pid_t));
+    *pid = getpid();
+    insert(sem->waitingList, pid);
     leaveCritical();
-    blockProcess(pid[0]);
+    blockProcess(*pid);
     return;
 }
 
@@ -113,12 +130,12 @@ void semWait(sem_t sem){
 void semPost(sem_t sem){
     if (sem == NULL) return;
     enterCritical();
-    if (sem->waiting > 0){
-        sem->waiting--;
-        pid_t *pid = (pid_t *)get(sem->waiting_list, 0);
-        remove(sem->waiting_list, pid);
+    if (getSize(sem->waitingList) > 0){
+        pid_t *pid = (pid_t *)get(sem->waitingList, 0);
+        remove(sem->waitingList, pid);
         leaveCritical();
         unblockProcess(*pid);
+        free(pid);
         return;
     }
     sem->value++;

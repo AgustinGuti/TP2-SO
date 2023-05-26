@@ -5,10 +5,10 @@ MemoryManagerADT myMemoryManager;
 static uint64_t occupiedMem = 0;
 static uint64_t totalMem;
 
-MemoryManagerADT initializeMemoryManager(uint64_t size, uint64_t initialDirection, uint64_t memoryForManager, uint64_t memoryForManagerEnd)
+MemoryManagerADT initializeMemoryManager(uint64_t size, void* initialDirection, void* memoryForManager, void* memoryForManagerEnd)
 {
     totalMem = size;
-    myMemoryManager = createMemoryManager(size, (uint64_t *)initialDirection, (uint64_t *)memoryForManager, (uint64_t *)memoryForManagerEnd);
+    myMemoryManager = createMemoryManager(size, initialDirection, memoryForManager, memoryForManagerEnd);
     return myMemoryManager;
 }
 

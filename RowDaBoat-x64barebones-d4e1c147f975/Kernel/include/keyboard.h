@@ -24,10 +24,7 @@ char isKeyMake(unsigned char data);
 void keyboard_handler(uint8_t event);
 void appendToBuffer(char letter);
 
-//void backspace();
-//void printLine();
 
 int getBuffer(int* out, uint32_t count);
-void removeFromBuffer(uint32_t count);
 
 #endif

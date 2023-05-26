@@ -10,7 +10,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 30 // functions quantity in sysCalls[]
+#define READY_CALLS 31 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -44,6 +44,7 @@ void semPost(sem_t sem);
 uint64_t *sys_getMemoryStatus();
 void sys_kill(int pid);
 int sys_nice(pid_t pid, int priority);
+pid_t sys_waitpid(pid_t pid);
 
 static uint64_t sysCalls[] = {
     (uint64_t)&sys_write,
@@ -76,6 +77,7 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_getMemoryStatus,
     (uint64_t)&sys_kill,
     (uint64_t)&sys_nice,
+    (uint64_t)&sys_waitpid
 };
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
@@ -115,7 +117,6 @@ int sys_read(int fd, const uint16_t *buf, uint32_t count)
     {
     case STDIN:
         ans = getBuffer(buf, count); // read from buffer
-       // removeFromBuffer(ans);       // remove read chars from buffer
         break;
     default:
         break;
@@ -150,6 +151,11 @@ int sys_execve(void *entryPoint, char *const argv[])
 void sys_kill(int pid)
 {
     killProcess(pid);
+}
+
+pid_t sys_waitpid(pid_t pid)
+{
+    return waitpid(pid);
 }
 
 uint64_t *sys_getMemoryStatus()

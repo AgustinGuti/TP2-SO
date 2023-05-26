@@ -2,7 +2,7 @@
 #include "memoryManager.h"
 
 
-MemoryManagerADT initializeMemoryManager(uint64_t size, uint64_t initialDirection, uint64_t memoryForManager, uint64_t memoryForManagerEnd);
+MemoryManagerADT initializeMemoryManager(uint64_t size, void* initialDirection, void* memoryForManager, void* memoryForManagerEnd);
 void *malloc(uint64_t size);
 uint64_t free(void *ptr);
 void setTotalMemory(uint64_t totalMem);
