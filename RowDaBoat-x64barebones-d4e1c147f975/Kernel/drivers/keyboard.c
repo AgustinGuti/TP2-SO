@@ -1,6 +1,7 @@
 #include <keyboard.h>
 #include <semaphores.h>
 #include <videoDriver.h>
+#include <pipes.h>
 
 extern void _hlt();
 extern char has_key();
@@ -161,79 +162,87 @@ char isKeyMake(unsigned char data)
 }
 
 #define BUFFER_SIZE 1024
-static uint16_t buffer[BUFFER_SIZE];
-static uint32_t occupiedBuffer = 0;
+//static uint16_t buffer[BUFFER_SIZE];
+//static uint32_t occupiedBuffer = 0;
 
-sem_t bufferSem = NULL;
+static sem_t bufferSem = NULL;
+static Pipe buffer = NULL;
+static readFD = -1;
+static writeFD = -1;
 
 void keyboard_handler(uint8_t event)
 {
     //printf("Keyboard handler\n");
    // printf("Buffer: %d\n", occupiedBuffer);
-    if (bufferSem == NULL){
-        bufferSem = semOpen("keyboardReadingSem", 0);
+    if (buffer == NULL){
+        int fds[2];
+        buffer = openPipe("keyboardBuffer", fds);
+        readFD = fds[0];
+        writeFD = fds[1];
     }
     int key = getKeyMake(event);
     if (key != -1)
     {
+        int newChar[1];
         switch (key){
             case TAB:
-                buffer[occupiedBuffer++] = ' ';
-                buffer[occupiedBuffer++] = ' ';
-                buffer[occupiedBuffer++] = ' ';
+                writeToPipe(writeFD, "   ", 3);
                 break;
             case NEWLINE: // Enter
-                buffer[occupiedBuffer++] = NEWLINE;
+                newChar[0] = NEWLINE;
+                writeToPipe(writeFD, newChar, 1);
                 break;
             case CTRL_C:
                 killProcess(getpid());
-                buffer[occupiedBuffer++] = '^';
-                buffer[occupiedBuffer++] = 'c';
-                buffer[occupiedBuffer++] = NEWLINE;
+                int newChars[3];
+                newChars[0] = '^';
+                newChars[1] = 'c';
+                newChars[2] = NEWLINE;
+                writeToPipe(writeFD, newChars, 3);
                 break;
             default:
-                buffer[occupiedBuffer++] = key;
+                newChar[0] = key;
+                writeToPipe(writeFD, newChar, 1);
                 break;
         }
-        semPost(bufferSem);
+       // semPost(bufferSem);
     }
 }
 
 // Returns how many chars are in the buffer
 int getBufferOcupied()
 {
-    return occupiedBuffer;
+    //return occupiedBuffer;
 }
 
 // Puts count chars from the buffer on out, or occupiedBuffer chars if its less. Returns amount of chars read
 int getBuffer(int *out, uint32_t count)
 {
-    if (bufferSem == NULL){
-        bufferSem = semOpen("keyboardReadingSem", 0);
+    if (buffer == NULL){
+        int fds[2];
+        buffer = openPipe("keyboardBuffer", fds);
+        readFD = fds[0];
+        writeFD = fds[1];
     }
-    int i = 0;
-    for (i = 0; i < count; i++)
-    {   
-        semWait(bufferSem);
-        out[i] = buffer[i];
-        removeFromBuffer(1);
-    }
+     //   semWait(bufferSem);
+    int size = readFromPipe(readFD, out, count);
+    return size;
+
    // printf("End of buffer %d\n", bufferSem->value);
-    return i;
 }
 
 // Removes the first count chars from the buffer
 //TODO redo this
 void removeFromBuffer(uint32_t count)
 {
-    int i;
-    for (i = count; i < BUFFER_SIZE; i++)
-    {
-        buffer[i - count] = buffer[i];
-    }
-    for (i = BUFFER_SIZE - count; i < BUFFER_SIZE; i++)
-    {
-        buffer[i] = 0; // Fills with 0
-    }
-    occupiedBuffer -= count;
+    // int i;
+    // for (i = count; i < BUFFER_SIZE; i++)
+    // {
+    //     buffer[i - count] = buffer[i];
+    // }
+    // for (i = BUFFER_SIZE - count; i < BUFFER_SIZE; i++)
+    // {
+    //     buffer[i] = 0; // Fills with 0
+    // }
+    // occupiedBuffer -= count;
 }

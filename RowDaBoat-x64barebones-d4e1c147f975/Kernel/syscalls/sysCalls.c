@@ -137,7 +137,7 @@ uint64_t sys_free(void *ptr)
     return 0;
 }
 
-int sys_fork()
+pid_t sys_fork()
 {
     return fork();
 }

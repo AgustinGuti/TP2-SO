@@ -6,14 +6,17 @@ sem_t sem;
 
 int processA() {
   
-    sem = semOpen("sem", 1);
-    semWait(sem);
-    if (a >= 100){
-        yield();
-        a -= 100;
-    }
-    semPost(sem);
-    semClose(sem);
+ //   sem = semOpen("sem", 1);
+   // semWait(sem);
+   // _sys_fork();
+    printf("Test\n");
+    printf("Hello from process %d\n", getpid());
+   // if (a >= 100){
+   // yield();
+    //    a -= 100;
+  //  }
+  //  semPost(sem);
+ //   semClose(sem);
     printf("Process A - PID: %d : %d\n", getpid(), a + 1);
     return 0;
 }

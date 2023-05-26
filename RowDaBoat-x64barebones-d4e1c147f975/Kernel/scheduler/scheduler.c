@@ -147,6 +147,12 @@ pid_t execve(void *entryPoint, char *const argv[])
     return process->pid;
 }
 
+pid_t fork(){
+    Process process = dupProcess(scheduler->currentProcess);
+    insert(scheduler->queue[process->priority], process);
+    return process->pid;
+}
+
 void yield()
 {
     // scheduler->quantumCounter = scheduler->quantum;

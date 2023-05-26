@@ -34,7 +34,12 @@
         "stddef.h": "c",
         "idtloader.h": "c",
         "syscalls.h": "c",
-        "arraylist.h": "c"
+        "arraylist.h": "c",
+        "stdarg.h": "c",
+        "clockdriver.h": "c",
+        "keyboard.h": "c",
+        "process.h": "c",
+        "pipes.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

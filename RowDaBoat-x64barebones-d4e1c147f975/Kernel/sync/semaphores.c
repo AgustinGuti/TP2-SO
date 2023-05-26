@@ -29,7 +29,7 @@ static uint32_t currentSemIds = 0;
 // Si no existe un semáforo con ese nombre, lo crea con valor value.
 // Si ya existe un semáforo con ese nombre, lo abre e ignora el valor value.
 sem_t semOpen(char *name, int value){
-    if (name == NULL || strlen(name) == 0 || value < 0) return NULL;
+    if ((name != NULL && strlen(name) == 0) || value < 0) return NULL;
 
     enterCritical();
     if (semaphores == NULL){
@@ -39,19 +39,21 @@ sem_t semOpen(char *name, int value){
     }
 
     resetIterator(semaphores->it);
-    sem_t sem;
-    while (hasNext(semaphores->it)){
-        sem = next(semaphores->it);
-        if (strcmp(sem->name, name) == 0){
-            sem->attached++;
-            leaveCritical();
-            return sem;
+    char * newName = NULL;
+    if (name != NULL){
+        while (hasNext(semaphores->it)){
+            sem_t sem = next(semaphores->it);
+            if (strcmp(sem->name, name) == 0){
+                sem->attached++;
+                leaveCritical();
+                return sem;
+            }
         }
+        newName = malloc(strlen(name) + 1);
     }
 
     sem_t newSem = malloc(sizeof(struct semaphoreCDT));
-    newSem->name = malloc(strlen(name) + 1);
-    strcpy(newSem->name, name);
+    newSem->name = newName;
     newSem->value = value;
     newSem->id = currentSemIds++;
     newSem->waiting = 0;
@@ -71,7 +73,9 @@ void semClose(sem_t sem){
     enterCritical();
     if (sem->attached == 1){
         remove(semaphores->semaphores, sem);
-        free(sem->name);
+        if (sem->name != NULL){
+            free(sem->name);
+        }
         leaveCritical();
         return;
     } else {
