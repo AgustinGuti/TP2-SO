@@ -23,12 +23,10 @@ static Pipes pipes = NULL;
 
 static uint16_t currentFD = 0;
 
-
 Pipe openPipe(char *name, int fds[2]){
     if(name == NULL || strlen(name) == 0){
         return NULL;
     }
-    //enterCritical();
     if(pipes == NULL){
         pipes = malloc(sizeof(struct PipesCDT));
         pipes->pipes = createLinkedList();
@@ -41,7 +39,6 @@ Pipe openPipe(char *name, int fds[2]){
             fds[0] = pipe->readFD;
             fds[1] = pipe->writeFD;
             pipe->attached++;
-       //     leaveCritical();
             return 0;
         }
     }
@@ -71,17 +68,11 @@ Pipe openPipe(char *name, int fds[2]){
         return NULL;
     }
     insert(pipes->pipes, pipe);
-   // leaveCritical();
     return pipe;
 }
 
 int closePipe(char *name){
-    if(name == NULL || strlen(name) == 0){
-        return -1;
-    }
-  //  enterCritical();
-    if(pipes == NULL){
-        leaveCritical();
+    if(name == NULL || strlen(name) == 0 || pipes == NULL){
         return -1;
     }
     resetIterator(pipes->it);
@@ -97,22 +88,14 @@ int closePipe(char *name){
                 remove(pipes->pipes, pipe);
                 free(pipe);
             }
-      //      leaveCritical();
             return 0;
         }
     }
-  //  leaveCritical();
     return -1;
 }
 
 int readFromPipe(int fd, uint16_t *buffer, int size){
-   // printf("Reading %d from pipe %d", size, fd);
-    if(buffer == NULL || size < 0){
-        return -1;
-    }
-    //enterCritical();
-    if(pipes == NULL){
-        //leaveCritical();
+    if(buffer == NULL || size < 0 ||  pipes == NULL){
         return -1;
     }
     resetIterator(pipes->it);
@@ -128,22 +111,14 @@ int readFromPipe(int fd, uint16_t *buffer, int size){
                 pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
                 i++;
             }
-          //  semPost(pipe->sem);
-           // leaveCritical();
             return i;
         }
     }
-   // leaveCritical();
     return -1;
 }
 
 int writeToPipe(int fd, uint16_t *buffer, int size){
-    if(buffer == NULL || size < 0){
-        return -1;
-    }
-  //  enterCritical();
-    if(pipes == NULL){
-       // leaveCritical();
+    if(buffer == NULL || size < 0 || pipes == NULL){
         return -1;
     }
     resetIterator(pipes->it);
@@ -152,18 +127,13 @@ int writeToPipe(int fd, uint16_t *buffer, int size){
         if(pipe->writeFD == fd){
             int i = 0;
             while(i < size){
-                if((pipe->writeIndex + 1) % pipe->size == pipe->readIndex){
-                   // semWait(pipe->sem);
-                }
                 pipe->buffer[pipe->writeIndex] = buffer[i];
                 pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
                 i++;
             }
             semPost(pipe->sem);
-        //    leaveCritical();
             return i;
         }
     }
-   // leaveCritical();
     return -1;
 }
