@@ -52,10 +52,6 @@ make all
 make all
 make all
 make all
-make all
-make all
-make all
-make all
 cd Toolchain/
 make all
 make clean
@@ -495,6 +491,10 @@ make buddy
 make buddy
 make buddy
 make buddy
+make buddy
+make buddy
+make buddy
+cd ~
 make buddy
 make buddy
 make buddy

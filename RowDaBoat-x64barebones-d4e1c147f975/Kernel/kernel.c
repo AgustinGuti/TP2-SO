@@ -49,14 +49,17 @@ extern void saveRegisters();
 extern void restoreStack();
 
 #define MEMORY_INITIAL_DIRECTION 0x600000
-#define MEMORY_TO_MAP_SIZE 0xF00000
+#define MEMORY_TO_MAP_SIZE 0xFFFFFFFF - MEMORY_INITIAL_DIRECTION
 
 int main()
 {
 	load_idt();
 	saveRegisters();
 	restoreStack();
-	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, (uint64_t)MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE) + 1, (uint64_t)MEMORY_INITIAL_DIRECTION, (uint64_t *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
+	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, 
+							(void *)MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), 
+							(void *)MEMORY_INITIAL_DIRECTION, 
+							(void *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
 	initScheduler();
 	char *argv[] = {"shell", 1, NULL};
 	// createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv, &startWrapper);

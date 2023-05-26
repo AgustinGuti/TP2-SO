@@ -88,6 +88,7 @@ void semClose(sem_t sem){
             free(sem->name);
         }
         destroyLinkedList(sem->waitingList);
+        freeIterator(sem->itConnectedProcesses);
         destroyLinkedList(sem->connectedProcesses);
         remove(semaphores->semaphoresList, sem);
         leaveCritical();

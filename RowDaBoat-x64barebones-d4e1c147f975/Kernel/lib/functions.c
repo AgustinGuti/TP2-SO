@@ -1,6 +1,6 @@
 #include <functions.h>
 
-void hex_to_str(char *char_num, int num)
+void hex_to_str(char *char_num, uint64_t num)
 {
   int digits = hex_num_length(num);
   if (num < 0)
@@ -40,7 +40,7 @@ void dec_to_str(char *char_num, int num)
   char_num[digits] = 0;
 }
 
-int hex_num_length(int num)
+int hex_num_length(uint64_t num)
 {
   if (num < 0)
   {

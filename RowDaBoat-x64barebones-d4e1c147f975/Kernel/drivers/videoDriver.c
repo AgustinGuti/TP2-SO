@@ -177,7 +177,7 @@ void printFormatString(uint32_t color, va_list valist, uint32_t argQty, const ch
 				dec_to_str(aux, num);
 				printString(color,aux);
 			}else if (type == 'X' || type == 'x'){
-				int num = va_arg(valist, int);
+				uint64_t num = va_arg(valist, uint64_t);
 				int numLength = hex_num_length(num);
 				char aux[numLength+1];
 				hex_to_str(aux, num);
