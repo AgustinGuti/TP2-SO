@@ -31,3 +31,7 @@ void blockProcess(int pid){
 void kill(int pid){
     _sys_kill(pid);
 }
+
+pid_t waitpid(pid_t pid){
+    return _sys_waitpid(pid);
+}

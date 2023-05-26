@@ -24,7 +24,7 @@ enum
 static pid_t currentPID = KERNEL_PID; // Static variable to track the current PID
 
 
-Process initProcess(char *name, uint8_t priority, uint8_t foreground){
+Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t parentPID){
     Process process = (Process)malloc(sizeof(ProcessCDT));
     if (process == NULL)
     {
@@ -41,6 +41,9 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground){
     strcpy(process->name, name);
     process->priority = priority - 1;
     process->foreground = foreground;
+    process->parentPID = parentPID;
+    process->waitingForPID = -1;
+    process->waitingSem = NULL;
     // Process stack is the top of the stack, stack base is process->stack + STACK_SIZE
     process->stack = (uint64_t *)malloc(STACK_SIZE*sizeof(process->stack[0]));
     //memset(process->stack, 0, STACK_SIZE);
@@ -59,9 +62,9 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground){
     return process;
 }
 
-Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper)
+Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID)
 {
-    Process process = initProcess(name, priority, foreground);
+    Process process = initProcess(name, priority, foreground, parentPID);
     int argc = 0;
     if (argv != NULL)
     {
@@ -128,7 +131,7 @@ uint64_t popFromStack(Process process)
 
 Process dupProcess(Process parentProcess)
 {
-    Process process = initProcess(parentProcess->name, parentProcess->priority+1, parentProcess->foreground);
+    Process process = initProcess(parentProcess->name, parentProcess->priority+1, parentProcess->foreground, parentProcess->pid);
 
     for (int i = 0; i < 15; i++){
         printf("Parent stack %d: %x\n", i, parentProcess->stack[STACK_SIZE-i-1]);
