@@ -173,6 +173,9 @@ void printFormatString(uint32_t color, va_list valist, uint32_t argQty, const ch
 			}else if (type == 'd'){
 				int num = va_arg(valist, int);
 				int numLength = dec_num_length(num);
+				if (num < 0){
+					numLength++;
+				}
 				char aux[numLength+1];
 				dec_to_str(aux, num);
 				printString(color,aux);
