@@ -249,7 +249,7 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
             }
         }
         char *args[3] = {"processA", foreground, NULL};
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 5; i++)
         {
             execve(&processA, args);
         }

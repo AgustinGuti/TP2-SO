@@ -1,23 +1,20 @@
 #include <testProcesses.h>
 #include <stdio.h>
 
-int a = 100;
+int a[1] = {100};
 sem_t sem;
 
 int processA() {
   
- //   sem = semOpen("sem", 1);
-   // semWait(sem);
-   // _sys_fork();
-    printf("Test\n");
-    printf("Hello from process %d\n", getpid());
-   // if (a >= 100){
-   // yield();
-    //    a -= 100;
-  //  }
-  //  semPost(sem);
- //   semClose(sem);
-    printf("Process A - PID: %d : %d\n", getpid(), a + 1);
+    sem = semOpen("sem", 1);
+    semWait(sem);
+    if (*a >= 100){
+       yield();
+       *a -= 10;
+    }
+    semPost(sem);
+    semClose(sem);
+    printf("Process A - PID: %d : %d\n", getpid(), *a + 1);
     return 0;
 }
 

@@ -173,9 +173,10 @@ void printMemoryState(){
 }
 
 void* allocMemory(MemoryManagerADT buddy, uint64_t size, uint64_t *allocatedMemorySize) {
-    void* res= allocMemoryRec(buddy, size, 0, allocatedMemorySize);
+    ///TODO check this, but I think size is in bytes and we are allocating in bits
+    void* res= allocMemoryRec(buddy, size*8, 0, allocatedMemorySize);
 
-   // printf("Allocated %d bytes at 0x%x\n", size, res);
+//    printf("Allocated %x bytes at 0x%x\n", size, res);
 //     long bit = getBlockIndex(buddy, res);
 //     if (bit < 0) {
 //         return 0;
@@ -188,7 +189,7 @@ void* allocMemory(MemoryManagerADT buddy, uint64_t size, uint64_t *allocatedMemo
 //     uint64_t block_size = getBlockSize(buddy, bit);
 
 //     printf("Allocated between %x and %x\n", getBlockStart(buddy, bit), getBlockStart(buddy, bit) + block_size - 1);
-//    // printTree(buddy, 6);
+   // printTree(buddy, 6);
     return res;
 }
 

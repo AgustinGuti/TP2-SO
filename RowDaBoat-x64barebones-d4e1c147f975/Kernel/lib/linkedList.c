@@ -13,8 +13,8 @@ typedef struct LinkedListCDT
 {
     NodeCTD *head;
     NodeCTD *tail;
-    int size;
-    NodeCTD *free[MAX_FREE_NODES];
+    uint32_t size;
+    NodeCTD **free;
     uint16_t freeNodes;
 } LinkedListCDT;
 typedef struct IteratorCDT
@@ -38,6 +38,7 @@ LinkedList createLinkedList()
     list->tail = NULL;
     list->size = 0;
     list->freeNodes = 0;
+    list->free = malloc(MAX_FREE_NODES * sizeof(Node));
     return list;
 }
 
@@ -60,7 +61,7 @@ void destroyLinkedList(LinkedList list)
         list->free[idx] = NULL;
         list->freeNodes--;
     }
-    
+    free(list->free);
     free(list);
 }
 

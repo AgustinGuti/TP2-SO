@@ -344,6 +344,7 @@ void killProcess(pid_t pid)
         }
     } else{
         printerr("Process %d not found\n", pid);
+        printProcesses();
     }
 }
 

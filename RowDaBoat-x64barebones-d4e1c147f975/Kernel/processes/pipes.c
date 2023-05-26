@@ -49,7 +49,7 @@ Pipe openPipe(char *name, int fds[2]){
     if(pipe == NULL){
         return NULL;
     }
-    pipe->buffer = (char *)malloc(PIPE_SIZE);
+    pipe->buffer = (char *)malloc(PIPE_SIZE*sizeof(pipe->buffer[0]));
     if(pipe->buffer == NULL){
         return NULL;
     }

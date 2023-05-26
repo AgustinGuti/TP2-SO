@@ -42,7 +42,7 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground){
     process->priority = priority - 1;
     process->foreground = foreground;
     // Process stack is the top of the stack, stack base is process->stack + STACK_SIZE
-    process->stack = (uint64_t *)malloc(STACK_SIZE*sizeof(uint64_t));
+    process->stack = (uint64_t *)malloc(STACK_SIZE*sizeof(process->stack[0]));
     //memset(process->stack, 0, STACK_SIZE);
     if (process->stack == NULL)
     {
