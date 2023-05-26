@@ -457,13 +457,13 @@ char callFork(uint8_t argumentQty, char arguments[argumentQty])
 
 char callTestMM(uint8_t argumentQty, char arguments[argumentQty])
 {
-    if (argumentQty != 2)
+    if (argumentQty != 1)
     {
         printf("Argumento invalido para test-mm\n");
     }
     else
     {
-        // uint64_t memorySize = strToNum(arguments + 1, strlen(arguments + 1));
+        uint64_t memorySize = strToNum(arguments + 1, strlen(arguments + 1));
         test_mm(memorySize);
         // char *arg1 = malloc(5);
         // int i = 1;

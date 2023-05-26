@@ -49,7 +49,7 @@ extern void saveRegisters();
 extern void restoreStack();
 
 #define MEMORY_INITIAL_DIRECTION 0x600000
-#define MEMORY_TO_MAP_SIZE 0xFFFFFFFF - MEMORY_INITIAL_DIRECTION
+#define MEMORY_TO_MAP_SIZE 0xFFFFFFF - MEMORY_INITIAL_DIRECTION
 
 int main()
 {
