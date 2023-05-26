@@ -147,7 +147,7 @@ char setFontSize(uint8_t argQty, char arguments[argQty], uint8_t rewrite)
     }
     else
     {
-        int num = strToNum(arguments, strlen(arguments));
+        int num = strToNum(arguments+1, strlen(arguments+1));
         if (num > 4 || num < 1)
         {
             printf("Ingrese una fuente entre 1 y 4\n");
