@@ -11,10 +11,12 @@
 #define BURST_TIME 10
 
 typedef struct SchedulerCDT *Scheduler;
+typedef int pid_t;
 
 void initScheduler();
 void *schedule(void *stackPointer);
 pid_t execve(void *entryPoint, char *const argv[]);
+pid_t fork();
 void printProcesses();
 pid_t getpid();
 void yield();

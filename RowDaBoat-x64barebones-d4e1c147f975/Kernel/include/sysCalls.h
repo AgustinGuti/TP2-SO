@@ -8,9 +8,7 @@
 #include <clockDriver.h>
 #include <stdint.h>
 
-#define STDIN 0
-#define STDOUT 1
-#define STDERR 2
+
 
 void _sysCallHandler();
 void setupSysCalls();

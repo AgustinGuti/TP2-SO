@@ -115,7 +115,7 @@ int sys_read(int fd, const uint16_t *buf, uint32_t count)
     {
     case STDIN:
         ans = getBuffer(buf, count); // read from buffer
-        removeFromBuffer(ans);       // remove read chars from buffer
+       // removeFromBuffer(ans);       // remove read chars from buffer
         break;
     default:
         break;
@@ -137,7 +137,7 @@ uint64_t sys_free(void *ptr)
     return 0;
 }
 
-int sys_fork()
+pid_t sys_fork()
 {
     return fork();
 }

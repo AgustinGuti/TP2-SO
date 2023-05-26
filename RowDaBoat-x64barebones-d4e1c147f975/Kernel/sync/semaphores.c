@@ -15,6 +15,7 @@ typedef struct semaphoreCDT {
     int id;
     int waiting;
     LinkedList waiting_list;
+    int attached;
 }semaphoreCDT;
 
 
@@ -28,38 +29,40 @@ static uint32_t currentSemIds = 0;
 // Si no existe un semáforo con ese nombre, lo crea con valor value.
 // Si ya existe un semáforo con ese nombre, lo abre e ignora el valor value.
 sem_t semOpen(char *name, int value){
-    if (name == NULL || strlen(name) == 0 || value < 0) return NULL;
+    if ((name != NULL && strlen(name) == 0) || value < 0) return NULL;
 
     enterCritical();
     if (semaphores == NULL){
-        printf("Creating semaphores\n");
         semaphores = malloc(sizeof(struct semaphoresCDT));
         semaphores->semaphores = createLinkedList();
         semaphores->it = iterator(semaphores->semaphores);
     }
-
     resetIterator(semaphores->it);
-    sem_t sem;
-    printf("Searching for semaphore %s\n", name);
-    while (hasNext(semaphores->it)){
-        sem = next(semaphores->it);
-        printf("Checking semaphore %s\n", sem->name);
-        if (strcmp(sem->name, name) == 0){
-            printf("Already exists semaphore %s with value %d\n", sem->name, sem->value);
-            leaveCritical();
-            return sem;
+    char * newName = NULL;
+    if (name != NULL){
+        while (hasNext(semaphores->it)){
+            sem_t sem = next(semaphores->it);
+            if (strcmp(sem->name, name) == 0){
+                sem->attached++;
+                leaveCritical();
+                return sem;
+            }
         }
+        newName = malloc(strlen(name) + 1);
+        strcpy(newName, name);
     }
 
     sem_t newSem = malloc(sizeof(struct semaphoreCDT));
-    newSem->name = malloc(strlen(name) + 1);
-    strcpy(newSem->name, name);
+    newSem->name = newName;
     newSem->value = value;
     newSem->id = currentSemIds++;
     newSem->waiting = 0;
     //printf("Creating semaphore %s with id %d\n", sem->name, sem->id);
     newSem->waiting_list = createLinkedList();
-    insert(semaphores->semaphores, newSem);
+    newSem->attached = 1;
+    if (name != NULL){
+        insert(semaphores->semaphores, newSem);
+    }
     leaveCritical();
     return newSem;
 }
@@ -70,17 +73,16 @@ sem_t semOpen(char *name, int value){
 void semClose(sem_t sem){
     if (sem == NULL) return;
     enterCritical();
-    if (sem->waiting == 0){
-        resetIterator(semaphores->it);
-        while (hasNext(semaphores->it)){
-            sem_t currSem = next(semaphores->it);
-            if (currSem->id == sem->id){
-                remove(semaphores->semaphores, currSem);
-                free(currSem->name);
-                leaveCritical();
-                return;
-            }
+    if (sem->attached == 1){
+        if (sem->name != NULL){
+            free(sem->name);
         }
+        destroyLinkedList(sem->waiting_list);
+        remove(semaphores->semaphores, sem);
+        leaveCritical();
+        return;
+    } else {
+        sem->attached--;
     }
     leaveCritical();
     return;
@@ -96,13 +98,13 @@ void semWait(sem_t sem){
         leaveCritical();
         return;
     }
-    pid_t *pid = malloc(sizeof(pid_t));
-    *pid = getpid();
+    pid_t pid[1] = {getpid()};
+   // pid_t *pid = malloc(sizeof(pid_t));
+   // *pid = getpid();
     sem->waiting++;
     insert(sem->waiting_list, pid);
-   // blockProcess(*pid);
     leaveCritical();
-   // triggerTimer();
+    blockProcess(pid[0]);
     return;
 }
 
@@ -115,9 +117,8 @@ void semPost(sem_t sem){
         sem->waiting--;
         pid_t *pid = (pid_t *)get(sem->waiting_list, 0);
         remove(sem->waiting_list, pid);
-     //   unblockProcess(*pid);
-       // free(pid);
         leaveCritical();
+        unblockProcess(*pid);
         return;
     }
     sem->value++;

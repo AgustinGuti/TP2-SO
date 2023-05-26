@@ -5,6 +5,10 @@
 #include <fonts.h>
 #include <stdarg.h>
 
+#define STDIN 0
+#define STDOUT 1
+#define STDERR 2
+
 #define BACKSPACE   0x08
 #define NEWLINE     0x0A
 

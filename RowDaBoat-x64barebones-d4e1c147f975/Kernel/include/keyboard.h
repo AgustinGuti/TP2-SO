@@ -15,7 +15,7 @@
 char hasKeyReady();
 
 //Devuelve el codigo ASCII (decimal) del caracter obtenido
-uint16_t getKeyMake(uint8_t event);
+int getKeyMake(uint8_t event);
 
 char isKeyBreak(unsigned char data);
 
