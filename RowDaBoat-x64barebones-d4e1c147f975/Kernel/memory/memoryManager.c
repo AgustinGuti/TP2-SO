@@ -73,8 +73,9 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 			}
 			addBlockToOccupiedList(memoryManager, allocatedMemorystartAdress, memoryToAllocate);
 
-			//printBlocks(memoryManager);
-			if (allocatedMemorySize != NULL){
+			printBlocks(memoryManager);
+			if (allocatedMemorySize != NULL)
+			{
 				*allocatedMemorySize = memoryToAllocate + BLOCK_STRUCT_SIZE;
 			}
 			return (uint64_t *)((uint64_t)allocatedMemorystartAdress);
@@ -86,7 +87,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 
 uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree)
 {
-	printBlocks(memoryManager);
+	// printBlocks(memoryManager);
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
 	{
@@ -107,7 +108,7 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 			addBlockToFreeList(memoryManager, memoryToFree, currentOccupiedBlock->size + BLOCK_STRUCT_SIZE);
 			uint64_t size = currentOccupiedBlock->size;
 			currentOccupiedBlock = NULL;
-			printBlocks(memoryManager);
+			// printBlocks(memoryManager);
 			return size;
 		}
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;

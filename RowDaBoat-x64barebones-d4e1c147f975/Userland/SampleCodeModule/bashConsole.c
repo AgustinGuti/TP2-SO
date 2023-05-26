@@ -263,10 +263,10 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
 
 char callFree(uint8_t argumentQty, char arguments[argumentQty])
 {
-    if (argumentQty == 1 && isHexaNumber(arguments))
+    if (argumentQty == 1 && isHexaNumber(arguments+1))
     {
         char flag = 0;
-        uint64_t ptr = hexaStrToNum(arguments, strlen(arguments), &flag);
+        uint64_t ptr = hexaStrToNum(arguments+1, strlen(arguments+1), &flag);
         if (flag == 1)
         {
             printerr("Numero muy grande. Overflow\n", 0);
@@ -286,10 +286,10 @@ char callFree(uint8_t argumentQty, char arguments[argumentQty])
 
 char callMalloc(uint8_t argumentQty, char arguments[argumentQty])
 {
-    if (argumentQty == 1 && isHexaNumber(arguments+1))
+    if (argumentQty == 1 && isHexaNumber(arguments + 1))
     {
         char flag = 0;
-        uint64_t size = hexaStrToNum(arguments+1, strlen(arguments+1), &flag);
+        uint64_t size = hexaStrToNum(arguments + 1, strlen(arguments + 1), &flag);
         if (flag == 1)
         {
             printerr("Numero muy grande. Overflow\n", 0);
@@ -462,8 +462,7 @@ char callTestMM(uint8_t argumentQty, char arguments[argumentQty])
     else
     {
         uint64_t memorySize = strToNum(arguments + 1, strlen(arguments + 1));
-        // printf("%s\n", arguments + 1);
-        // test_mm(memorySize);
+        test_mm(memorySize);
     }
     return 0;
 }
@@ -519,7 +518,6 @@ char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty])
     }
     return 0;
 }
-
 
 char exitConsole(uint8_t argumentQty, char arguments[argumentQty])
 {
