@@ -26,6 +26,8 @@ extern char get_key();
 #define LCTRL_BREAK 0x9D
 #define LALT_BREAK 0xB8
 
+#define LCTRL_MAKE 0xC2
+
 #define UP_ARROW 300
 #define DOWN_ARROW 301
 #define LEFT_ARROW 302
@@ -99,6 +101,9 @@ int getKeyMake(uint8_t event)
     case LALT_BREAK:
         isAltDown = 0;
         break;
+    case LCTRL_MAKE:
+        isCtrDown = 1;
+        break;
     default:
         if (event == 0xE0)
         { // 2 part command
@@ -115,9 +120,6 @@ int getKeyMake(uint8_t event)
                 break;
             case LALT:
                 isAltDown = 1;
-                break;
-            case LCTRL:
-                isCtrDown = 1;
                 break;
             default:
                 if (key < 255)
@@ -172,8 +174,6 @@ static writeFD = -1;
 
 void keyboard_handler(uint8_t event)
 {
-    //printf("Keyboard handler\n");
-   // printf("Buffer: %d\n", occupiedBuffer);
     if (buffer == NULL){
         int fds[2];
         buffer = openPipe("keyboardBuffer", fds);
@@ -205,14 +205,7 @@ void keyboard_handler(uint8_t event)
                 writeToPipe(writeFD, newChar, 1);
                 break;
         }
-       // semPost(bufferSem);
     }
-}
-
-// Returns how many chars are in the buffer
-int getBufferOcupied()
-{
-    //return occupiedBuffer;
 }
 
 // Puts count chars from the buffer on out, or occupiedBuffer chars if its less. Returns amount of chars read
@@ -224,25 +217,8 @@ int getBuffer(int *out, uint32_t count)
         readFD = fds[0];
         writeFD = fds[1];
     }
-     //   semWait(bufferSem);
     int size = readFromPipe(readFD, out, count);
     return size;
 
    // printf("End of buffer %d\n", bufferSem->value);
-}
-
-// Removes the first count chars from the buffer
-//TODO redo this
-void removeFromBuffer(uint32_t count)
-{
-    // int i;
-    // for (i = count; i < BUFFER_SIZE; i++)
-    // {
-    //     buffer[i - count] = buffer[i];
-    // }
-    // for (i = BUFFER_SIZE - count; i < BUFFER_SIZE; i++)
-    // {
-    //     buffer[i] = 0; // Fills with 0
-    // }
-    // occupiedBuffer -= count;
 }

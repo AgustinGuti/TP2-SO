@@ -19,8 +19,6 @@ enum
     R15
 };
 
-
-
 static pid_t currentPID = KERNEL_PID; // Static variable to track the current PID
 
 
@@ -69,7 +67,25 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         {
             argc++;
         }
+    }    
+    char **argvAux = (char **)malloc((argc + 1) * sizeof(char *));
+    if (argvAux == NULL)
+    {
+        /*not enough memory for argvAux*/
+        return NULL;
     }
+    for (int i = 0; i < argc; i++)
+    {
+        argvAux[i] = (char *)malloc(strlen(argv[i]) + 1);
+        if (argvAux[i] == NULL)
+        {
+            /*not enough memory for argvAux[i]*/
+            return NULL;
+        }
+        strcpy(argvAux[i], argv[i]);
+    }
+    argvAux[argc] = NULL;    
+
     pushToStack(process, 0x0);                // ss
     pushToStack(process, process->stackBase); // stackPointer
     pushToStack(process, 0x202);              // rflags
@@ -88,7 +104,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         }
         else if (i == RDX)
         {
-            pushToStack(process, argv);
+            pushToStack(process, argvAux);
         }
         else
         {

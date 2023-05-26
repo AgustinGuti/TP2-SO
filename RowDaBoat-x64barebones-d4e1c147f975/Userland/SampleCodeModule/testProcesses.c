@@ -5,7 +5,7 @@ int a[1] = {100};
 sem_t sem;
 
 int processA() {
-  
+
     sem = semOpen("sem", 1);
     semWait(sem);
     if (*a >= 100){

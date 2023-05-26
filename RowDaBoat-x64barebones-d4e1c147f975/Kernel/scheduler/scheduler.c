@@ -142,7 +142,7 @@ Process getNextProcess()
 
 pid_t execve(void *entryPoint, char *const argv[])
 {
-    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, strToNum(argv[1], 1), argv, &startWrapper);
+    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, strToNum(argv[1], 1), &argv[2] , &startWrapper);
     insert(scheduler->queue[process->priority], process);
     return process->pid;
 }
