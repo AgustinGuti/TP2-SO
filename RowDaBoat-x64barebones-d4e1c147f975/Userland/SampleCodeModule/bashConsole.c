@@ -238,7 +238,7 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
         char foreground[2] = "1";
         if (argumentQty == 1)
         {
-            if (arguments[0] == '&')
+            if (arguments[1] == '&')
             {
                 strcpy(foreground, "0");
             }
@@ -250,10 +250,10 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
         }
         char *args[3] = {"processA", foreground, NULL};
         pid_t pidA;
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 1; i++)
         {
             pidA = execve(&processA, args);
-            waitpid(pidA);
+            //waitpid(pidA);
         }
     }
     else

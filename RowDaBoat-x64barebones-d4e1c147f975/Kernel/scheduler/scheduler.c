@@ -1,6 +1,8 @@
 #include <scheduler.h>
 #include "videoDriver.h"
 
+#define SHELL_PID 0
+
 typedef struct SchedulerCDT
 {
     LinkedList queue[MAX_PRIORITY];
@@ -142,8 +144,15 @@ Process getNextProcess()
 
 pid_t execve(void *entryPoint, char *const argv[])
 {
-    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, strToNum(argv[1], 1), &argv[2] , &startWrapper, getpid());
+    int foreground = strToNum(argv[1], 1);
+
+    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, foreground, &argv[2] , &startWrapper, getpid());
     insert(scheduler->queue[process->priority], process);
+    if(foreground){
+        if (scheduler->currentProcess->pid == SHELL_PID){
+            waitpid(process->pid);
+        }
+    }
     return process->pid;
 }
 

@@ -8,7 +8,7 @@
 #include "process.h"
 
 #define STACK_SIZE 4096
-#define BURST_TIME 10
+#define BURST_TIME 5
 
 typedef struct SchedulerCDT *Scheduler;
 typedef int pid_t;

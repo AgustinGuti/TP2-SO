@@ -150,25 +150,43 @@ Process dupProcess(Process parentProcess)
     Process process = initProcess(parentProcess->name, parentProcess->priority+1, parentProcess->foreground, parentProcess->pid);
 
     for (int i = 0; i < 15; i++){
-        printf("Parent stack %d: %x\n", i, parentProcess->stack[STACK_SIZE-i-1]);
+        printf("[0x%x]:  Parent stack %d: %x\n", &parentProcess->stack[STACK_SIZE-i-1],i, parentProcess->stack[STACK_SIZE-i-1]);
     }
 
-    memcpy(process->stack, parentProcess->stack, STACK_SIZE * sizeof(uint64_t));
+    // printf("\nParent stack: %x\n", parentProcess->stack);
+    // printf("Parent stack base: %x\n", parentProcess->stackBase);
+    // printf("Parent stack pointer: %x\n", parentProcess->stackPointer);
+   // memcpy(process->stack, parentProcess->stack, STACK_SIZE * sizeof(uint64_t));
 
-    uint64_t parentStackOffset = (uint64_t) (parentProcess->stackPointer - parentProcess->stackBase);
-    uint64_t parentStackOffsetFromStack1 = (uint64_t)((uint64_t *)parentProcess->stack[STACK_SIZE - 2] - parentProcess->stackPointer);
-    uint64_t parentStackOffsetFromStack2 = (uint64_t)((uint64_t *)parentProcess->stack[STACK_SIZE - 9] - parentProcess->stackPointer);
-    uint64_t parentStackOffsetFromStack3 = (uint64_t)((uint64_t *)parentProcess->stack[STACK_SIZE - 13] - parentProcess->stackPointer);
+
+    uint64_t parentStackOffset = parentProcess->stackBase - parentProcess->stackPointer;
+    printf("Parent stack offset: %d\n", parentStackOffset);
+    uint64_t parentStackOffsetFromStack1 = (uint64_t)(parentProcess->stack[STACK_SIZE - 2] - (uint64_t)parentProcess->stackPointer);
+    uint64_t parentStackOffsetFromStack2 = (uint64_t)(parentProcess->stack[STACK_SIZE - 9] - (uint64_t)parentProcess->stackPointer);
+    uint64_t parentStackOffsetFromStack3 = (uint64_t)(parentProcess->stack[STACK_SIZE - 13] - (uint64_t)parentProcess->stackPointer);
+    uint64_t parentStackOffsetFromStack4 = (uint64_t)(parentProcess->stack[STACK_SIZE - 15] - (uint64_t)parentProcess->stackPointer);
+    printf("Parent delta: %x\n", parentStackOffsetFromStack1);
+
+    
+    // printf("\nProcess stack: %x\n", process->stack);
+    // printf("Process stack base: %x\n", process->stackBase);
+    // printf("Process stack pointer: %x\n", process->stackPointer);
+    for (int i = STACK_SIZE - 1; i >= 0; i--){
+        pushToStack(process, parentProcess->stack[i]);
+    }
 
 
     process->stackPointer = process->stackBase - parentStackOffset;
-    process->stack[STACK_SIZE-2] = process->stackPointer + parentStackOffsetFromStack1;
-    process->stack[STACK_SIZE-9] = process->stackPointer + parentStackOffsetFromStack2;
-    process->stack[STACK_SIZE-13] = process->stackPointer + parentStackOffsetFromStack3;
+    // process->stack[STACK_SIZE-2] = process->stackPointer + parentStackOffsetFromStack1;
+    // process->stack[STACK_SIZE-9] = process->stackPointer + parentStackOffsetFromStack2;
+    // process->stack[STACK_SIZE-13] = process->stackPointer + parentStackOffsetFromStack3;
+    // process->stack[STACK_SIZE-15] = process->stackPointer + parentStackOffsetFromStack4;
+    printf("Child delta: %x\n", process->stack[STACK_SIZE-2] - (uint64_t)process->stackPointer);
 
     for (int i = 0; i < 15; i++){
-        printf("Child stack %d: %x\n", i, process->stack[STACK_SIZE-i-1]);
+        printf("[0x%x]: Child stack %d: %x\n", &process->stack[STACK_SIZE-i-1] ,i, process->stack[STACK_SIZE-i-1]);
     }
+    printf("Child RSP: %x\n", process->stackPointer);
     process->state = READY;
     return process;
 }
