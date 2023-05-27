@@ -4,6 +4,7 @@
 #include <testProcesses.h>
 #include <tests.h>
 #include <memory.h>
+#include <phylos.h>
 
 extern void zeroDivision();
 extern void displayTime();
@@ -32,10 +33,11 @@ char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
 char callNice(uint8_t argumentQty, char arguments[argumentQty]);
 char callFork(uint8_t argumentQty, char arguments[argumentQty]);
 char callTestMM(uint8_t argumentQty, char arguments[argumentQty]);
-#define COMMAND_QTY 21
+char callPhylo(uint8_t argumentQty, char arguments[argumentQty]);
+#define COMMAND_QTY 22
 
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM};
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo"};
+static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -454,6 +456,20 @@ char callFork(uint8_t argumentQty, char arguments[argumentQty])
     }
     return 0;
 }
+
+char callPhylo(uint8_t argumentQty, char arguments[argumentQty])
+{
+    if (argumentQty != 0)
+    {
+        printf("Argumento invalido para phylo\n");
+    }
+    else
+    {
+        phylos();
+    }
+    return 0;
+}
+
 
 char callTestMM(uint8_t argumentQty, char arguments[argumentQty])
 {
