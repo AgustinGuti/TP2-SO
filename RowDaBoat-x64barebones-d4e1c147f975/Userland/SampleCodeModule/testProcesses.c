@@ -50,19 +50,17 @@ void processC() {
 
 void cat() {
     /* cat process implementation*/
-    close(0);
+    // close(0);
     int fds[2];
-    if( pipe("pipe", fds) == -1){
+    if( pipe(NULL, fds) == -1){
         printf("Error creating pipe\n");
         return;
     }
     printf("fd0: %d , fd1: %d\n", fds[0], fds[1]);
+    char buffer[2];
     while(1){
-        char buffer[100];
-        int read = _sys_read(fds[0], buffer, 100);
-        if(read != 0)
-            _sys_write(1, buffer, read);
-        printf("read: %d\n", read);
+        _sys_read(0,buffer, 1);
+        printf("%c", buffer[0]);
     }
     close(fds[0]);
     close(fds[1]);

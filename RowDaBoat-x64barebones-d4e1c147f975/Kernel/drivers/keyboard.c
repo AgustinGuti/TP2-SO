@@ -193,12 +193,7 @@ void keyboard_handler(uint8_t event)
                 writeToPipe(buffer, newChar, 1);
                 break;
             case CTRL_C:
-                killProcess(getpid());
-                // int newChars[3];
-                // newChars[0] = '^';
-                // newChars[1] = 'c';
-                // newChars[2] = NEWLINE;
-                // writeToPipe(writeFD, newChars, 3);
+                killForegroundProcess();
                 break;
             default:
                 newChar[0] = key;
