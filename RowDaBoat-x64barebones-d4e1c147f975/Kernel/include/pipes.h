@@ -11,10 +11,9 @@
 
 typedef struct PipeCDT *Pipe;
 
-Pipe openPipe(char *name, int fds[2]);
-// int closePipe(int fd);
-int readFromPipe(int fd, uint16_t *buffer, int size);
-int writeToPipe(int fd, uint16_t *buffer, int size);
-int closePipe(char *name);
+Pipe openPipe(char *name);
+int closePipe(Pipe pipe);
+int readFromPipe(Pipe pipe, uint16_t *buffer, int size);
+int writeToPipe(Pipe pipe, uint16_t *buffer, int size);
 
 #endif

@@ -28,10 +28,10 @@ void printf(const char* fmt, ...){
 }
 
 void printerr(const char* fmt, int argQty, ...){
-	va_list valist;
-	va_start(valist, argQty);
-	printFD(STDERR, fmt, argQty, valist);
-	va_end(valist);
+	// va_list valist;
+	// va_start(valist, argQty);
+	// printFD(STDERR, fmt, argQty, valist);
+	// va_end(valist);
 }
 
 void printFD(int fd, const char* fmt, int argQty, va_list valist){

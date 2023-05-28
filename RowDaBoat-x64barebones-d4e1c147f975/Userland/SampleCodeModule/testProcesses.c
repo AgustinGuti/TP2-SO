@@ -22,9 +22,9 @@ int processA() {
     // }
     // semPost(sem);
     // semClose(sem);
-    for(int i= 0; i < 1000000000; i++){
-        *a += 1;
-    }
+    // for(int i= 0; i < 1000000000; i++){
+    //     *a += 1;
+    // }
     printf("Process A - PID: %d : %d\n", getpid(), *a + 1);
     return 0;
 }

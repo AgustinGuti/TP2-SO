@@ -1,13 +1,11 @@
 #include <pipes.h>
 
 typedef struct PipeCDT{
-    uint16_t *buffer;
+    char *buffer;
     char *name;
     int size;
     int readIndex;
     int writeIndex;
-    int readFD;
-    int writeFD;
     int attached;
     sem_t sem;
 }PipeCDT;
@@ -21,10 +19,8 @@ typedef struct PipesCDT * Pipes;
 
 static Pipes pipes = NULL;
 
-static uint16_t currentFD = 0;
-
-Pipe openPipe(char *name, int fds[2]){
-    if(name == NULL || strlen(name) == 0){
+Pipe openPipe(char *name){
+    if(name != NULL && strlen(name) == 0){
         return NULL;
     }
     if(pipes == NULL){
@@ -32,16 +28,23 @@ Pipe openPipe(char *name, int fds[2]){
         pipes->pipes = createLinkedList();
         pipes->it = iterator(pipes->pipes);
     }
-    resetIterator(pipes->it);
-    while(hasNext(pipes->it)){
-        Pipe pipe = next(pipes->it);
-        if(strcmp(pipe->name, name) == 0){
-            fds[0] = pipe->readFD;
-            fds[1] = pipe->writeFD;
-            pipe->attached++;
-            return 0;
+    char *newName = NULL;
+    if (name != NULL){
+        resetIterator(pipes->it);
+        while(hasNext(pipes->it)){
+            Pipe pipe = next(pipes->it);
+            if(strcmp(pipe->name, name) == 0){
+                pipe->attached++;
+                return 0;
+            }
         }
+        newName = (char *)malloc(strlen(name) + 1);
+        if(newName == NULL){
+            return NULL;
+        }
+        strcpy(newName, name);
     }
+
     Pipe pipe = (Pipe)malloc(sizeof(PipeCDT));
     if(pipe == NULL){
         return NULL;
@@ -50,19 +53,11 @@ Pipe openPipe(char *name, int fds[2]){
     if(pipe->buffer == NULL){
         return NULL;
     }
-    pipe->name = (char *)malloc(strlen(name) + 1);
-    if(pipe->name == NULL){
-        return NULL;
-    }
-    strcpy(pipe->name, name);
+    pipe->name = newName;
     pipe->size = PIPE_SIZE;
     pipe->readIndex = 0;
     pipe->writeIndex = 0;
     pipe->attached = 1;
-    pipe->readFD = currentFD++;
-    pipe->writeFD = currentFD++;
-    fds[0] = pipe->readFD;
-    fds[1] = pipe->writeFD;
     pipe->sem = semOpen(NULL, 0);
     if(pipe->sem == NULL){
         return NULL;
@@ -71,69 +66,117 @@ Pipe openPipe(char *name, int fds[2]){
     return pipe;
 }
 
-int closePipe(char *name){
-    if(name == NULL || strlen(name) == 0 || pipes == NULL){
+int closePipe(Pipe pipe){
+    if(pipe == NULL){
         return -1;
     }
-    resetIterator(pipes->it);
-    while(hasNext(pipes->it)){
-        Pipe pipe = next(pipes->it);
-        if(strcmp(pipe->name, name) == 0){
-            if (pipe->attached > 1){
-                pipe->attached--;
-            }else{
-                semClose(pipe->sem);
-                free(pipe->buffer);
-                free(pipe->name);
-                remove(pipes->pipes, pipe);
-                free(pipe);
-            }
-            return 0;
+    if (pipe->attached > 1){
+        pipe->attached--;
+    }else{
+        semClose(pipe->sem);
+        free(pipe->buffer);
+        if (pipe->name != NULL){
+            free(pipe->name);
         }
+        remove(pipes->pipes, pipe);
+        free(pipe);
     }
-    return -1;
+    return 0;
 }
 
-int readFromPipe(int fd, uint16_t *buffer, int size){
-    if(buffer == NULL || size < 0 ||  pipes == NULL){
+// int closePipe(char *name){
+//     if(name == NULL || strlen(name) == 0 || pipes == NULL){
+//         return -1;
+//     }
+//     resetIterator(pipes->it);
+//     while(hasNext(pipes->it)){
+//         Pipe pipe = next(pipes->it);
+//         if(strcmp(pipe->name, name) == 0){
+//             if (pipe->attached > 1){
+//                 pipe->attached--;
+//             }else{
+//                 semClose(pipe->sem);
+//                 free(pipe->buffer);
+//                 free(pipe->name);
+//                 remove(pipes->pipes, pipe);
+//                 free(pipe);
+//             }
+//             return 0;
+//         }
+//     }
+//     return -1;
+// }
+
+int readFromPipe(Pipe pipe, uint16_t *buffer, int size){
+    if(pipe == NULL || buffer == NULL || size < 0){
         return -1;
     }
-    resetIterator(pipes->it);
-    while(hasNext(pipes->it)){
-        Pipe pipe = next(pipes->it);
-        if(pipe->readFD == fd){
-            if(pipe->readIndex == pipe->writeIndex){
-                semWait(pipe->sem);
-            }
-            int i = 0;
-            while(i < size && pipe->readIndex != pipe->writeIndex){
-                buffer[i] = pipe->buffer[pipe->readIndex];
-                pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
-                i++;
-            }
-            return i;
-        }
+    if(pipe->readIndex == pipe->writeIndex){
+        semWait(pipe->sem);
     }
-    return -1;
+    int i = 0;
+    while(i < size && pipe->readIndex != pipe->writeIndex){
+        buffer[i] = pipe->buffer[pipe->readIndex];
+        pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
+        i++;
+    }
+    return i;
 }
 
-int writeToPipe(int fd, uint16_t *buffer, int size){
-    if(buffer == NULL || size < 0 || pipes == NULL){
+int writeToPipe(Pipe pipe, uint16_t *buffer, int size){
+    if(pipe == NULL || buffer == NULL || size < 0){
         return -1;
     }
-    resetIterator(pipes->it);
-    while(hasNext(pipes->it)){
-        Pipe pipe = next(pipes->it);
-        if(pipe->writeFD == fd){
-            int i = 0;
-            while(i < size){
-                pipe->buffer[pipe->writeIndex] = buffer[i];
-                pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
-                i++;
-            }
-            semPost(pipe->sem);
-            return i;
-        }
+    int i = 0;
+    while(i < size){
+        pipe->buffer[pipe->writeIndex] = buffer[i];
+        pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
+        i++;
     }
-    return -1;
+    semPost(pipe->sem);
+    return i;
 }
+
+// int readFromPipe(int fd, uint16_t *buffer, int size){
+//     if(buffer == NULL || size < 0 ||  pipes == NULL){
+//         return -1;
+//     }
+//     resetIterator(pipes->it);
+//     while(hasNext(pipes->it)){
+//         Pipe pipe = next(pipes->it);
+//         if(pipe->readFD == fd){
+//             if(pipe->readIndex == pipe->writeIndex){
+//                 semWait(pipe->sem);
+//             }
+//             int i = 0;
+//             while(i < size && pipe->readIndex != pipe->writeIndex){
+//                 buffer[i] = pipe->buffer[pipe->readIndex];
+//                 pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
+//                 i++;
+//             }
+//             return i;
+//         }
+//     }
+//     return -1;
+// }
+
+// int writeToPipe(int fd, uint16_t *buffer, int size){
+//     if(buffer == NULL || size < 0 || pipes == NULL){
+//         return -1;
+//     }
+//     resetIterator(pipes->it);
+//     while(hasNext(pipes->it)){
+//         Pipe pipe = next(pipes->it);
+//         if(pipe->writeFD == fd){
+//             int i = 0;
+//             while(i < size){
+//                 pipe->buffer[pipe->writeIndex] = buffer[i];
+//                 pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
+//                 i++;
+//             }
+//             semPost(pipe->sem);
+//             return i;
+//         }
+//     }
+//     return -1;
+// }
