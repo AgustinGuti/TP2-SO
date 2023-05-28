@@ -26,7 +26,10 @@ extern char get_key();
 #define LCTRL_BREAK 0x9D
 #define LALT_BREAK 0xB8
 
-#define LCTRL_MAKE 0xC2
+// Ctrl when shell is running
+#define LCTRL_MAKE_1 0xC2
+// Ctrl when shell is not running
+#define LCTRL_MAKE_2 0x1D
 
 #define UP_ARROW 300
 #define DOWN_ARROW 301
@@ -101,7 +104,10 @@ int getKeyMake(uint8_t event)
     case LALT_BREAK:
         isAltDown = 0;
         break;
-    case LCTRL_MAKE:
+    case LCTRL_MAKE_1:
+        isCtrDown = 1;
+        break;
+    case LCTRL_MAKE_2:
         isCtrDown = 1;
         break;
     default:
@@ -195,9 +201,9 @@ void keyboard_handler(uint8_t event)
             case CTRL_C:
                 killProcess(getpid());
                 int newChars[3];
-                newChars[0] = '^';
-                newChars[1] = 'c';
-                newChars[2] = NEWLINE;
+                // newChars[0] = '^';
+                // newChars[1] = 'c';
+                // newChars[2] = NEWLINE;
                 writeToPipe(writeFD, newChars, 3);
                 break;
             default:

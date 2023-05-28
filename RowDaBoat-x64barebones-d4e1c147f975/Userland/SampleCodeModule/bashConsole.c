@@ -326,7 +326,7 @@ char callKill(uint8_t argumentQty, char arguments[argumentQty])
     }
     else
     {
-        int pid = strToNum(arguments, strlen(arguments));
+        int pid = strToNum(arguments+1, 1);
         kill(pid);
     }
     return 0;
