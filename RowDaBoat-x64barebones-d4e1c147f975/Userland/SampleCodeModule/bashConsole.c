@@ -252,10 +252,9 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
         }
         char *args[3] = {"processA", foreground, NULL};
         pid_t pidA;
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 2; i++)
         {
             pidA = execve(&processA, args);
-            //waitpid(pidA);
         }
     }
     else
@@ -273,7 +272,8 @@ char callFree(uint8_t argumentQty, char arguments[argumentQty])
         uint64_t ptr = hexaStrToNum(arguments+1, strlen(arguments+1), &flag);
         if (flag == 1)
         {
-            printerr("Numero muy grande. Overflow\n", 0);
+            // printerr("Numero muy grande. Overflow\n", 0);
+            printf("Numero muy grande. Overflow\n");
         }
         else
         {
@@ -296,7 +296,8 @@ char callMalloc(uint8_t argumentQty, char arguments[argumentQty])
         uint64_t size = hexaStrToNum(arguments + 1, strlen(arguments + 1), &flag);
         if (flag == 1)
         {
-            printerr("Numero muy grande. Overflow\n", 0);
+            // printerr("Numero muy grande. Overflow\n", 0);
+            printf("Numero muy grande. Overflow\n");
         }
         else
         {
@@ -376,7 +377,8 @@ char callMemoryDump(uint8_t argumentQty, char arguments[argumentQty])
         uint64_t direction = hexaStrToNum(arguments, strlen(arguments), &flag);
         if (flag == 1)
         {
-            printerr("Direccion muy grande. Overflow\n", 0);
+            // printerr("Direccion muy grande. Overflow\n", 0);
+            printf("Direccion muy grande. Overflow\n");
         }
         else
         {

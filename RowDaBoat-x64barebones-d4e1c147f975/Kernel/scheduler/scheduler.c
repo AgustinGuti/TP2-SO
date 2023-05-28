@@ -395,3 +395,7 @@ pid_t waitpid(pid_t pid)
     return pid;
 }
 
+Process getCurrentProcess()
+{
+    return scheduler->currentProcess;
+}

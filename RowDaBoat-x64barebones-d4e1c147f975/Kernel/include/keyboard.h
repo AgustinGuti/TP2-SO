@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 #include "scheduler.h"
+#include "pipes.h"
+
+// Forward declaration for Pipe type
+typedef struct PipeCDT PipeCDT;
+typedef PipeCDT *Pipe;
 
 #define BACKSPACE   0x08
 #define NEWLINE     0x0A
@@ -22,7 +27,7 @@ char isKeyBreak(unsigned char data);
 char isKeyMake(unsigned char data);
 
 void keyboard_handler(uint8_t event);
-void appendToBuffer(char letter);
+Pipe getKeyboardBuffer();
 
 
 int getBuffer(int* out, uint32_t count);

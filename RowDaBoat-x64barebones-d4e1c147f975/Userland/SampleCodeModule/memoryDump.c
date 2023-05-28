@@ -21,7 +21,8 @@ void memoryDump(uint64_t direction){
         }
         printf("\n");
     }else{
-        printerr("Direccion de memoria invalida. La direccion maxima es %x \n",1,MAX_MEMORY-32);
+        // printerr("Direccion de memoria invalida. La direccion maxima es %x \n",1,MAX_MEMORY-32);
+        printf("Direccion de memoria invalida. La direccion maxima es %x \n",MAX_MEMORY-32);
     }
 }
     

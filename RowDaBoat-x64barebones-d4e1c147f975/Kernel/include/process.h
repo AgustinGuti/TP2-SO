@@ -6,10 +6,16 @@
 #include "functions.h"
 #include <semaphores.h>
 #include <videoDriver.h>
+#include <keyboard.h>
+#include "pipes.h"
+
+// Forward declaration for Pipe type
+typedef struct PipeCDT PipeCDT;
+typedef PipeCDT *Pipe;
 
 #define STACK_SIZE 4096
 #define PIPE_SIZE 1024
-#define MAX_FDS 5
+#define INITIAL_FD_LIMIT 10
 
 #define MAX_PRIORITY 4
 
@@ -19,6 +25,9 @@
 typedef enum{ READY, RUNNING, BLOCKED, ZOMBIE } processState;
 
 typedef int pid_t;
+
+typedef enum {READ, WRITE, EMPTY} PipeType;
+
 
 typedef struct ProcessCDT
 {
@@ -30,7 +39,10 @@ typedef struct ProcessCDT
     uint64_t *stackBase;
     uint64_t *stackPointer;
     uint8_t foreground;
-    int fds[MAX_FDS];
+    Pipe *fds;
+    PipeType *pipeTypes;
+    Pipe stdio;
+    int fdLimit;
     pid_t parentPID;
     pid_t waitingForPID;
     sem_t waitingSem;
@@ -45,5 +57,9 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
 void emptyProcess();
 void freeStack(Process process);
 Process dupProcess(Process parentProcess);
+int openProcessPipe(char *name, int fds[2]);
+int closeProcessPipe(int fd);
+int readProcessPipe(int fd, char *buffer, int bytes);
+int writeProcessPipe(int fd, char *buffer, int size);
 
 #endif

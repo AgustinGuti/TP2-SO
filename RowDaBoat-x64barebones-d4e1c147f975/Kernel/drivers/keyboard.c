@@ -170,21 +170,15 @@ char isKeyMake(unsigned char data)
 }
 
 #define BUFFER_SIZE 1024
-//static uint16_t buffer[BUFFER_SIZE];
-//static uint32_t occupiedBuffer = 0;
 
-static sem_t bufferSem = NULL;
 static Pipe buffer = NULL;
-static readFD = -1;
-static writeFD = -1;
+static readFD = 0;
+static writeFD = 1;
 
 void keyboard_handler(uint8_t event)
 {
     if (buffer == NULL){
-        int fds[2];
-        buffer = openPipe("keyboardBuffer", fds);
-        readFD = fds[0];
-        writeFD = fds[1];
+        buffer = openPipe(NULL);
     }
     int key = getKeyMake(event);
     if (key != -1)
@@ -192,36 +186,41 @@ void keyboard_handler(uint8_t event)
         int newChar[1];
         switch (key){
             case TAB:
-                writeToPipe(writeFD, "   ", 3);
+                writeToPipe(buffer, "   ", 3);
                 break;
             case NEWLINE: // Enter
                 newChar[0] = NEWLINE;
-                writeToPipe(writeFD, newChar, 1);
+                writeToPipe(buffer, newChar, 1);
                 break;
             case CTRL_C:
                 killProcess(getpid());
-                int newChars[3];
+                // int newChars[3];
                 // newChars[0] = '^';
                 // newChars[1] = 'c';
                 // newChars[2] = NEWLINE;
-                writeToPipe(writeFD, newChars, 3);
+                // writeToPipe(writeFD, newChars, 3);
                 break;
             default:
                 newChar[0] = key;
-                writeToPipe(writeFD, newChar, 1);
+                writeToPipe(buffer, newChar, 1);
                 break;
         }
     }
+}
+
+Pipe getKeyboardBuffer()
+{
+    if (buffer == NULL){
+        buffer = openPipe(NULL);
+    }
+    return buffer;
 }
 
 // Puts count chars from the buffer on out, or occupiedBuffer chars if its less. Returns amount of chars read
 int getBuffer(int *out, uint32_t count)
 {
     if (buffer == NULL){
-        int fds[2];
-        buffer = openPipe("keyboardBuffer", fds);
-        readFD = fds[0];
-        writeFD = fds[1];
+        buffer = openPipe(NULL);
     }
     int size = readFromPipe(readFD, out, count);
     return size;

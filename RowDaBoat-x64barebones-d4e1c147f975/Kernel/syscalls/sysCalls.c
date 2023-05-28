@@ -2,6 +2,8 @@
 #include <memory.h>
 #include <scheduler.h>
 #include <semaphores.h>
+#include <process.h>
+
 
 #define OUT_LETTER_COLOR BLACK // Blanco sobre negro
 #define OUT_BACK_COLOR BLACK
@@ -96,32 +98,13 @@ void setupSysCalls()
 
 void sys_write(int fd, const char *buf, uint64_t count)
 {
-    switch (fd)
-    {
-    case STDOUT:
-        printStringLimited(0xFFFFFF, buf, count);
-        break;
-    case STDERR:
-        printStringLimited(0xFF0000, buf, count);
-        break;
-    default:
-        break;
-    }
+    return writeProcessPipe(fd, buf, count);
 }
 
 // Read up to count chars to buf, returns amount of chars
 int sys_read(int fd, const uint16_t *buf, uint32_t count)
 {
-    int ans = 0;
-    switch (fd)
-    {
-    case STDIN:
-        ans = getBuffer(buf, count); // read from buffer
-        break;
-    default:
-        break;
-    }
-    return ans;
+    return readProcessPipe(fd, buf, count);
 }
 
 void *sys_malloc(uint64_t size)
