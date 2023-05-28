@@ -29,8 +29,8 @@ GLOBAL _sys_semPost
 GLOBAL _sys_kill
 GLOBAL _sys_nice
 GLOBAL _sys_waitpid
-GLOBAL _sys_openPipe
-GLOBAL _sys_closePipe
+GLOBAL _sys_openProcessPipe
+GLOBAL _sys_closeProcessPipe
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -402,8 +402,8 @@ _sys_waitpid:
     mov rsp, rbp
     pop rbp
     ret
-;Pipe sys_openPipe(char *name);
-_sys_openPipe:
+;Pipe sys_openProcessPipe(char *name, int fds[2]);
+_sys_openProcessPipe:
     push rbp
     mov rbp, rsp
     
@@ -413,8 +413,8 @@ _sys_openPipe:
     mov rsp, rbp
     pop rbp
     ret
-;int sys_closePipe(Pipe pipe);
-_sys_closePipe:
+;int sys_closeProcessPipe(int fd);
+_sys_closeProcessPipe:
     push rbp
     mov rbp, rsp
     

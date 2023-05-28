@@ -49,14 +49,21 @@ void processC() {
 }
 
 void cat() {
-    // Pipe buffer = openPipe(NULL);
-    // int readFD = 0;
-    // int writeFD = 1;
-    // while(1){
-    //     /* implement cat function */
-    //     char c;
-    //     int read = _sys_read(0, &c, 1);
-    //     if( read != 0)
-    //         writeToPipe(1, &c, 1);
-    // }
+    /* cat process implementation*/
+    close(0);
+    int fds[2];
+    if( pipe("pipe", fds) == -1){
+        printf("Error creating pipe\n");
+        return;
+    }
+    printf("fd0: %d , fd1: %d\n", fds[0], fds[1]);
+    while(1){
+        char buffer[100];
+        int read = _sys_read(fds[0], buffer, 100);
+        if(read != 0)
+            _sys_write(1, buffer, read);
+        printf("read: %d\n", read);
+    }
+    close(fds[0]);
+    close(fds[1]);
 }

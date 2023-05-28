@@ -3,7 +3,6 @@
 #include <scheduler.h>
 #include <semaphores.h>
 #include <process.h>
-#include <pipes.h>
 
 #define OUT_LETTER_COLOR BLACK // Blanco sobre negro
 #define OUT_BACK_COLOR BLACK
@@ -47,8 +46,8 @@ uint64_t *sys_getMemoryStatus();
 void sys_kill(int pid);
 int sys_nice(pid_t pid, int priority);
 pid_t sys_waitpid(pid_t pid);
-Pipe sys_openPipe(char *name);
-int sys_closePipe(Pipe pipe);
+Pipe sys_openProcessPipe(char *name, int fds[2]);
+int sys_closeProcessPipe(int fd);
 
 static uint64_t sysCalls[] = {
     (uint64_t)&sys_write,
@@ -82,8 +81,8 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_kill,
     (uint64_t)&sys_nice,
     (uint64_t)&sys_waitpid,
-    (uint64_t)&sys_openPipe,
-    (uint64_t)&sys_closePipe
+    (uint64_t)&sys_openProcessPipe,
+    (uint64_t)&sys_closeProcessPipe
 };
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
@@ -288,12 +287,12 @@ int sys_nice(pid_t pid, int priority)
     return nice(pid, priority);
 }
 
-Pipe sys_openPipe(char *name)
+Pipe sys_openProcessPipe(char *name, int fds[2])
 {
-    return openPipe(name);
+    return openProcessPipe(name, fds);
 }
 
-int sys_closePipe(Pipe pipe)
+int sys_closeProcessPipe(int fd)
 {
-    closePipe(pipe);
+    closeProcessPipe(fd);
 }
