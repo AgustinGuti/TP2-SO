@@ -5,6 +5,9 @@
 
 typedef struct semaphore *sem_t;
 
+typedef struct pipe *Pipe;
+
+
 #define STDERR 2
 #define STDOUT 1
 #define STDIN 0
@@ -39,6 +42,8 @@ void _sys_semWait(sem_t sem);
 void _sys_semPost(sem_t sem);
 int _sys_nice(int pid, int priority);
 uint64_t * sys_getMemoryStatus();
+Pipe _sys_openPipe(char *name);
+int _sys_closePipe(Pipe pipe);
 
 
 #endif

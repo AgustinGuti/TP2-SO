@@ -561,7 +561,7 @@ section .data
 
 section .bss
 	maxSysCall resb 30
-	sysCallsPointers resb 256		;Alcanza para 32 sysCalls
+	sysCallsPointers resb 512		;Alcanza para 64 sysCalls
 	registers resq 17
 
 	startRegisters resq 17

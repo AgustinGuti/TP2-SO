@@ -48,13 +48,15 @@ void processC() {
     return;
 }
 
-// void cat() {
-//   char c;
-// //   while( (getChar(c)) != EOF)
-//   while(1) {
-//     c = getChar();
-//     if(c != NULL)
-//         putChar(c);
-//   }
-//   return;
-// }
+void cat() {
+    // Pipe buffer = openPipe(NULL);
+    // int readFD = 0;
+    // int writeFD = 1;
+    // while(1){
+    //     /* implement cat function */
+    //     char c;
+    //     int read = _sys_read(0, &c, 1);
+    //     if( read != 0)
+    //         writeToPipe(1, &c, 1);
+    // }
+}
