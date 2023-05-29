@@ -48,13 +48,10 @@ void processC() {
     return;
 }
 
-// void cat() {
-//   char c;
-// //   while( (getChar(c)) != EOF)
-//   while(1) {
-//     c = getChar();
-//     if(c != NULL)
-//         putChar(c);
-//   }
-//   return;
-// }
+void cat() {
+    char buffer[2];
+    while(1){
+        _sys_read(0,buffer, 1);
+        printf("%c", buffer[0]);
+    }
+}

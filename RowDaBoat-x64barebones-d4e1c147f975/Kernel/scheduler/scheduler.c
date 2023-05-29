@@ -21,9 +21,6 @@ typedef struct SchedulerCDT
 
 static Scheduler scheduler = NULL;
 
-static Process processList[1]; //  printf("RSP: %x\n", stackPointer);
-                               // La primera vez que me llama el kernel tengo que guardar su stackPointer en algun lado
-
 Process getNextProcess();
 void printProcesses();
 Process getProcess(pid_t pid);
@@ -147,11 +144,14 @@ pid_t execve(void *entryPoint, char *const argv[])
     int foreground = strToNum(argv[1], 1);
 
     Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, foreground, &argv[2] , &startWrapper, getpid());
-    insert(scheduler->queue[process->priority], process);
     if(foreground){
-        if (scheduler->currentProcess->pid == SHELL_PID){
-            waitpid(process->pid);
-        }
+        int currentForeground = scheduler->currentProcess->foreground;
+        scheduler->currentProcess->foreground = 0;    
+        insert(scheduler->queue[process->priority], process);
+        waitpid(process->pid);
+        scheduler->currentProcess->foreground = currentForeground;
+    }else{
+        insert(scheduler->queue[process->priority], process);
     }
     return process->pid;
 }
@@ -337,6 +337,10 @@ void unblockProcessFromProcess(Process process)
 
 void killProcess(pid_t pid)
 {   
+    if(pid == SHELL_PID && scheduler->currentProcess->pid != SHELL_PID){
+        printerr("No es posible matar la shell desde otro proceso.\n");
+        return;
+    }
     Process process = getProcess(pid);
     if (process != NULL)
     {
@@ -359,6 +363,29 @@ void killProcess(pid_t pid)
     } else{
         printerr("Process %d not found\n", pid);
         printProcesses();
+    }
+}
+
+Process getForegroundProcess() {
+    int currentPriority = MAX_PRIORITY - 1;
+    while(currentPriority >= 0){
+        resetIterator(scheduler->it[currentPriority]);
+        while(hasNext(scheduler->it[currentPriority])){
+            Process proc = next(scheduler->it[currentPriority]);
+            if (proc->foreground){
+                return proc;
+            }
+        }
+        currentPriority--;
+    }
+    return NULL;
+}
+
+void killForegroundProcess() {
+    Process process = getForegroundProcess();
+    if (process != NULL)
+    {
+        killProcess(process->pid);
     }
 }
 
@@ -395,3 +422,7 @@ pid_t waitpid(pid_t pid)
     return pid;
 }
 
+Process getCurrentProcess()
+{
+    return scheduler->currentProcess;
+}

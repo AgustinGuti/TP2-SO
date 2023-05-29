@@ -2,6 +2,7 @@
 #include <memory.h>
 #include <scheduler.h>
 #include <semaphores.h>
+#include <process.h>
 
 #define OUT_LETTER_COLOR BLACK // Blanco sobre negro
 #define OUT_BACK_COLOR BLACK
@@ -10,7 +11,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 32 // functions quantity in sysCalls[]
+#define READY_CALLS 34 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -46,6 +47,8 @@ void sys_kill(int pid);
 int sys_nice(pid_t pid, int priority);
 pid_t sys_waitpid(pid_t pid);
 void * sys_realloc(void *ptr, uint64_t newSize);
+Pipe sys_openProcessPipe(char *name, int fds[2]);
+int sys_closeProcessPipe(int fd);
 
 static uint64_t sysCalls[] = {
     (uint64_t)&sys_write,
@@ -79,7 +82,9 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_kill,
     (uint64_t)&sys_nice,
     (uint64_t)&sys_waitpid,
-    (uint64_t)&sys_realloc,
+    (uint64_t)&sys_realloc,,
+    (uint64_t)&sys_openProcessPipe,
+    (uint64_t)&sys_closeProcessPipe
 };
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
@@ -98,32 +103,13 @@ void setupSysCalls()
 
 void sys_write(int fd, const char *buf, uint64_t count)
 {
-    switch (fd)
-    {
-    case STDOUT:
-        printStringLimited(0xFFFFFF, buf, count);
-        break;
-    case STDERR:
-        printStringLimited(0xFF0000, buf, count);
-        break;
-    default:
-        break;
-    }
+    return writeProcessPipe(fd, buf, count);
 }
 
 // Read up to count chars to buf, returns amount of chars
 int sys_read(int fd, const uint16_t *buf, uint32_t count)
 {
-    int ans = 0;
-    switch (fd)
-    {
-    case STDIN:
-        ans = getBuffer(buf, count); // read from buffer
-        break;
-    default:
-        break;
-    }
-    return ans;
+    return readProcessPipe(fd, buf, count);
 }
 
 void *sys_malloc(uint64_t size)
@@ -306,4 +292,14 @@ void sys_semPost(sem_t sem)
 int sys_nice(pid_t pid, int priority)
 {
     return nice(pid, priority);
+}
+
+Pipe sys_openProcessPipe(char *name, int fds[2])
+{
+    return openProcessPipe(name, fds);
+}
+
+int sys_closeProcessPipe(int fd)
+{
+    closeProcessPipe(fd);
 }

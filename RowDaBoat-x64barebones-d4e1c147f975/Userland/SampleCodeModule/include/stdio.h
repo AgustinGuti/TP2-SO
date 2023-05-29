@@ -20,7 +20,7 @@ void newline();
 void backspace();
 
 void printf(const char *fmt, ...);
-void printerr(const char *fmt, int argQty, ...);
+// void printerr(const char *fmt, int argQty, ...);
 int scanf(const char *fmt, int argQty, ...);
 void cleanScreen();
 

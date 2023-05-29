@@ -3,6 +3,7 @@
 #include <semaphores.h>
 #include <stddef.h>
 #include <processes.h>
+#include <pipes.h>
 
 int processA();
 
