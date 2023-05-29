@@ -6,40 +6,43 @@
 #include <memory.h>
 #include <phylos.h>
 
+#define MAX_ARGS 10
+
 extern void zeroDivision();
 extern void displayTime();
+char parseAndExecuteCommands(uint8_t *str, int length);
+void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length);
 
-char setFontSize(uint8_t argQty, char arguments[argQty], uint8_t rewrite);
+char help(uint8_t argumentQty, const char** arguments);
+char clean(uint8_t argumentQty, const char** arguments);
+char startTron(uint8_t argumentQty, const char** arguments);
+char callMemoryDump(uint8_t argumentQty, const char** arguments);
+char time(uint8_t argumentQty, const char** arguments);
+char callZeroDivision(uint8_t argumentQty, const char** arguments);
+char callInvalidOpcode(uint8_t argumentQty, const char** arguments);
+char callSetFontSize(uint8_t argumentQty, const char** arguments);
+char exitConsole(uint8_t argumentQty, const char** arguments);
+char callInforeg(uint8_t argumentQty, const char** arguments);
+char callHimnoAlegria(uint8_t argumentQty, const char** arguments);
+char callMalloc(uint8_t argumentQty, const char** arguments);
+char callFree(uint8_t argumentQty, const char** arguments);
+char callExec(uint8_t argumentQty, const char** arguments);
+char callPrintProcesses(uint8_t argumentQty, const char** arguments);
+char callGetMemoryStatus(uint8_t argumentQty, const char** arguments);
+char callBlock(uint8_t argumentQty, const char** arguments);
+char callKill(uint8_t argumentQty, const char** arguments);
+char callNice(uint8_t argumentQty, const char** arguments);
+char callFork(uint8_t argumentQty, const char** arguments);
+char callTestMM(uint8_t argumentQty, const char** arguments);
+char callPhylo(uint8_t argumentQty, const char** arguments);
+char callCat(uint8_t argumentQty, const char** arguments);
+char callTestSync(uint8_t argumentQty, char **arguments);
 
-char help(uint8_t argumentQty, char arguments[argumentQty]);
-char clean(uint8_t argumentQty, char arguments[argumentQty]);
-char startTron(uint8_t argumentQty, char arguments[argumentQty]);
-char callMemoryDump(uint8_t argumentQty, char arguments[argumentQty]);
-char time(uint8_t argumentQty, char arguments[argumentQty]);
-char callZeroDivision(uint8_t argumentQty, char arguments[argumentQty]);
-char callInvalidOpcode(uint8_t argumentQty, char arguments[argumentQty]);
-char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty]);
-char exitConsole(uint8_t argumentQty, char arguments[argumentQty]);
-char callInforeg(uint8_t argumentQty, char arguments[argumentQty]);
-char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty]);
-char callMalloc(uint8_t argumentQty, char arguments[argumentQty]);
-char callFree(uint8_t argumentQty, char arguments[argumentQty]);
-char callExec(uint8_t argumentQty, char arguments[argumentQty]);
-char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty]);
-char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty]);
-char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
-char callKill(uint8_t argumentQty, char arguments[argumentQty]);
-char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
-char callNice(uint8_t argumentQty, char arguments[argumentQty]);
-char callFork(uint8_t argumentQty, char arguments[argumentQty]);
-char callTestMM(uint8_t argumentQty, char arguments[argumentQty]);
-char callPhylo(uint8_t argumentQty, char arguments[argumentQty]);
-char callCat(uint8_t argumentQty, char arguments[argumentQty]);
 
-#define COMMAND_QTY 23
+#define COMMAND_QTY 24
 
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "cat"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callCat};
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "cat", "test-sync"};
+static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callCat, &callTestSync};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -74,7 +77,7 @@ int startConsole()
 
                     if (printBuf[i] == NEWLINE)
                     {
-                        exit = processCommand(commandBuffer, commandBufferPos);
+                        exit = parseAndExecuteCommands(commandBuffer, commandBufferPos);
                         printText(LINE_INDICATOR);
                         for (int arg_idx = 0; arg_idx < commandBufferPos; arg_idx++)
                         { // Clear buffer
@@ -97,74 +100,120 @@ int startConsole()
     return 1;
 }
 
-// Returns exit status
-char processCommand(uint8_t *str, int length)
+char parseAndExecuteCommands(uint8_t *str, int length)
 {
-    char command[length];
+    char pipePos = -1;
+    for (int i = 0; i < length; i++)
+    {
+        if (str[i] == '|')
+        {
+            pipePos = i;
+            break;
+        }
+    }
+    if (pipePos == -1)
+    {
+        // No pipe, execute a single command
+        return processCommand(str, length);
+    }
+
+    // Split the string at the pipe position
+    int command1Length = pipePos;
+    int command2Length = length - command1Length - 1;
+
+    char command1[command1Length + 1];
+    char command2[command2Length + 1];
+    memcpy(command1, str, command1Length);
+    command1[command1Length] = '\0';
+    memcpy(command2, pipePos + 1, command2Length);
+    command2[command2Length] = '\0';
+
+    // Process command 1
+
+    char* arguments1[MAX_ARGS];
+    int argumentQty1 = 0;
+    char *command1Name[command1Length + 1];
+    getCommandAndArgs(command1, arguments1, &argumentQty1, command1Name, command1Length + 1);
+
+    char* arguments2[MAX_ARGS];
+    int argumentQty2 = 0;
+    char *command2Name[command2Length + 1];
+    getCommandAndArgs(command2, arguments2, &argumentQty2, command2Name, command2Length + 1);
+    
+    // for (int i = 0; i < COMMAND_QTY; i++)
+    // {
+    //     if (strcmp(command1Name, commandNames[i]) == 0)
+    //     {
+    //         return (*commands[i])(argumentQty1, (const char**)arguments1);
+    //     }
+    // }
+    // // Process command 2
+    // for (int i = 0; i < COMMAND_QTY; i++)
+    // {
+    //     if (strcmp(command2Name, commandNames[i]) == 0)
+    //     {
+    //         return (*commands[i])(argumentQty2, (const char**)arguments2);
+    //     }
+    // }
+
+    return 0;
+}
+
+void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length)
+{
     int i = 0;
     while (str[i] == ' ')
     {
         i++;
     }
     int cmd_idx = 0;
-    while (str[i] != ' ' && i < length)
+    while (str[i] != ' ' && str[i] != '\0')
     {
         command[cmd_idx++] = str[i];
         i++;
     }
-    command[cmd_idx] = 0;
-
-    char arguments[length];
-    uint8_t arg_idx = 0;
-    uint8_t argQty = 0;
-    while (i < length)
+    command[cmd_idx] = '\0';
+    int argIdx = 0;
+    *argQty = 0;
+    int argLen = 0;
+    while (str[i] != '\0')
     {
         if (str[i] == ' ')
         {
-            argQty++;
+            args[*argQty][argLen] = '\0';
+            (*argQty)++;
+            argLen = 0;
         }
-        arguments[arg_idx++] = str[i];
+        else
+        {
+            args[*argQty][argLen++] = str[i];
+        }
         i++;
     }
-    arguments[arg_idx] = 0;
+    args[*argQty][argLen] = '\0';
+ //   (*argQty)++;
+}
+
+// Returns exit status
+char processCommand(uint8_t *str, int length)
+{
+    char arguments[MAX_ARGS][1024];
+    int argQty = 0;
+    char command[length + 1];
+    getCommandAndArgs(str, arguments, &argQty, command, length + 1);
 
     for (int i = 0; i < COMMAND_QTY; i++)
     {
         if (strcmp(command, commandNames[i]) == 0)
         {
-            return (*commands[i])(argQty, arguments);
+            return (*commands[i])(argQty, (const char**)arguments);
         }
     }
     printf("Comando no reconocido\n");
     return 0;
 }
 
-char setFontSize(uint8_t argQty, char arguments[argQty], uint8_t rewrite)
-{
-    if (argQty < 1)
-    {
-        printf("Ingrese una fuente entre 1 y 4\n");
-    }
-    else if (argQty > 1)
-    {
-        printf("Demasiados argumentos\n");
-    }
-    else
-    {
-        int num = strToNum(arguments+1, strlen(arguments+1));
-        if (num > 4 || num < 1)
-        {
-            printf("Ingrese una fuente entre 1 y 4\n");
-        }
-        else
-        {
-            _sys_setFontSize(num, rewrite);
-        }
-    }
-    return 0;
-}
-
-char help(uint8_t argumentQty, char arguments[argumentQty])
+char help(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty == 0)
     {
@@ -180,12 +229,12 @@ char help(uint8_t argumentQty, char arguments[argumentQty])
     }
     else
     {
-        if (strcmp(arguments, "please") == 0)
+        if (strcmp(arguments[0], "please") == 0)
         {
             printf("No.\n");
             return 0;
         }
-        else if (strcmp(arguments, "all") == 0)
+        else if (strcmp(arguments[0], "all") == 0)
         {
             for (int i = 0; i < COMMAND_QTY; i++)
             {
@@ -197,7 +246,7 @@ char help(uint8_t argumentQty, char arguments[argumentQty])
         {
             for (int i = 0; i < COMMAND_QTY; i++)
             {
-                if (strcmp(arguments, commandNames[i]) == 0)
+                if (strcmp(arguments[0], commandNames[i]) == 0)
                 {
                     printf("%s\n", commandDescriptions[i]);
                     return 0;
@@ -209,7 +258,8 @@ char help(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char clean(uint8_t argumentQty, char arguments[argumentQty])
+
+char clean(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
@@ -222,7 +272,7 @@ char clean(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char startTron(uint8_t argumentQty, char arguments[argumentQty])
+char startTron(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
@@ -235,14 +285,14 @@ char startTron(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callExec(uint8_t argumentQty, char arguments[argumentQty])
+char callExec(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty <= 1)
     {
         char foreground[2] = "1";
         if (argumentQty == 1)
         {
-            if (arguments[1] == '&')
+            if (strcmp(arguments[0], "&") == 0)
             {
                 strcpy(foreground, "0");
             }
@@ -266,20 +316,19 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callFree(uint8_t argumentQty, char arguments[argumentQty])
+char callFree(uint8_t argumentQty, const char** arguments)
 {
-    if (argumentQty == 1 && isHexaNumber(arguments+1))
+    if (argumentQty == 1 && isHexaNumber(arguments[0]))
     {
         char flag = 0;
-        uint64_t ptr = hexaStrToNum(arguments+1, strlen(arguments+1), &flag);
+        uint64_t ptr = hexaStrToNum(arguments[0], strlen(arguments[0]), &flag);
         if (flag == 1)
         {
-            // printerr("Numero muy grande. Overflow\n", 0);
             printf("Numero muy grande. Overflow\n");
         }
         else
         {
-            const freedBytes = free(ptr);
+            const uint64_t freedBytes = free(ptr);
             printf("%x bytes liberados\n", freedBytes);
         }
     }
@@ -290,20 +339,19 @@ char callFree(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callMalloc(uint8_t argumentQty, char arguments[argumentQty])
+char callMalloc(uint8_t argumentQty, const char** arguments)
 {
-    if (argumentQty == 1 && isHexaNumber(arguments + 1))
+    if (argumentQty == 1 && isHexaNumber(arguments[0]))
     {
         char flag = 0;
-        uint64_t size = hexaStrToNum(arguments + 1, strlen(arguments + 1), &flag);
+        uint64_t size = hexaStrToNum(arguments[0], strlen(arguments[0]), &flag);
         if (flag == 1)
         {
-            // printerr("Numero muy grande. Overflow\n", 0);
             printf("Numero muy grande. Overflow\n");
         }
         else
         {
-            uint64_t *ptr = malloc(size);
+            uint64_t* ptr = malloc(size);
             if (ptr == NULL)
             {
                 printf("No se reservo memoria\n");
@@ -321,7 +369,7 @@ char callMalloc(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callKill(uint8_t argumentQty, char arguments[argumentQty])
+char callKill(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 1)
     {
@@ -329,13 +377,13 @@ char callKill(uint8_t argumentQty, char arguments[argumentQty])
     }
     else
     {
-        int pid = strToNum(arguments+1, 1);
+        int pid = strToNum(arguments[0], strlen(arguments[0]));
         kill(pid);
     }
     return 0;
 }
 
-char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty])
+char callGetMemoryStatus(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
@@ -343,7 +391,7 @@ char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty])
     }
     else
     {
-        uint64_t *memStatus = getMemoryStatus();
+        uint64_t* memStatus = getMemoryStatus();
         if (memStatus == NULL)
         {
             printf("No se pudo obtener el estado de la memoria\n");
@@ -357,7 +405,7 @@ char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callBlock(uint8_t argumentQty, char arguments[argumentQty])
+char callBlock(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 1)
     {
@@ -365,18 +413,18 @@ char callBlock(uint8_t argumentQty, char arguments[argumentQty])
     }
     else
     {
-        int num = strToNum(arguments, strlen(arguments));
+        int num = strToNum(arguments[0], strlen(arguments[0]));
         blockProcess(num);
     }
     return 0;
 }
 
-char callMemoryDump(uint8_t argumentQty, char arguments[argumentQty])
+char callMemoryDump(uint8_t argumentQty, const char** arguments)
 {
-    if (argumentQty == 1 && isHexaNumber(arguments))
+    if (argumentQty == 1 && isHexaNumber(arguments[0]))
     {
         char flag = 0;
-        uint64_t direction = hexaStrToNum(arguments, strlen(arguments), &flag);
+        uint64_t direction = hexaStrToNum(arguments[0], strlen(arguments[0]), &flag);
         if (flag == 1)
         {
             // printerr("Direccion muy grande. Overflow\n", 0);
@@ -394,7 +442,7 @@ char callMemoryDump(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callNice(uint8_t argumentQty, char arguments[argumentQty])
+char callNice(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 2)
     {
@@ -402,26 +450,8 @@ char callNice(uint8_t argumentQty, char arguments[argumentQty])
     }
     else
     {
-        char *arg1 = malloc(5);
-        int i = 1;
-        while (arguments[i] != ' ' && i < 4)
-        {
-            arg1[i] = arguments[i];
-            i++;
-        }
-        arg1[i] = 0;
-        i++;
-        char *arg2 = malloc(5);
-        int j = 0;
-        while (arguments[i] != ' ' && j < 4)
-        {
-            arg2[j] = arguments[i];
-            i++;
-            j++;
-        }
-        arg2[j] = 0;
-        int pid = strToNum(arg1, strlen(arg1));
-        int priority = strToNum(arg2, strlen(arg2));
+        int pid = strToNum(arguments[0], strlen(arguments[0]));
+        int priority = strToNum(arguments[1], strlen(arguments[1]));
         int returnValue = _sys_nice(pid, priority);
         if (returnValue < 0)
         {
@@ -435,7 +465,7 @@ char callNice(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callFork(uint8_t argumentQty, char arguments[argumentQty])
+char callFork(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
@@ -444,24 +474,11 @@ char callFork(uint8_t argumentQty, char arguments[argumentQty])
     else
     {
         fork();
-        // int pid = fork();
-        // if (pid == -1)
-        // {
-        //     printf("Error al crear el proceso hijo\n");
-        // }
-        // else if (pid == 0)
-        // {
-        //     printf("Soy el proceso hijo\n");
-        // }
-        // else
-        // {
-        //     printf("Soy el proceso padre. Mi pid es %d y el de mi hijo es %d\n", getpid(), pid);
-        // }
     }
     return 0;
 }
 
-char callPhylo(uint8_t argumentQty, char arguments[argumentQty])
+char callPhylo(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
@@ -474,7 +491,7 @@ char callPhylo(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callCat(uint8_t argumentQty, char arguments[argumentQty])
+char callCat(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
@@ -487,7 +504,7 @@ char callCat(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callTestMM(uint8_t argumentQty, char arguments[argumentQty])
+char callTestMM(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 1)
     {
@@ -495,39 +512,26 @@ char callTestMM(uint8_t argumentQty, char arguments[argumentQty])
     }
     else
     {
-        uint64_t memorySize = strToNum(arguments + 1, strlen(arguments + 1));
+        uint64_t memorySize = strToNum(arguments[0], strlen(arguments[0]));
         test_mm(memorySize);
-        // char *arg1 = malloc(5);
-        // int i = 1;
-        // while (arguments[i] == ' ')
-        // {
-        //     i++;
-        // }
-        // int j = 0;
-        // while (arguments[i] != ' ' && i < 4)
-        // {
-        //     arg1[j] = arguments[i];
-        //     i++;
-        //     j++;
-        // }
-        // arg1[i] = 0;
-        // i++;
-        // char *arg2 = malloc(5);
-        // j = 0;
-        // while (arguments[i] != ' ' && j < 4)
-        // {
-        //     arg2[j] = arguments[i];
-        //     i++;
-        //     j++;
-        // }
-        // arg2[j] = 0;
-        // char *argv[2] = {arg1, arg2};
-        // test_sync(argumentQty, argv);
     }
     return 0;
 }
 
-char time(uint8_t argumentQty, char arguments[argumentQty])
+char callTestSync(uint8_t argumentQty, char **arguments)
+{
+    if (argumentQty != 2)
+    {
+        printf("Argumento invalido para test-sync\n");
+    }
+    else
+    {
+        test_sync(argumentQty, arguments);
+    }
+    return 0;
+}
+
+char time(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
@@ -540,11 +544,11 @@ char time(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callZeroDivision(uint8_t argumentQty, char arguments[argumentQty])
+char callZeroDivision(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
-        printf("Argumento invalido para time\n");
+        printf("Argumento invalido para zero-division\n");
     }
     else
     {
@@ -553,11 +557,11 @@ char callZeroDivision(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callInvalidOpcode(uint8_t argumentQty, char arguments[argumentQty])
+char callInvalidOpcode(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
-        printf("Argumento invalido para time\n");
+        printf("Argumento invalido para invalid-opcode\n");
     }
     else
     {
@@ -566,24 +570,36 @@ char callInvalidOpcode(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty])
+char callSetFontSize(uint8_t argumentQty, const char** arguments)
 {
-    if (argumentQty != 1)
+    if (argumentQty < 1)
     {
-        printf("Argumento invalido para time\n");
+        printf("Ingrese una fuente entre 1 y 4\n");
+    }
+    else if (argumentQty > 1)
+    {
+        printf("Demasiados argumentos\n");
     }
     else
     {
-        setFontSize(argumentQty, arguments, 1);
+        int num = strToNum(arguments[0], strlen(arguments[0]));
+        if (num > 4 || num < 1)
+        {
+            printf("Ingrese una fuente entre 1 y 4\n");
+        }
+        else
+        {
+            _sys_setFontSize(num, 1);
+        }
     }
     return 0;
 }
 
-char exitConsole(uint8_t argumentQty, char arguments[argumentQty])
+char exitConsole(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 0)
     {
-        printf("Argumento invalido para time\n");
+        printf("Argumento invalido para exit-console\n");
     }
     else
     {
@@ -592,7 +608,7 @@ char exitConsole(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callInforeg(uint8_t argumentQty, char arguments[argumentQty])
+char callInforeg(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -605,7 +621,7 @@ char callInforeg(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty])
+char callHimnoAlegria(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -618,7 +634,7 @@ char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty])
     return 0;
 }
 
-char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty])
+char callPrintProcesses(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
