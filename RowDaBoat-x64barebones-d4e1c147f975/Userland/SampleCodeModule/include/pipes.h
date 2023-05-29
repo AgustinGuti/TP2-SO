@@ -1,5 +1,5 @@
 #include <sysCallInterface.h>
 
-Pipe pipe(char * name);
+Pipe pipe(char * name, int fds[2]);
 
-int closePipe(Pipe pipe);
+int close(int fd);

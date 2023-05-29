@@ -42,8 +42,8 @@ void _sys_semWait(sem_t sem);
 void _sys_semPost(sem_t sem);
 int _sys_nice(int pid, int priority);
 uint64_t * sys_getMemoryStatus();
-Pipe _sys_openPipe(char *name);
-int _sys_closePipe(Pipe pipe);
+Pipe _sys_openProcessPipe(char *name, int fds[2]);
+int _sys_closeProcessPipe(int fd);
 
 
 #endif

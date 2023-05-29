@@ -49,14 +49,9 @@ void processC() {
 }
 
 void cat() {
-    // Pipe buffer = openPipe(NULL);
-    // int readFD = 0;
-    // int writeFD = 1;
-    // while(1){
-    //     /* implement cat function */
-    //     char c;
-    //     int read = _sys_read(0, &c, 1);
-    //     if( read != 0)
-    //         writeToPipe(1, &c, 1);
-    // }
+    char buffer[2];
+    while(1){
+        _sys_read(0,buffer, 1);
+        printf("%c", buffer[0]);
+    }
 }

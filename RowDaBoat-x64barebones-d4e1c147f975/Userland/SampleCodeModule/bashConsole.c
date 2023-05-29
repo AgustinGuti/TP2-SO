@@ -493,14 +493,22 @@ char callPhylo(uint8_t argumentQty, const char** arguments)
 
 char callCat(uint8_t argumentQty, const char** arguments)
 {
-    if (argumentQty != 0)
+    char foreground[2] = "1";
+    if (argumentQty == 1)
     {
-        printf("Argumento invalido para cat\n");
+        if (arguments[1] == '&')
+        {
+            strcpy(foreground, "0");
+        }
+        else
+        {
+            printf("Argumento invalido para cat\n");
+            return 0;
+        }
     }
-    else
-    {
-        cat();
-    }
+    char *args[3] = {"cat", foreground, NULL};
+    pid_t pid;
+    pid = execve(&cat, args);
     return 0;
 }
 

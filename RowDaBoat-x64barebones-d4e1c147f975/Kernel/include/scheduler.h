@@ -24,6 +24,8 @@ void printProcesses();
 pid_t getpid();
 void yield();
 void exit(int value);
+void killProcess(pid_t pid);
+void killForegroundProcess();
 void blockHandler(pid_t pid);
 void blockProcess(pid_t pid);
 void unblockProcess(pid_t pid);
