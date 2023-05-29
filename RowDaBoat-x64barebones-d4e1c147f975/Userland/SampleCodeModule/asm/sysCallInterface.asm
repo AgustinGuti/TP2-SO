@@ -29,6 +29,7 @@ GLOBAL _sys_semPost
 GLOBAL _sys_kill
 GLOBAL _sys_nice
 GLOBAL _sys_waitpid
+GLOBAL _sys_realloc
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -395,6 +396,18 @@ _sys_waitpid:
     mov rbp, rsp
     
     mov rax, 30     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void * sys_realloc(void * ptr, uint64_t size);
+_sys_realloc:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 31     ;id 
     int 80h
 
     mov rsp, rbp

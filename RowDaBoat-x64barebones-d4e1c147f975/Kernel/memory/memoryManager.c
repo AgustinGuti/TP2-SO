@@ -110,6 +110,31 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 	return 0;
 }
 
+void * reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, uint64_t *const allocatedMemorySize)
+{
+	void *newMemory = allocMemory(memoryManager, newSize, allocatedMemorySize);
+	if (newMemory == NULL)
+	{
+		return NULL;
+	}
+	MemoryBlock *currentBlock = memoryManager->firstOccupiedBlock;
+	while (currentBlock != NULL)
+	{
+		if (currentBlock->startAddress == memoryToRealloc)
+		{
+			break;
+		}
+		currentBlock = currentBlock->nextBlock;
+	}
+	if(currentBlock == NULL){
+		return NULL;
+	}
+	memcpy(newMemory, memoryToRealloc, currentBlock->size);
+	freeMemory(memoryManager, memoryToRealloc);
+	return newMemory;
+}
+
+
 void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
 {
 	MemoryBlock *currentBlock = memoryManager->firstFreeBlock;
@@ -226,3 +251,5 @@ void printBlocks(MemoryManagerADT const memoryManager)
 	}
 	printf("DONE\n");
 }
+
+

@@ -7,6 +7,7 @@
 #include <processes.h>
 #include <functions.h>
 #include <stddef.h>
+#include <memory.h>
 
 void phylos();
 

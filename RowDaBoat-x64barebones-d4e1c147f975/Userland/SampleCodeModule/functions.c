@@ -133,6 +133,15 @@ uint32_t strlen(char *str){
     return len;
 }
 
+uint32_t strlenWithSpaceEnd(char *str){
+    uint32_t len = 0;
+    while (str[len] != 0 && str[len] != ' '){
+      len++;
+    }
+    return len;
+}
+
+
 void buildRectSprite(uint16_t width, uint16_t height, uint32_t color, uint8_t **location){
   for (int i = 0; i < height; i++){
     for (int j = 0; j < width; j++){
@@ -152,6 +161,18 @@ int isHexaNumber(char * str){
   }
   return 1; 
 }
+
+int isHexaNumberWithSpaceEnd(char * str){
+  int i=0;
+  while (str[i]!=0 && str[i]!=' '){
+    if((str[i]<'0'|| str[i]>'9') && (str[i]<'A' || str[i]>'F') && (str[i]<'a' || str[i]>'f')){
+      return 0;
+    }  
+    i++;
+  }
+  return 1; 
+}
+
 
 void strcpy(char *dest, char *src){
   memcpy(dest, src, strlen(src) + 1);

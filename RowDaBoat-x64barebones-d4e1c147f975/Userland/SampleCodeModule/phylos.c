@@ -1,17 +1,17 @@
 #include <phylos.h>
 
-
-#define N 5
 #define LEFT (i + N - 1) % N
 #define RIGHT (i + 1) % N
 #define THINKING 0
 #define HUNGRY 1
 #define EATING 2
 
-int state[N];
+
+int N = 5;
+int *state;
 sem_t mutex;
-sem_t s[N];
-pid_t philosophersPID[N];
+sem_t *s;
+pid_t *philosophersPID;
 
 void philosopher(char argc, char **argv);
 void take_forks(int i);
@@ -20,8 +20,16 @@ void test(int i);
 void eat(int phil);
 void think(int phil);
 void printState();
+void addPhilo();
+void removePhilo();
+int left(int i);
+int right(int i);
 
 void phylos(){
+    state = (int *)malloc(N*sizeof(int));
+    s = (sem_t *)malloc(N*sizeof(sem_t));
+    philosophersPID = (pid_t *)malloc(N*sizeof(pid_t));
+
     int i;
     for(i = 0; i < N; i++){
         state[i] = THINKING;
@@ -32,8 +40,6 @@ void phylos(){
     char *mutexName = "mutex";
     mutex =semOpen(mutexName, 1);
 
-    //int execve(void* entryPoint, char * const argv[]);
-    //create the processes for each philosopher
     char foreground[2] = "0";
     char *args[4];
 
@@ -52,12 +58,10 @@ void phylos(){
         switch (c)
         {
         case 'a':
-            // addPhilo();
-            printf("add\n");
+            addPhilo();
             break;
         case 'r':
-            printf("remove\n");
-            // removePhilo();
+            removePhilo();
             break;
         case 'q':
             printf("quit\n");
@@ -71,9 +75,40 @@ void phylos(){
     return;
 }
 
+void addPhilo(){
+    N++;
+    state = (int *)realloc(state, N*sizeof(int));
+    s = (sem_t *)realloc(s, N*sizeof(sem_t));
+    philosophersPID = (pid_t *)realloc(philosophersPID, N*sizeof(pid_t));
+    state[N-1] = THINKING;
+    char name[2]= "0";
+    decToStr(name, N-1);
+    s[N-1]= semOpen(name, 0);
+    char foreground[2] = "0";
+    char *args[4];
+    args[0] = "philosopher";
+    args[1] = foreground;
+    args[3]= NULL;
+    args[2] = (char *)malloc(2*sizeof(char));
+    decToStr(args[2], N-1);
+    philosophersPID[N-1] = execve(&philosopher, args);
+}
+
+void removePhilo(){
+    if(N>1){
+        N--;
+        kill(philosophersPID[N]);
+        state = (int *)realloc(state, N*sizeof(int));
+        s = (sem_t *)realloc(s, N*sizeof(sem_t));
+        philosophersPID = (pid_t *)realloc(philosophersPID, N*sizeof(pid_t));
+    }
+    else{
+        printf("Can't remove more philosophers\n");
+    }
+}
+
 void philosopher(char argc, char **argv){
     int i = strToNum(argv[0], 1);
-    int j;
 
     while(1){
         think(i);
@@ -94,13 +129,13 @@ void take_forks(int i){
 void put_forks(int i){
     semWait(mutex);
     state[i] = THINKING;
-    test(LEFT);
-    test(RIGHT);
+    test(left(i));
+    test(right(i));
     semPost(mutex);
 }
 
 void test(int i){
-    if(state[i] == HUNGRY && state[LEFT] != EATING && state[RIGHT] != EATING){
+    if(state[i] == HUNGRY && state[left(i)] != EATING && state[right(i)] != EATING){
         state[i] = EATING;
         semPost(s[i]);
     }
@@ -110,7 +145,7 @@ void eat(int phil)
 {
     //long for so it takes a while
     int i=0;
-    while(i<100000000){
+    while(i<5000000){
         i++;
     }
 	printState();
@@ -120,7 +155,7 @@ void think(int phil)
 {
     //long for so it takes a while
     int i=0;
-    while(i<100000000){
+    while(i<5000000){
         i++;
     }
 }
@@ -142,4 +177,12 @@ void printState(){
         }
     }
     printf("\n");
+}
+
+int left(int i){
+    return (i + N - 1) % N;
+}
+
+int right(int i){
+    return (i + 1) % N;
 }

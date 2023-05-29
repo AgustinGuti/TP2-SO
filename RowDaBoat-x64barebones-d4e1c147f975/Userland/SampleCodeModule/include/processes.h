@@ -13,5 +13,6 @@ void yield();
 void exit(int value);
 void blockProcess(int pid);
 pid_t waitpid(pid_t pid);
+void kill(int pid);
 
 #endif

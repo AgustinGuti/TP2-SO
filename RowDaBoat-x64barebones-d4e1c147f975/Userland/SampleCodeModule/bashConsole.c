@@ -34,10 +34,11 @@ char callNice(uint8_t argumentQty, char arguments[argumentQty]);
 char callFork(uint8_t argumentQty, char arguments[argumentQty]);
 char callTestMM(uint8_t argumentQty, char arguments[argumentQty]);
 char callPhylo(uint8_t argumentQty, char arguments[argumentQty]);
-#define COMMAND_QTY 22
+char callRealloc(uint8_t argumentQty, char arguments[argumentQty]);
+#define COMMAND_QTY 23
 
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo};
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "realloc"};
+static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callRealloc};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -149,7 +150,7 @@ char setFontSize(uint8_t argQty, char arguments[argQty], uint8_t rewrite)
     }
     else
     {
-        int num = strToNum(arguments+1, strlen(arguments+1));
+        int num = strToNum(arguments + 1, strlen(arguments + 1));
         if (num > 4 || num < 1)
         {
             printf("Ingrese una fuente entre 1 y 4\n");
@@ -255,7 +256,7 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
         for (int i = 0; i < 1; i++)
         {
             pidA = execve(&processA, args);
-            //waitpid(pidA);
+            // waitpid(pidA);
         }
     }
     else
@@ -267,10 +268,10 @@ char callExec(uint8_t argumentQty, char arguments[argumentQty])
 
 char callFree(uint8_t argumentQty, char arguments[argumentQty])
 {
-    if (argumentQty == 1 && isHexaNumber(arguments+1))
+    if (argumentQty == 1 && isHexaNumber(arguments + 1))
     {
         char flag = 0;
-        uint64_t ptr = hexaStrToNum(arguments+1, strlen(arguments+1), &flag);
+        uint64_t ptr = hexaStrToNum(arguments + 1, strlen(arguments + 1), &flag);
         if (flag == 1)
         {
             printerr("Numero muy grande. Overflow\n", 0);
@@ -316,6 +317,58 @@ char callMalloc(uint8_t argumentQty, char arguments[argumentQty])
         printf("Argumento invalido para malloc\n");
     }
     return 0;
+}
+
+char callRealloc(uint8_t argumentQty, char arguments[argumentQty])
+{
+    if (argumentQty != 2 || !isHexaNumberWithSpaceEnd(arguments + 1))
+    {
+        printf("Argumento invalido para realloc\n");
+        return 0;
+    }
+    char *arg1 = malloc(15);
+    int i = 1;
+    while (arguments[i] != ' ' && arguments[i] != 0)
+    {
+        arg1[i-1] = arguments[i];
+        i++;
+    }
+    arg1[i-1] = 0;
+    i++;
+    if(!isHexaNumberWithSpaceEnd(arguments + i)){
+        printf("Argumento invalido para realloc\n");
+        return 0;
+    }
+    char *arg2 = malloc(15);
+    int j = 0;
+    while (arguments[i] != ' ' && arguments[i] != 0)
+    {
+        arg2[j] = arguments[i];
+        i++;
+        j++;
+    }
+    arg2[j] = 0;
+    char flag = 0;
+    uint64_t *ptr = (uint64_t *)hexaStrToNum(arg1, strlenWithSpaceEnd(arg1), &flag);
+    uint64_t newSize = (uint64_t)hexaStrToNum(arg2, strlen(arg2), &flag);
+    free(arg1);
+    free(arg2);
+    if (flag == 1)
+    {
+        printerr("Numero muy grande. Overflow\n", 0);
+    }
+    else
+    {
+        uint64_t *newPtr = realloc(ptr, newSize);
+        if (newPtr == NULL)
+        {
+            printf("No se reservo memoria\n");
+        }
+        else
+        {
+            printf("Se reservo memoria en la direccion %x\n", newPtr);
+        }
+    }
 }
 
 char callKill(uint8_t argumentQty, char arguments[argumentQty])
@@ -418,6 +471,8 @@ char callNice(uint8_t argumentQty, char arguments[argumentQty])
         arg2[j] = 0;
         int pid = strToNum(arg1, strlen(arg1));
         int priority = strToNum(arg2, strlen(arg2));
+        free(arg1);
+        free(arg2);
         int returnValue = _sys_nice(pid, priority);
         if (returnValue < 0)
         {
@@ -469,7 +524,6 @@ char callPhylo(uint8_t argumentQty, char arguments[argumentQty])
     }
     return 0;
 }
-
 
 char callTestMM(uint8_t argumentQty, char arguments[argumentQty])
 {
