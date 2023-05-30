@@ -1,11 +1,7 @@
 #include <processes.h>
 
-int fork(){
-    return _sys_fork();
-}
-
-int execve(void* entryPoint, char *const argv[]){
-    return _sys_execve(entryPoint, argv);
+int execve(void* entryPoint, Pipe *pipes, char pipeQty, char *const argv[]){
+    return _sys_execve(entryPoint, pipes, pipeQty, argv);
 }
 
 void printProcesses(){

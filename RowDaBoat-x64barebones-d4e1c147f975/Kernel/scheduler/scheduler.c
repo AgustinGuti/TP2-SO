@@ -48,10 +48,11 @@ void initScheduler()
     scheduler->itProcessesToFree = iterator(scheduler->processesToFree);
     char *argv[2] = {"Kernel", NULL};
     // int kernelPID = createProcess("Kernel", NULL, 1, 0, argv);
-    scheduler->currentProcess = createProcess("Kernel", NULL, 1, 0, argv, &startWrapper, getpid());
+
+    scheduler->currentProcess = createProcess("Kernel", NULL, 1, 0, argv, &startWrapper, getpid(), NULL, 0);
     insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
     argv[0] = "Empty";
-    scheduler->empty = createProcess("Empty", &emptyProcess, 1, 0, argv, &startWrapper, getpid());
+    scheduler->empty = createProcess("Empty", &emptyProcess, 1, 0, argv, &startWrapper, getpid(), NULL, 0);
     // scheduler->currentProcess = getProcess(kernelPID);
     scheduler->quantum = BURST_TIME;
     scheduler->quantumCounter = BURST_TIME - 1;
@@ -139,11 +140,11 @@ Process getNextProcess()
     return scheduler->empty;
 }
 
-pid_t execve(void *entryPoint, char *const argv[])
+pid_t execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[])
 {
     int foreground = strToNum(argv[1], 1);
 
-    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, foreground, &argv[2] , &startWrapper, getpid());
+    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, foreground, &argv[2] , &startWrapper, getpid(), pipes, pipeQty);
     if(foreground){
         int currentForeground = scheduler->currentProcess->foreground;
         scheduler->currentProcess->foreground = 0;    
@@ -153,12 +154,6 @@ pid_t execve(void *entryPoint, char *const argv[])
     }else{
         insert(scheduler->queue[process->priority], process);
     }
-    return process->pid;
-}
-
-pid_t fork(){
-    Process process = dupProcess(scheduler->currentProcess);
-    insert(scheduler->queue[process->priority], process);
     return process->pid;
 }
 

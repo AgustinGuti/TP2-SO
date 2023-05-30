@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "functions.h"
 #include "process.h"
+#include "pipes.h"
 
 #define STACK_SIZE 4096
 #define BURST_TIME 5
@@ -18,8 +19,7 @@ typedef int pid_t;
 
 void initScheduler();
 void *schedule(void *stackPointer);
-pid_t execve(void *entryPoint, char *const argv[]);
-pid_t fork();
+pid_t execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[]);
 void printProcesses();
 pid_t getpid();
 void yield();

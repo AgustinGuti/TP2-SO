@@ -68,8 +68,8 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i] = execve(&my_process_inc, argvDec);
-    pids[i + TOTAL_PAIR_PROCESSES] = execve(&my_process_inc, argvInc);
+    pids[i] = execve(&my_process_inc, NULL, 0, argvDec);
+    pids[i + TOTAL_PAIR_PROCESSES] = execve(&my_process_inc, NULL, 0, argvInc);
   }
 
 //   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {

@@ -7,13 +7,16 @@
 #include <phylos.h>
 
 #define MAX_ARGS 10
+#define MAX_ARG_LENGTH 100
+#define MAX_COMMAND_NAME_LENGTH 50
 
 extern void zeroDivision();
 extern void displayTime();
 char parseAndExecuteCommands(uint8_t *str, int length);
 void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length);
+char getCommandIndex(char *commandName);
 
-char help(uint8_t argumentQty, const char** arguments);
+char help(char argc, char **argv);
 char clean(uint8_t argumentQty, const char** arguments);
 char startTron(uint8_t argumentQty, const char** arguments);
 char callMemoryDump(uint8_t argumentQty, const char** arguments);
@@ -32,17 +35,18 @@ char callGetMemoryStatus(uint8_t argumentQty, const char** arguments);
 char callBlock(uint8_t argumentQty, const char** arguments);
 char callKill(uint8_t argumentQty, const char** arguments);
 char callNice(uint8_t argumentQty, const char** arguments);
-char callFork(uint8_t argumentQty, const char** arguments);
 char callTestMM(uint8_t argumentQty, const char** arguments);
-char callPhylo(uint8_t argumentQty, const char** arguments);
 char callCat(uint8_t argumentQty, const char** arguments);
 char callTestSync(uint8_t argumentQty, char **arguments);
 
 
 #define COMMAND_QTY 24
 
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "cat", "test-sync"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callCat, &callTestSync};
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "test-mm", "phylo", "cat", "test-sync"};
+static char (*commands[])(uint8_t, char *) = {&help, &cleanScreen, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callTestMM, &phylos, &cat, &callTestSync};
+static char executableCommands[COMMAND_QTY] = { 1,      1,      1,      1,              1,          1,                  1,                  0,              1,              0,          1,                0,           0,       0,              1,                      1,              0,          0,        0,           1,          1,        1,          1};
+static char argMaxQtys[COMMAND_QTY] = {          1,     0,      0,      1,              0,          0,                  0,                  1,              0,              0,          0,                1,           1,       0,              0,                      0,              1,          1,        1,           1,          0,        0,          1};    
+static char argMinQtys[COMMAND_QTY] = {          0,     0,      0,      1,              0,          0,                  0,                  1,              0,              0,          0,                1,           1,       0,              0,                      0,              1,          1,        1,           1,          0,        0,          1};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -105,7 +109,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     char pipePos = -1;
     for (int i = 0; i < length; i++)
     {
-        if (str[i] == '|')
+        if (str[i] == '_')
         {
             pipePos = i;
             break;
@@ -114,8 +118,60 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     if (pipePos == -1)
     {
         // No pipe, execute a single command
-        return processCommand(str, length);
+        char command[length + 1];
+        int command1Length = length;
+        char arguments1[MAX_ARGS][MAX_ARG_LENGTH + 1];
+        int argumentQty1 = 0;
+        char command1Name[command1Length + 1][MAX_COMMAND_NAME_LENGTH + 1];
+        memcpy(command, str, command1Length);
+        command[command1Length] = '\0';
+
+        getCommandAndArgs(command, arguments1, &argumentQty1, command1Name, command1Length + 1);
+        int command1Index = getCommandIndex(command1Name);
+        if (command1Index == -1)
+        {
+            return 0;
+        }
+
+        char *argv1[MAX_ARGS + 2];
+        for(int i = 0; i < MAX_ARGS + 2; i++){
+            argv1[i] = malloc(MAX_ARG_LENGTH + 1);
+        }
+        argv1[0] = commandNames[command1Index];
+        if (executableCommands[command1Index]){
+            int hasBackground = 0;
+            if (argumentQty1 > 0){
+                if (strcmp(arguments1[argumentQty1-1], "&") == 0){
+                    hasBackground = 1;
+                    strcpy(arguments1[1], "0");
+                }else{
+                    strcpy(arguments1[1], "1");
+                }
+            }else{
+                strcpy(arguments1[1], "1");
+            }
+            if (argumentQty1 - hasBackground > argMaxQtys[command1Index] || argumentQty1 + hasBackground < argMinQtys[command1Index]){
+                printf("Cantidad de argumentos invalida para %s\n", command1Name);
+                return 0;
+            }
+
+            for (int i = 0; i < argumentQty1; i++){
+                strcpy(argv1[i + 2], arguments1[i]);
+            }
+            argv1[argumentQty1 + 2] = NULL;
+
+            execve(commands[command1Index], NULL, 0, argv1);
+        }else{
+            if (argumentQty1 > argMaxQtys[command1Index] || argumentQty1 < argMinQtys[command1Index]){
+                printf("Cantidad de argumentos invalida para %s\n", command1Name);
+                return 0;
+            }
+            commands[command1Index](argumentQty1, arguments1);
+        }
+
+        return 0;
     }
+
 
     // Split the string at the pipe position
     int command1Length = pipePos;
@@ -125,54 +181,116 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     char command2[command2Length + 1];
     memcpy(command1, str, command1Length);
     command1[command1Length] = '\0';
-    memcpy(command2, pipePos + 1, command2Length);
+    memcpy(command2, str + pipePos + 1, command2Length);
     command2[command2Length] = '\0';
 
-    // Process command 1
-
-    char* arguments1[MAX_ARGS];
+    char arguments1[MAX_ARGS][MAX_ARG_LENGTH];
     int argumentQty1 = 0;
-    char *command1Name[command1Length + 1];
+    char command1Name[command1Length + 1][MAX_COMMAND_NAME_LENGTH + 1];
     getCommandAndArgs(command1, arguments1, &argumentQty1, command1Name, command1Length + 1);
+    int command1Index = getCommandIndex(command1Name);
+    if (argumentQty1 > argMaxQtys[command1Index] || argumentQty1 < argMinQtys[command1Index]){
+        printf("Cantidad de argumentos invalida para %s\n", command1Name);
+        return 0;
+    }
 
-    char* arguments2[MAX_ARGS];
+    char arguments2[MAX_ARGS][MAX_ARG_LENGTH];
     int argumentQty2 = 0;
-    char *command2Name[command2Length + 1];
+    char command2Name[command2Length + 1][MAX_COMMAND_NAME_LENGTH + 1];
     getCommandAndArgs(command2, arguments2, &argumentQty2, command2Name, command2Length + 1);
-    
-    // for (int i = 0; i < COMMAND_QTY; i++)
-    // {
-    //     if (strcmp(command1Name, commandNames[i]) == 0)
-    //     {
-    //         return (*commands[i])(argumentQty1, (const char**)arguments1);
-    //     }
-    // }
-    // // Process command 2
-    // for (int i = 0; i < COMMAND_QTY; i++)
-    // {
-    //     if (strcmp(command2Name, commandNames[i]) == 0)
-    //     {
-    //         return (*commands[i])(argumentQty2, (const char**)arguments2);
-    //     }
-    // }
+    printf("Pipe found\n");
+    int command2Index = getCommandIndex(command2Name);
+    if (argumentQty2 > argMaxQtys[command2Index] || argumentQty2 < argMinQtys[command2Index]){
+        printf("Cantidad de argumentos invalida para %s\n", command2Name);
+        return 0;
+    }
 
+
+    if(command1Index == -1 || command2Index == -1){
+        return 0;
+    }
+
+    Pipe connectingPipe = NULL;
+
+    if (executableCommands[command1Index] == 1 && executableCommands[command2Index] == 1){
+        connectingPipe = pipe(NULL, NULL);
+        if (connectingPipe == NULL)
+        {
+            printf("Error al crear el pipe\n");
+            return 0;
+        }
+    }
+
+    char *argv1[MAX_ARGS + 2];
+    for (int i = 0; i < MAX_ARGS + 2; i++){
+        argv1[i] = malloc(MAX_ARG_LENGTH + 1);
+    }
+    strcpy(argv1[0], command1Name);
+    if (strcmp(arguments1[argumentQty1-1], "&") == 0){
+        strcpy(argv1[1], "0");
+    }else{
+        strcpy(argv1[1], "1");
+    }
+    for (int i = 0; i < argumentQty1; i++){
+        strcpy(argv1[i + 2], arguments1[i]);
+    }
+    argv1[argumentQty1 + 2] = NULL;
+
+    char *argv2[MAX_ARGS + 2];
+    for (int i = 0; i < MAX_ARGS + 2; i++){
+        argv2[i] = malloc(MAX_ARG_LENGTH + 1);
+    }
+    strcpy(argv2[0], command2Name);
+    if (strcmp(arguments2[argumentQty2-1], "&") == 0){
+        strcpy(argv2[1], "0");
+    }else{
+        strcpy(argv2[1], "1");
+    }
+    for (int i = 0; i < argumentQty2; i++){
+        strcpy(argv2[i + 2], arguments2[i]);
+    }
+    argv2[argumentQty2 + 2] = NULL;
+
+    Pipe pipes1[2] = {NULL, connectingPipe};
+    Pipe pipes2[2] = {connectingPipe, NULL};
+    char pipeQty = 2;
+
+    execve(commands[command1Index], pipes1, pipeQty, argv1);
+    execve(commands[command2Index], pipes2, pipeQty, argv2);
     return 0;
+}
+
+char getCommandIndex(char *commandName){
+    int commandIndex;
+    for (commandIndex = 0; commandIndex < COMMAND_QTY; commandIndex++){
+        if (strcmp(commandName, commandNames[commandIndex]) == 0){
+            break;
+        }
+    }
+    if (commandIndex == COMMAND_QTY){
+        printf("Comando no encontrado. Utilize 'help' para ver los comandos disponibles\n");
+        return -1;
+    }
+    return commandIndex;
 }
 
 void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length)
 {
+    printf("Getting command and args %s\n", str);
     int i = 0;
     while (str[i] == ' ')
     {
         i++;
     }
+    int offset = i;
     int cmd_idx = 0;
     while (str[i] != ' ' && str[i] != '\0')
     {
-        command[cmd_idx++] = str[i];
         i++;
+        cmd_idx++;
     }
-    command[cmd_idx] = '\0';
+    memcpy(command, str+offset, cmd_idx);
+    command[cmd_idx+1] = '\0';
     int argIdx = 0;
     *argQty = 0;
     int argLen = 0;
@@ -180,9 +298,12 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
     {
         if (str[i] == ' ')
         {
-            args[*argQty][argLen] = '\0';
-            (*argQty)++;
-            argLen = 0;
+            if (argLen > 0)
+            {
+                args[*argQty][argLen] = '\0';
+                (*argQty)++;
+                argLen = 0;
+            }
         }
         else
         {
@@ -190,8 +311,10 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
         }
         i++;
     }
-    args[*argQty][argLen] = '\0';
- //   (*argQty)++;
+    
+    if (argLen > 0)
+        (*argQty)++;
+    args[*argQty][argLen] = '\0';    
 }
 
 // Returns exit status
@@ -213,9 +336,29 @@ char processCommand(uint8_t *str, int length)
     return 0;
 }
 
-char help(uint8_t argumentQty, const char** arguments)
+char callTron(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty == 0)
+    {
+        printf("No se puede llamar a tron sin argumentos\n");
+        return 0;
+    }
+    else if (argumentQty > 1)
+    {
+        printf("Demasiados argumentos para tron\n");
+        return 0;
+    }
+    else
+    {
+        printf("Llamando a %s...\n", arguments[0]);
+        return 0;
+    }
+}
+
+char help(char argc, char **argv)
+{
+    printf("Help\n");
+    if (argc == 0)
     {
         printf("Los comandos disponibles son:\n");
         for (int i = 0; i < COMMAND_QTY; i++)
@@ -223,18 +366,18 @@ char help(uint8_t argumentQty, const char** arguments)
             printf("%s\n", commandNames[i]);
         }
     }
-    else if (argumentQty > 1)
+    else if (argc > 1)
     {
         printf("Demasiados argumentos para help\n");
     }
     else
     {
-        if (strcmp(arguments[0], "please") == 0)
+        if (strcmp(argv[0], "please") == 0)
         {
             printf("No.\n");
             return 0;
         }
-        else if (strcmp(arguments[0], "all") == 0)
+        else if (strcmp(argv[0], "all") == 0)
         {
             for (int i = 0; i < COMMAND_QTY; i++)
             {
@@ -246,7 +389,7 @@ char help(uint8_t argumentQty, const char** arguments)
         {
             for (int i = 0; i < COMMAND_QTY; i++)
             {
-                if (strcmp(arguments[0], commandNames[i]) == 0)
+                if (strcmp(argv[0], commandNames[i]) == 0)
                 {
                     printf("%s\n", commandDescriptions[i]);
                     return 0;
@@ -306,7 +449,7 @@ char callExec(uint8_t argumentQty, const char** arguments)
         pid_t pidA;
         for (int i = 0; i < 2; i++)
         {
-            pidA = execve(&processA, args);
+            pidA = execve(&processA, NULL, 0, args);
         }
     }
     else
@@ -465,32 +608,6 @@ char callNice(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callFork(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para fork\n");
-    }
-    else
-    {
-        fork();
-    }
-    return 0;
-}
-
-char callPhylo(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para phylo\n");
-    }
-    else
-    {
-        phylos();
-    }
-    return 0;
-}
-
 char callCat(uint8_t argumentQty, const char** arguments)
 {
     char foreground[2] = "1";
@@ -508,7 +625,7 @@ char callCat(uint8_t argumentQty, const char** arguments)
     }
     char *args[3] = {"cat", foreground, NULL};
     pid_t pid;
-    pid = execve(&cat, args);
+    pid = execve(&cat, NULL, 0, args);
     return 0;
 }
 

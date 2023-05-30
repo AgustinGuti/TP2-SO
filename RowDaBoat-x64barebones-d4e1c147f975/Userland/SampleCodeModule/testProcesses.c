@@ -35,7 +35,7 @@ void processB() {
     pid_t pidC;
     for (int i = 0; i < 2; i++)
     {
-        pidC = execve(&processC, args);
+        pidC = execve(&processC, NULL, 0, args);
         waitpid(pidC);
     }
     printf("In B\n");

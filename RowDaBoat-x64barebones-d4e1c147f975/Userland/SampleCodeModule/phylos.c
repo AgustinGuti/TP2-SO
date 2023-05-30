@@ -43,7 +43,7 @@ void phylos(){
     args[2] = (char *)malloc(2*sizeof(char));
     for(i = 0; i < N; i++){
         decToStr(args[2], i);    
-        philosophersPID[i] = execve(&philosopher, args);
+        philosophersPID[i] = execve(&philosopher, NULL, 0, args);
     }
     int exit=0;
     while (!exit)

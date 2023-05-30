@@ -223,8 +223,8 @@ _sys_free:
     pop rbp
     ret
 
-;int sys_fork();
-_sys_fork:
+;void sys_kill(int pid);
+_sys_kill:
     push rbp
     mov rbp, rsp
     
@@ -367,24 +367,12 @@ _sys_getMemoryStatus:
     pop rbp
     ret
 
-;void sys_kill(int pid);
-_sys_kill:
-    push rbp
-    mov rbp, rsp
-    
-    mov rax, 28     ;id 
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
 ;void sys_nice(int pid, int priority);
 _sys_nice:
     push rbp
     mov rbp, rsp
     
-    mov rax, 29     ;id 
+    mov rax, 28     ;id 
     int 80h
 
     mov rsp, rbp
@@ -396,7 +384,7 @@ _sys_waitpid:
     push rbp
     mov rbp, rsp
     
-    mov rax, 30     ;id 
+    mov rax, 39     ;id 
     int 80h
 
     mov rsp, rbp
@@ -407,7 +395,7 @@ _sys_openProcessPipe:
     push rbp
     mov rbp, rsp
     
-    mov rax, 31     ;id 
+    mov rax, 30     ;id 
     int 80h
 
     mov rsp, rbp
@@ -418,7 +406,7 @@ _sys_closeProcessPipe:
     push rbp
     mov rbp, rsp
     
-    mov rax, 32    ;id 
+    mov rax, 31    ;id 
     int 80h
 
     mov rsp, rbp

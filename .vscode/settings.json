@@ -39,7 +39,8 @@
         "clockdriver.h": "c",
         "keyboard.h": "c",
         "process.h": "c",
-        "pipes.h": "c"
+        "pipes.h": "c",
+        "bashconsole.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -11,7 +11,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 33 // functions quantity in sysCalls[]
+#define READY_CALLS 32 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -31,8 +31,7 @@ uint8_t sys_getScreenBpp();
 char sys_getSavedRegisters(uint64_t registers[REGISTER_QTY]);
 void *sys_malloc(uint64_t size);
 uint64_t sys_free(void *ptr);
-int sys_fork();
-int sys_execve(void *entryPoint, char *const argv[]);
+int sys_execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[]);
 void sys_printProcesses();
 void sys_exit(int status);
 void sys_yield();
@@ -66,7 +65,7 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_getSavedRegisters,
     (uint64_t)&sys_malloc,
     (uint64_t)&sys_free,
-    (uint64_t)&sys_fork,
+    (uint64_t)&sys_kill,
     (uint64_t)sys_execve,
     (uint64_t)&sys_printProcesses,
     (uint64_t)&sys_exit,
@@ -78,11 +77,11 @@ static uint64_t sysCalls[] = {
     (uint64_t)&semWait,
     (uint64_t)&semPost,
     (uint64_t)&sys_getMemoryStatus,
-    (uint64_t)&sys_kill,
     (uint64_t)&sys_nice,
     (uint64_t)&sys_waitpid,
     (uint64_t)&sys_openProcessPipe,
-    (uint64_t)&sys_closeProcessPipe
+    (uint64_t)&sys_closeProcessPipe,
+
 };
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
@@ -124,14 +123,9 @@ uint64_t sys_free(void *ptr)
     return 0;
 }
 
-pid_t sys_fork()
+int sys_execve(void* entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
 {
-    return fork();
-}
-
-int sys_execve(void *entryPoint, char *const argv[])
-{
-    return execve(entryPoint, argv);
+    return execve(entryPoint, pipes, pipeQty, argv);
 }
 
 void sys_kill(int pid)
