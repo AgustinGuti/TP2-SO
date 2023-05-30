@@ -5,9 +5,9 @@
 #define THINKING 0
 #define HUNGRY 1
 #define EATING 2
-#define BLOCK 5
+#define BLOCK 100
 
-int N = BLOCK;
+int N = 0;
 int currentMax = BLOCK;
 int *state;
 int processToKill=-1;
@@ -61,19 +61,8 @@ void phylos(){
     }
 
 
-    char foreground[2] = "0";
-    char *args[4];
-
-    args[0] = malloc(12*sizeof(char));
-    strcpy(args[0], "philosopher");
-    args[1] = malloc(2*sizeof(char));
-    strcpy(args[1], foreground);
-    args[2] = malloc(3*sizeof(char));
-    args[3]= NULL;
-
-    for(i = 0; i < N; i++){
-        decToStr(args[2], i);    
-        philosophersPID[i] = execve(&philosopher, args);
+    for (int i = 0; i < 5; i++){
+        addPhilo();
     }
 
     int exit=0;
@@ -143,7 +132,7 @@ void addPhilo(){
 
 void removePhilo(){
     semWait(changingQtyMutex);
-    if (N>2){
+    if (N > 2){
         put_forks(N-1);
         kill(philosophersPID[N-1]);
         semClose(forks[N-1]);
@@ -158,7 +147,6 @@ void removePhilo(){
 
 void philosopher(char argc, char **argv){
     int i = strToNum(argv[0], 1);
-
     while(1){
         think(i);
         take_forks(i);
@@ -188,11 +176,11 @@ void take_forks(int i){
 }
 
 void put_forks(int i){
+    semPost(forks[i]);
+    semPost(forks[right(i)]);
     semWait(mutex);
     state[i] = THINKING;
     semPost(mutex);
-    semPost(forks[i]);
-    semPost(forks[right(i)]);
 }
 
 
@@ -216,6 +204,7 @@ void think(int phil)
 }
 
 void printState(){
+    semWait(changingQtyMutex);
     int i;
     for(i = 0; i < N; i++){
         switch (state[i])
@@ -224,7 +213,7 @@ void printState(){
             printf(". ");
             break;
         case HUNGRY:
-            printf(". ");
+            printf("- ");
             break;
         case EATING:
             printf("E ");
@@ -232,12 +221,15 @@ void printState(){
         }
     }
     printf("\n");
+  // printProcesses();
+    
+    semPost(changingQtyMutex);
 }
 
 int left(int i){
-    return (i + N - 1) % N;
+    return (i + 1) % N;
 }
 
 int right(int i){
-    return (i + 1) % N;
+    return (i - 1 + N) % N;
 }

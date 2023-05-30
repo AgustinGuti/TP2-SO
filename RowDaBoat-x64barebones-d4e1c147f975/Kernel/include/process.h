@@ -46,6 +46,7 @@ typedef struct ProcessCDT
     pid_t parentPID;
     pid_t waitingForPID;
     sem_t waitingSem;
+
 } ProcessCDT;
 
 
