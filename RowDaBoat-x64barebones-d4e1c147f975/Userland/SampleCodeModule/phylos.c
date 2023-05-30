@@ -44,23 +44,19 @@ void phylos(){
         }
        
     }
-    char *mutexName = "mutex";
     
-    if((mutex = semOpen(mutexName, 1)) == NULL){
-        printf("Error opening semaphore %s\n", mutexName);
+    if((mutex = semOpen(NULL, 1)) == NULL){
+        printf("Error opening semaphore mutex\n");
         return;
     }
-    
-    char *processToKillMutexName = "processToKillMutex";
-    
-    if((processToKillMutex = semOpen(processToKillMutexName, 1)) == NULL){
-        printf("Error opening semaphore %s\n", processToKillMutexName);
+        
+    if((processToKillMutex = semOpen(NULL, 1)) == NULL){
+        printf("Error opening semaphore processToKillMutexName\n");
         return;
     }
 
-    char *changingQtyName = "changingQty";
-    if((changingQtyMutex = semOpen(changingQtyName, 1)) == NULL){
-        printf("Error opening semaphore %s\n", changingQtyName);
+    if((changingQtyMutex = semOpen(NULL, 1)) == NULL){
+        printf("Error opening semaphore changingQty\n");
         return;
     }
 
@@ -68,14 +64,18 @@ void phylos(){
     char foreground[2] = "0";
     char *args[4];
 
-    args[0] = "philosopher";
-    args[1] = foreground;
+    args[0] = malloc(12*sizeof(char));
+    strcpy(args[0], "philosopher");
+    args[1] = malloc(2*sizeof(char));
+    strcpy(args[1], foreground);
+    args[2] = malloc(3*sizeof(char));
     args[3]= NULL;
-    args[2] = (char *)malloc(2*sizeof(char));
+
     for(i = 0; i < N; i++){
         decToStr(args[2], i);    
         philosophersPID[i] = execve(&philosopher, args);
     }
+
     int exit=0;
     while (!exit)
     {
@@ -123,48 +123,43 @@ void addPhilo(){
         philosophersPID = (pid_t *)realloc(philosophersPID, currentMax*sizeof(pid_t));
     }
     state[N-1] = THINKING;
-    char name[2]= "0";
-    decToStr(name, N-1);
-    if((forks[N-1]= semOpen(name, 1)) == NULL){
-        printf("Error opening semaphore %s\n", name);
+    if((forks[N-1] = semOpen(NULL, 1)) == NULL){
+        printf("Error opening semaphore %d\n", N-1);
         return;
     }
     char foreground[2] = "0";
     char *args[4];
-    args[0] = "philosopher";
-    args[1] = foreground;
+
+    args[0] = malloc(12*sizeof(char));
+    strcpy(args[0], "philosopher");
+    args[1] = malloc(2*sizeof(char));
+    strcpy(args[1], foreground);
+    args[2] = malloc(3*sizeof(char));
     args[3]= NULL;
-    args[2] = (char *)malloc(2*sizeof(char));
     decToStr(args[2], N-1);
     philosophersPID[N-1] = execve(&philosopher, args);
     semPost(changingQtyMutex);
 }
 
 void removePhilo(){
-    if(N>2){
-        semWait(changingQtyMutex);
-        semWait(processToKillMutex);
-        processToKill = N-1;
+    semWait(changingQtyMutex);
+    if (N>2){
+        put_forks(N-1);
+        kill(philosophersPID[N-1]);
+        semClose(forks[N-1]);
         N--;
-        semPost(processToKillMutex);
-    }
-    else{
+        semPost(changingQtyMutex);
+    }else{
         printf("Can't remove more philosophers\n");
     }
+    semPost(changingQtyMutex);
+
 }
 
 void philosopher(char argc, char **argv){
     int i = strToNum(argv[0], 1);
 
     while(1){
-        if(i==processToKill){
-            semWait(processToKillMutex);
-            processToKill=-1;
-            semPost(processToKillMutex);
-            semClose(forks[i]);
-            semPost(changingQtyMutex);
-            return;
-        }
         think(i);
         take_forks(i);
         eat(i);
@@ -176,7 +171,6 @@ void take_forks(int i){
     semWait(mutex);
     state[i] = HUNGRY;
     semPost(mutex);
-
     if(i%2==0){
         semWait(forks[i]);
         semWait(forks[right(i)]);
