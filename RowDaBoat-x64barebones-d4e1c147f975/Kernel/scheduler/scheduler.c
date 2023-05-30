@@ -27,6 +27,7 @@ Process getProcess(pid_t pid);
 void * changeProcess(void *rsp);
 
 static char ready = 0;
+static uint64_t counter = 0; 
 
 void initScheduler()
 {
@@ -89,6 +90,14 @@ void *schedule(void *rsp)
                 else {
                     moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
+            }
+            counter++;
+            if (counter%MAX_PRIORITY != MAX_PRIORITY - 1){
+                Process auxNode = removeFirst(scheduler->queue[counter%MAX_PRIORITY]);
+                if (auxNode != NULL){
+                    insert(scheduler->queue[MAX_PRIORITY - 1], auxNode);
+                }
+                auxNode->priority = MAX_PRIORITY - 1;
             }
             void* newRsp = changeProcess(rsp);
             return newRsp;

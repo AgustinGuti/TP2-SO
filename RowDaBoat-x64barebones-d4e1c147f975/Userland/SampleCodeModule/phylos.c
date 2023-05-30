@@ -221,7 +221,6 @@ void printState(){
         }
     }
     printf("\n");
-  // printProcesses();
     
     semPost(changingQtyMutex);
 }
