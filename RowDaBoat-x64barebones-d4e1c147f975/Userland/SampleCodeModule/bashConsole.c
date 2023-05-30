@@ -37,12 +37,12 @@ char callTestMM(uint8_t argumentQty, const char** arguments);
 char callPhylo(uint8_t argumentQty, const char** arguments);
 char callCat(uint8_t argumentQty, const char** arguments);
 char callTestSync(uint8_t argumentQty, char **arguments);
+char callWC(uint8_t argumentQty, const char** arguments);
 
+#define COMMAND_QTY 25
 
-#define COMMAND_QTY 24
-
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "cat", "test-sync"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callCat, &callTestSync};
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "cat", "test-sync", "wc"};
+static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callCat, &callTestSync, &callWC};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -511,6 +511,28 @@ char callCat(uint8_t argumentQty, const char** arguments)
     pid = execve(&cat, args);
     return 0;
 }
+
+char callWC(uint8_t argumentQty, const char** arguments)
+{
+    char foreground[2] = "1";
+    if (argumentQty == 1)
+    {
+        if (arguments[1] == '&')
+        {
+            strcpy(foreground, "0");
+        }
+        else
+        {
+            printf("Argumento invalido para wc\n");
+            return 0;
+        }
+    }
+    char *args[3] = {"wc", foreground, NULL};
+    pid_t pid;
+    pid = execve(&wc, args);
+    return 0;
+}
+
 
 char callTestMM(uint8_t argumentQty, const char** arguments)
 {

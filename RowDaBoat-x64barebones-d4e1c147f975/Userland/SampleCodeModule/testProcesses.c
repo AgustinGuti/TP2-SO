@@ -57,3 +57,15 @@ void cat() {
         printf("%c", c);
     }
 }
+
+void wc() {
+    int count = 1;
+    char c;
+    while ((c = getChar()) != EOF) {
+        printf("%c", c);
+        if (c == '\n') {
+            count++;
+        }
+    }
+    printf("\nLineas: %d\n", count);
+}

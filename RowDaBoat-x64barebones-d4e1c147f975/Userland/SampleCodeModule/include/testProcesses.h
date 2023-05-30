@@ -12,3 +12,5 @@ void processB();
 void processC();
 
 void cat();
+
+void wc();
