@@ -22,10 +22,12 @@ int processA() {
     // }
     // semPost(sem);
     // semClose(sem);
-    for(int i= 0; i < 1000000000; i++){
-        *a += 1;
-    }
-    printf("Process A - PID: %d : %d\n", getpid(), *a + 1);
+    // for(int i= 0; i < 1000000000; i++){
+    //     *a += 1;
+    // }
+    // printf("Process A - PID: %d : %d\n", getpid(), *a + 1);
+
+    printf("%d\n", -1);
     return 0;
 }
 
@@ -50,8 +52,8 @@ void processC() {
 
 void cat() {
     char buffer[2];
-    while(1){
-        _sys_read(0,buffer, 1);
-        printf("%c", buffer[0]);
+    char c;
+    while((c=getChar()) != EOF){
+        printf("%c", c);
     }
 }
