@@ -82,7 +82,7 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_kill,
     (uint64_t)&sys_nice,
     (uint64_t)&sys_waitpid,
-    (uint64_t)&sys_realloc,,
+    (uint64_t)&sys_realloc,
     (uint64_t)&sys_openProcessPipe,
     (uint64_t)&sys_closeProcessPipe
 };

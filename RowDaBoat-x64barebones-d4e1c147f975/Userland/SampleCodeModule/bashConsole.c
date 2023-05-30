@@ -7,62 +7,38 @@
 #include <phylos.h>
 
 #define MAX_ARGS 10
+#define MAX_ARG_LENGTH 100
 
 extern void zeroDivision();
 extern void displayTime();
 char parseAndExecuteCommands(uint8_t *str, int length);
 void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length);
 
-char help(uint8_t argumentQty, const char** arguments);
-char clean(uint8_t argumentQty, const char** arguments);
-char startTron(uint8_t argumentQty, const char** arguments);
-char callMemoryDump(uint8_t argumentQty, const char** arguments);
-char time(uint8_t argumentQty, const char** arguments);
-char callZeroDivision(uint8_t argumentQty, const char** arguments);
-char callInvalidOpcode(uint8_t argumentQty, const char** arguments);
-char callSetFontSize(uint8_t argumentQty, const char** arguments);
-char exitConsole(uint8_t argumentQty, const char** arguments);
-char callInforeg(uint8_t argumentQty, const char** arguments);
-char callHimnoAlegria(uint8_t argumentQty, const char** arguments);
-char callMalloc(uint8_t argumentQty, const char** arguments);
-char callFree(uint8_t argumentQty, const char** arguments);
-char callExec(uint8_t argumentQty, const char** arguments);
-char callPrintProcesses(uint8_t argumentQty, const char** arguments);
-char callGetMemoryStatus(uint8_t argumentQty, const char** arguments);
-char callBlock(uint8_t argumentQty, const char** arguments);
-char callKill(uint8_t argumentQty, const char** arguments);
-char callNice(uint8_t argumentQty, const char** arguments);
-char callFork(uint8_t argumentQty, const char** arguments);
-char callTestMM(uint8_t argumentQty, const char** arguments);
-char callPhylo(uint8_t argumentQty, const char** arguments);
-char callCat(uint8_t argumentQty, const char** arguments);
+char help(uint8_t argumentQty, const char **arguments);
+char clean(uint8_t argumentQty, const char **arguments);
+char startTron(uint8_t argumentQty, const char **arguments);
+char callMemoryDump(uint8_t argumentQty, const char **arguments);
+char time(uint8_t argumentQty, const char **arguments);
+char callZeroDivision(uint8_t argumentQty, const char **arguments);
+char callInvalidOpcode(uint8_t argumentQty, const char **arguments);
+char callSetFontSize(uint8_t argumentQty, const char **arguments);
+char exitConsole(uint8_t argumentQty, const char **arguments);
+char callInforeg(uint8_t argumentQty, const char **arguments);
+char callHimnoAlegria(uint8_t argumentQty, const char **arguments);
+char callMalloc(uint8_t argumentQty, const char **arguments);
+char callFree(uint8_t argumentQty, const char **arguments);
+char callExec(uint8_t argumentQty, const char **arguments);
+char callPrintProcesses(uint8_t argumentQty, const char **arguments);
+char callGetMemoryStatus(uint8_t argumentQty, const char **arguments);
+char callBlock(uint8_t argumentQty, const char **arguments);
+char callKill(uint8_t argumentQty, const char **arguments);
+char callNice(uint8_t argumentQty, const char **arguments);
+char callFork(uint8_t argumentQty, const char **arguments);
+char callTestMM(uint8_t argumentQty, const char **arguments);
+char callPhylo(uint8_t argumentQty, const char **arguments);
+char callCat(uint8_t argumentQty, const char **arguments);
 char callTestSync(uint8_t argumentQty, char **arguments);
-
-
-char help(uint8_t argumentQty, char arguments[argumentQty]);
-char clean(uint8_t argumentQty, char arguments[argumentQty]);
-char startTron(uint8_t argumentQty, char arguments[argumentQty]);
-char callMemoryDump(uint8_t argumentQty, char arguments[argumentQty]);
-char time(uint8_t argumentQty, char arguments[argumentQty]);
-char callZeroDivision(uint8_t argumentQty, char arguments[argumentQty]);
-char callInvalidOpcode(uint8_t argumentQty, char arguments[argumentQty]);
-char callSetFontSize(uint8_t argumentQty, char arguments[argumentQty]);
-char exitConsole(uint8_t argumentQty, char arguments[argumentQty]);
-char callInforeg(uint8_t argumentQty, char arguments[argumentQty]);
-char callHimnoAlegria(uint8_t argumentQty, char arguments[argumentQty]);
-char callMalloc(uint8_t argumentQty, char arguments[argumentQty]);
-char callFree(uint8_t argumentQty, char arguments[argumentQty]);
-char callExec(uint8_t argumentQty, char arguments[argumentQty]);
-char callPrintProcesses(uint8_t argumentQty, char arguments[argumentQty]);
-char callGetMemoryStatus(uint8_t argumentQty, char arguments[argumentQty]);
-char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
-char callKill(uint8_t argumentQty, char arguments[argumentQty]);
-char callBlock(uint8_t argumentQty, char arguments[argumentQty]);
-char callNice(uint8_t argumentQty, char arguments[argumentQty]);
-char callFork(uint8_t argumentQty, char arguments[argumentQty]);
-char callTestMM(uint8_t argumentQty, char arguments[argumentQty]);
-char callPhylo(uint8_t argumentQty, char arguments[argumentQty]);
-char callRealloc(uint8_t argumentQty, char arguments[argumentQty]);
+char callRealloc(uint8_t argumentQty, const char **arguments);
 
 #define COMMAND_QTY 25
 
@@ -155,16 +131,16 @@ char parseAndExecuteCommands(uint8_t *str, int length)
 
     // Process command 1
 
-    char* arguments1[MAX_ARGS];
+    char *arguments1[MAX_ARGS];
     int argumentQty1 = 0;
     char *command1Name[command1Length + 1];
     getCommandAndArgs(command1, arguments1, &argumentQty1, command1Name, command1Length + 1);
 
-    char* arguments2[MAX_ARGS];
+    char *arguments2[MAX_ARGS];
     int argumentQty2 = 0;
     char *command2Name[command2Length + 1];
     getCommandAndArgs(command2, arguments2, &argumentQty2, command2Name, command2Length + 1);
-    
+
     // for (int i = 0; i < COMMAND_QTY; i++)
     // {
     //     if (strcmp(command1Name, commandNames[i]) == 0)
@@ -205,9 +181,12 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
     {
         if (str[i] == ' ')
         {
-            args[*argQty][argLen] = '\0';
-            (*argQty)++;
-            argLen = 0;
+            if (argLen > 0)
+            {
+                args[*argQty][argLen] = '\0';
+                (*argQty)++;
+                argLen = 0;
+            }
         }
         else
         {
@@ -215,14 +194,26 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
         }
         i++;
     }
+    
+    if (argLen > 0)
+        (*argQty)++;
     args[*argQty][argLen] = '\0';
- //   (*argQty)++;
+
+    for(int i = 0; i < *argQty; i++)
+    {
+        printf("Arg %d: %s\n", i, args[i]);
+    }
+    
 }
 
 // Returns exit status
 char processCommand(uint8_t *str, int length)
 {
-    char arguments[MAX_ARGS][1024];
+    char *arguments[MAX_ARGS];
+    for (int i = 0; i < MAX_ARGS; i++)
+    {
+        arguments[i] = malloc(MAX_ARG_LENGTH);
+    }
     int argQty = 0;
     char command[length + 1];
     getCommandAndArgs(str, arguments, &argQty, command, length + 1);
@@ -231,14 +222,14 @@ char processCommand(uint8_t *str, int length)
     {
         if (strcmp(command, commandNames[i]) == 0)
         {
-            return (*commands[i])(argQty, (const char**)arguments);
+            return (*commands[i])(argQty, (const char **)arguments);
         }
     }
     printf("Comando no reconocido\n");
     return 0;
 }
 
-char help(uint8_t argumentQty, const char** arguments)
+char help(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty == 0)
     {
@@ -283,8 +274,7 @@ char help(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-
-char clean(uint8_t argumentQty, const char** arguments)
+char clean(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -297,7 +287,7 @@ char clean(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char startTron(uint8_t argumentQty, const char** arguments)
+char startTron(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -310,7 +300,7 @@ char startTron(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callExec(uint8_t argumentQty, const char** arguments)
+char callExec(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty <= 1)
     {
@@ -341,7 +331,7 @@ char callExec(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callFree(uint8_t argumentQty, const char** arguments)
+char callFree(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty == 1 && isHexaNumber(arguments[0]))
     {
@@ -364,7 +354,7 @@ char callFree(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callMalloc(uint8_t argumentQty, const char** arguments)
+char callMalloc(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty == 1 && isHexaNumber(arguments[0]))
     {
@@ -376,7 +366,7 @@ char callMalloc(uint8_t argumentQty, const char** arguments)
         }
         else
         {
-            uint64_t* ptr = malloc(size);
+            uint64_t *ptr = malloc(size);
             if (ptr == NULL)
             {
                 printf("No se reservo memoria\n");
@@ -394,59 +384,41 @@ char callMalloc(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callRealloc(uint8_t argumentQty, char arguments[argumentQty])
+char callRealloc(uint8_t argumentQty, const char **arguments)
 {
-    if (argumentQty != 2 || !isHexaNumberWithSpaceEnd(arguments + 1))
+    /**
+     * int pid = strToNum(arguments[0], strlen(arguments[0]));
+        int priority = strToNum(arguments[1], strlen(arguments[1]));
+        int returnValue = _sys_nice(pid, priority);
+        if (returnValue < 0)
+    */
+
+    if (argumentQty != 2 || !isHexaNumber(arguments[0]) || !isHexaNumber(arguments[1]))
     {
         printf("Argumento invalido para realloc\n");
         return 0;
     }
-    char *arg1 = malloc(15);
-    int i = 1;
-    while (arguments[i] != ' ' && arguments[i] != 0)
+    int flag1 = 0, flag2 = 0;
+    uint64_t *ptr = (uint64_t *)hexaStrToNum(arguments[0], strlen(arguments[0]), &flag1);
+
+    uint64_t newSize = (uint64_t)hexaStrToNum(arguments[1], strlen(arguments[1]), &flag2);
+    if (flag1 == 1 || flag2 == 1)
     {
-        arg1[i-1] = arguments[i];
-        i++;
-    }
-    arg1[i-1] = 0;
-    i++;
-    if(!isHexaNumberWithSpaceEnd(arguments + i)){
-        printf("Argumento invalido para realloc\n");
+        printerr("Argumento inválido\n", 0);
         return 0;
     }
-    char *arg2 = malloc(15);
-    int j = 0;
-    while (arguments[i] != ' ' && arguments[i] != 0)
+    uint64_t *newPtr = realloc(ptr, newSize);
+    if (newPtr == NULL)
     {
-        arg2[j] = arguments[i];
-        i++;
-        j++;
-    }
-    arg2[j] = 0;
-    char flag = 0;
-    uint64_t *ptr = (uint64_t *)hexaStrToNum(arg1, strlenWithSpaceEnd(arg1), &flag);
-    uint64_t newSize = (uint64_t)hexaStrToNum(arg2, strlen(arg2), &flag);
-    free(arg1);
-    free(arg2);
-    if (flag == 1)
-    {
-        printerr("Numero muy grande. Overflow\n", 0);
+        printf("No se reservo memoria\n");
     }
     else
     {
-        uint64_t *newPtr = realloc(ptr, newSize);
-        if (newPtr == NULL)
-        {
-            printf("No se reservo memoria\n");
-        }
-        else
-        {
-            printf("Se reservo memoria en la direccion %x\n", newPtr);
-        }
+        printf("Se reservo memoria en la direccion %x\n", newPtr);
     }
 }
 
-char callKill(uint8_t argumentQty, const char** arguments)
+char callKill(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 1)
     {
@@ -460,7 +432,7 @@ char callKill(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callGetMemoryStatus(uint8_t argumentQty, const char** arguments)
+char callGetMemoryStatus(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -468,7 +440,7 @@ char callGetMemoryStatus(uint8_t argumentQty, const char** arguments)
     }
     else
     {
-        uint64_t* memStatus = getMemoryStatus();
+        uint64_t *memStatus = getMemoryStatus();
         if (memStatus == NULL)
         {
             printf("No se pudo obtener el estado de la memoria\n");
@@ -482,7 +454,7 @@ char callGetMemoryStatus(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callBlock(uint8_t argumentQty, const char** arguments)
+char callBlock(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 1)
     {
@@ -496,7 +468,7 @@ char callBlock(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callMemoryDump(uint8_t argumentQty, const char** arguments)
+char callMemoryDump(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty == 1 && isHexaNumber(arguments[0]))
     {
@@ -519,7 +491,7 @@ char callMemoryDump(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callNice(uint8_t argumentQty, const char** arguments)
+char callNice(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 2)
     {
@@ -542,7 +514,7 @@ char callNice(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callFork(uint8_t argumentQty, const char** arguments)
+char callFork(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -555,7 +527,7 @@ char callFork(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callPhylo(uint8_t argumentQty, const char** arguments)
+char callPhylo(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -568,7 +540,7 @@ char callPhylo(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callCat(uint8_t argumentQty, const char** arguments)
+char callCat(uint8_t argumentQty, const char **arguments)
 {
     char foreground[2] = "1";
     if (argumentQty == 1)
@@ -589,7 +561,7 @@ char callCat(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callTestMM(uint8_t argumentQty, const char** arguments)
+char callTestMM(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 1)
     {
@@ -616,7 +588,7 @@ char callTestSync(uint8_t argumentQty, char **arguments)
     return 0;
 }
 
-char time(uint8_t argumentQty, const char** arguments)
+char time(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -629,7 +601,7 @@ char time(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callZeroDivision(uint8_t argumentQty, const char** arguments)
+char callZeroDivision(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -642,7 +614,7 @@ char callZeroDivision(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callInvalidOpcode(uint8_t argumentQty, const char** arguments)
+char callInvalidOpcode(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -655,7 +627,7 @@ char callInvalidOpcode(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callSetFontSize(uint8_t argumentQty, const char** arguments)
+char callSetFontSize(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty < 1)
     {
@@ -680,7 +652,7 @@ char callSetFontSize(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char exitConsole(uint8_t argumentQty, const char** arguments)
+char exitConsole(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {

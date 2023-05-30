@@ -5,18 +5,21 @@
 #define THINKING 0
 #define HUNGRY 1
 #define EATING 2
+#define BLOCK 5
 
-
-int N = 5;
+int N = BLOCK;
+int currentMax = BLOCK;
 int *state;
+int processToKill=-1;
 sem_t mutex;
-sem_t *s;
+sem_t *forks;
+sem_t processToKillMutex;
 pid_t *philosophersPID;
+sem_t changingQtyMutex;
 
 void philosopher(char argc, char **argv);
 void take_forks(int i);
 void put_forks(int i);
-void test(int i);
 void eat(int phil);
 void think(int phil);
 void printState();
@@ -26,19 +29,41 @@ int left(int i);
 int right(int i);
 
 void phylos(){
-    state = (int *)malloc(N*sizeof(int));
-    s = (sem_t *)malloc(N*sizeof(sem_t));
-    philosophersPID = (pid_t *)malloc(N*sizeof(pid_t));
+    state = (int *)malloc(currentMax*sizeof(int));
+    forks= (sem_t *)malloc(currentMax*sizeof(sem_t));
+    philosophersPID = (pid_t *)malloc(currentMax*sizeof(pid_t));
 
     int i;
     for(i = 0; i < N; i++){
         state[i] = THINKING;
         char name[2]= "0";
         decToStr(name, i);
-        s[i]= semOpen(name, 0);
+        if((forks[i]= semOpen(name, 1)) == NULL){
+            printf("Error opening semaphore %s\n", name);
+            return;
+        }
+       
     }
     char *mutexName = "mutex";
-    mutex =semOpen(mutexName, 1);
+    
+    if((mutex = semOpen(mutexName, 1)) == NULL){
+        printf("Error opening semaphore %s\n", mutexName);
+        return;
+    }
+    
+    char *processToKillMutexName = "processToKillMutex";
+    
+    if((processToKillMutex = semOpen(processToKillMutexName, 1)) == NULL){
+        printf("Error opening semaphore %s\n", processToKillMutexName);
+        return;
+    }
+
+    char *changingQtyName = "changingQty";
+    if((changingQtyMutex = semOpen(changingQtyName, 1)) == NULL){
+        printf("Error opening semaphore %s\n", changingQtyName);
+        return;
+    }
+
 
     char foreground[2] = "0";
     char *args[4];
@@ -64,26 +89,46 @@ void phylos(){
             removePhilo();
             break;
         case 'q':
-            printf("quit\n");
             exit = 1;
             break;
         }
         
     }
-        
+    //Kill childs
+    for(i = 0; i < N; i++){
+        kill(philosophersPID[i]);
+    }   
+
+    free(state);
+    free(forks);
+    free(philosophersPID);
+    semClose(mutex);
+    semClose(processToKillMutex);
+    for(i = 0; i < N; i++){
+        char name[2]= "0";
+        decToStr(name, i);
+        semClose(forks[i]);
+    }
 
     return;
 }
 
 void addPhilo(){
+    semWait(changingQtyMutex);
     N++;
-    state = (int *)realloc(state, N*sizeof(int));
-    s = (sem_t *)realloc(s, N*sizeof(sem_t));
-    philosophersPID = (pid_t *)realloc(philosophersPID, N*sizeof(pid_t));
+    if(N>currentMax){
+        currentMax *=2;
+        state = (int *)realloc(state, currentMax*sizeof(int));
+        forks = (sem_t *)realloc(forks, currentMax*sizeof(sem_t));
+        philosophersPID = (pid_t *)realloc(philosophersPID, currentMax*sizeof(pid_t));
+    }
     state[N-1] = THINKING;
     char name[2]= "0";
     decToStr(name, N-1);
-    s[N-1]= semOpen(name, 0);
+    if((forks[N-1]= semOpen(name, 1)) == NULL){
+        printf("Error opening semaphore %s\n", name);
+        return;
+    }
     char foreground[2] = "0";
     char *args[4];
     args[0] = "philosopher";
@@ -92,15 +137,16 @@ void addPhilo(){
     args[2] = (char *)malloc(2*sizeof(char));
     decToStr(args[2], N-1);
     philosophersPID[N-1] = execve(&philosopher, args);
+    semPost(changingQtyMutex);
 }
 
 void removePhilo(){
-    if(N>1){
+    if(N>2){
+        semWait(changingQtyMutex);
+        semWait(processToKillMutex);
+        processToKill = N-1;
         N--;
-        kill(philosophersPID[N]);
-        state = (int *)realloc(state, N*sizeof(int));
-        s = (sem_t *)realloc(s, N*sizeof(sem_t));
-        philosophersPID = (pid_t *)realloc(philosophersPID, N*sizeof(pid_t));
+        semPost(processToKillMutex);
     }
     else{
         printf("Can't remove more philosophers\n");
@@ -111,6 +157,14 @@ void philosopher(char argc, char **argv){
     int i = strToNum(argv[0], 1);
 
     while(1){
+        if(i==processToKill){
+            semWait(processToKillMutex);
+            processToKill=-1;
+            semPost(processToKillMutex);
+            semClose(forks[i]);
+            semPost(changingQtyMutex);
+            return;
+        }
         think(i);
         take_forks(i);
         eat(i);
@@ -121,31 +175,38 @@ void philosopher(char argc, char **argv){
 void take_forks(int i){
     semWait(mutex);
     state[i] = HUNGRY;
-    test(i);
     semPost(mutex);
-    semWait(s[i]);
+
+    if(i%2==0){
+        semWait(forks[i]);
+        semWait(forks[right(i)]);
+        semWait(mutex);
+        state[i] = EATING;
+        semPost(mutex);
+    }
+    else{
+        semWait(forks[right(i)]);
+        semWait(forks[i]);
+        semWait(mutex);
+        state[i] = EATING;
+        semPost(mutex);
+    }
 }
 
 void put_forks(int i){
     semWait(mutex);
     state[i] = THINKING;
-    test(left(i));
-    test(right(i));
     semPost(mutex);
+    semPost(forks[i]);
+    semPost(forks[right(i)]);
 }
 
-void test(int i){
-    if(state[i] == HUNGRY && state[left(i)] != EATING && state[right(i)] != EATING){
-        state[i] = EATING;
-        semPost(s[i]);
-    }
-}
 
 void eat(int phil)
 {
     //long for so it takes a while
     int i=0;
-    while(i<5000000){
+    while(i<10000000){
         i++;
     }
 	printState();
@@ -155,7 +216,7 @@ void think(int phil)
 {
     //long for so it takes a while
     int i=0;
-    while(i<5000000){
+    while(i<10000000){
         i++;
     }
 }
