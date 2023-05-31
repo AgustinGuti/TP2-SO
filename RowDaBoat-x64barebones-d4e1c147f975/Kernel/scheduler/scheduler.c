@@ -366,7 +366,6 @@ void killProcess(pid_t pid)
         return;
     }
     Process process = getProcess(pid);
-    printf("Killing process %d\n", pid);
     if (process != NULL)
     {
         Process parent = getProcess(process->parentPID);
@@ -410,7 +409,6 @@ void killForegroundProcess() {
     Process process = getForegroundProcess();
     if (process != NULL)
     {
-        printf("Killing foreground process %d\n", process->pid);
         killProcess(process->pid);
     }
 }
