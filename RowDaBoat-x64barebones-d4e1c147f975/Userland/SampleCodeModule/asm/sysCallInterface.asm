@@ -384,7 +384,7 @@ _sys_waitpid:
     push rbp
     mov rbp, rsp
     
-    mov rax, 39     ;id 
+    mov rax, 29     ;id 
     int 80h
 
     mov rsp, rbp

@@ -39,7 +39,7 @@ typedef struct command {
     char executable;
 } command;
 
-#define COMMAND_QTY 24
+#define COMMAND_QTY 22
 
 static command commands[COMMAND_QTY] = {
     {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
@@ -139,6 +139,10 @@ char parseAndExecuteCommands(uint8_t *str, int length)
             commands[command].function(0, argv);
         }
         execve(commands[command].function, NULL, 0, argv);
+        for(int i = 0; i < MAX_ARGS + 2; i++){
+            free(argv[i]);
+        }
+        free(argv);
         return 0;
     }
 
@@ -168,9 +172,21 @@ char parseAndExecuteCommands(uint8_t *str, int length)
         return 0;
     }
 
-    execve(commands[command1].function, pipes1, pipeQty, argv1);
-    execve(commands[command2].function, pipes2, pipeQty,argv2);
+    int pid1 = execve(commands[command1].function, pipes1, pipeQty, argv1);
+    int pid2 = execve(commands[command2].function, pipes2, pipeQty,argv2);
+ 
+    waitpid(pid1);
+    waitpid(pid2);
 
+    close(connectingPipe);
+
+    for(int i = 0; i < MAX_ARGS + 2; i++){
+        free(argv1[i]);
+        free(argv2[i]);
+    }
+    free(argv1);
+    free(argv2);
+    
     return 0;
 }
 
@@ -206,6 +222,11 @@ int getFullCommand(char *str, int length, int *argc, char **args)
         }
         if (*argc - hasBackground > commands[commandIndex].argMaxQty || *argc + hasBackground < commands[commandIndex].argMinQty){
             printf("Cantidad de argumentos invalida para %s\n", commandName);
+            for (int i = 0; i < MAX_ARGS; i++)
+            {
+                free(arguments[i]);
+            }
+            free(arguments);
             return -1;
         }
 
@@ -216,9 +237,19 @@ int getFullCommand(char *str, int length, int *argc, char **args)
     }else{
         if (*argc > commands[commandIndex].argMaxQty || *argc < commands[commandIndex].argMinQty){
             printf("Cantidad de argumentos invalida para %s\n", commandName);
+            for (int i = 0; i < MAX_ARGS; i++)
+            {
+                free(arguments[i]);
+            }
+            free(arguments);
             return -1;
         }
     }
+    for (int i = 0; i < MAX_ARGS; i++)
+    {
+        free(arguments[i]);
+    }
+    free(arguments);
     return commandIndex;
 }
 
