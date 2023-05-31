@@ -31,7 +31,7 @@ char callNice(char argc, const char** argv);
 char callTestMM(char argc, const char** argv);
 char callSleep(char argc, const char **argv);
 char callRealloc(char argc, const char **argv);
-
+char callLoop(char argc, const char **argv);
 
 typedef struct command {
     char *name;
@@ -42,7 +42,7 @@ typedef struct command {
     char executable;
 } command;
 
-#define COMMAND_QTY 25
+#define COMMAND_QTY 26
 
 static command commands[COMMAND_QTY] = {
     {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
@@ -69,7 +69,8 @@ static command commands[COMMAND_QTY] = {
     {"test-sync", &test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1},
     {"sleep", &callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1},
     {"wc", &wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1},
-    {"realloc", &callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1}
+    {"realloc", &callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1},
+    {"loop", &callLoop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1}
 };
 
 int startConsole()
@@ -590,6 +591,20 @@ char callSleep(char argc, const char **argv)
     {
         int num = strToNum(argv[0], strlen(argv[0]));
         _sys_sleep(num);
+    }
+    return 0;
+}
+
+char callLoop(char argc, const char **argv)
+{
+    if (argc != 1)
+    {
+        printf("Argumento invalido para loop\n");
+    }
+    else
+    {
+        int num = strToNum(argv[0], strlen(argv[0]));
+        loop(num);
     }
     return 0;
 }

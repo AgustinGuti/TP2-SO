@@ -301,6 +301,5 @@ int sys_closeProcessPipe(int fd)
 
 void sys_sleep(int millis)
 {
-    printf("Sleeping for %d millis\n", millis);
     sleep(millis);
 }
