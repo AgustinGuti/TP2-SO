@@ -46,7 +46,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
       semWait(sem);
     slowInc(&global, inc);
     if (use_sem)
-      semWait(sem);
+      semPost(sem);
   }
 
   if (use_sem)
@@ -55,11 +55,12 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   return 0;
 }
 
-uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
-  uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
+uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem}
+  int pids[2 * TOTAL_PAIR_PROCESSES];
 
-  if (argc != 2)
+  if (argc != 2){
     return -1;
+  }
 
   char *argvDec[] = {"my_process_inc", "1" ,argv[0], "-1", argv[1], NULL};
   char *argvInc[] = {"my_process_inc", "0" ,argv[0], "1", argv[1], NULL};
@@ -68,14 +69,14 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i] = execve(&my_process_inc, argvDec);
-    pids[i + TOTAL_PAIR_PROCESSES] = execve(&my_process_inc, argvInc);
+    pids[i] = execve(&my_process_inc, NULL, 0, argvDec);
+    pids[i + TOTAL_PAIR_PROCESSES] = execve(&my_process_inc, NULL, 0, argvInc);
   }
 
-//   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-//     waitpid(pids[i]);
-//     waitpid(pids[i + TOTAL_PAIR_PROCESSES]);
-//   }
+  for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
+    waitpid(pids[i]);
+    waitpid(pids[i + TOTAL_PAIR_PROCESSES]);
+  }
 
   printf("Final value: %d\n", global);    
 

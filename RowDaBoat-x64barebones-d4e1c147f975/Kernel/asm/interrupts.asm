@@ -560,7 +560,7 @@ section .data
 	exceptionText db "Kernel exception %d", 0
 
 section .bss
-	maxSysCall resb 30
+	maxSysCall resb 1
 	sysCallsPointers resb 512		;Alcanza para 64 sysCalls
 	registers resq 17
 

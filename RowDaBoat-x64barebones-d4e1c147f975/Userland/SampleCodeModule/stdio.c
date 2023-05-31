@@ -2,6 +2,7 @@
 #include <stddef.h>
 
 #define LINE_INDICATOR "$> "
+#define EOF -1
 
 void newlineFD(int fd);
 void backspaceFD(int fd);
@@ -49,6 +50,12 @@ void printFD(int fd, const char* fmt, int argQty, va_list valist){
 			pos++;
 			char type = fmt[pos];
 			if (type == 's'){
+				// int i = 0;
+				// char *string = va_arg(valist, char *);
+				// while(string[i] != 0){
+				// 	putCharFD(string[i],fd);
+				// 	i++;
+				// }
 				printTextFD(va_arg(valist, char *),fd);
 			}else if (type == 'c'){
 				putCharFD(va_arg(valist, int),fd);
@@ -85,7 +92,6 @@ void printText(char *string){
 
 void putCharFD(char character, int fd){
 	char aux[] = {character};
-	// printf("to write: %c\n", character);
 	_sys_write(fd,aux, 1);
 }
 
@@ -156,7 +162,7 @@ int scanf(const char *fmt, int argQty, ...){
 			char type = fmt[pos];
 			if (type == 's'){
 				uint8_t *out = va_arg(valist,char*);
-				uint16_t aux[1];
+				char aux[1];
 				int readChar = 1;
 				int arrPos = 0;												
 				while (readChar != 0 && (arrPos < charQty || i == 0)){		//Nothing else to read, or reached max char quantity. If there was no max, read to the end
@@ -168,7 +174,7 @@ int scanf(const char *fmt, int argQty, ...){
 				}
 			}else if (type == 'S'){
 				uint16_t *out = va_arg(valist,char*);
-				uint16_t aux[1];
+				char aux[1];
 				int readChar = 1;
 				int arrPos = 0;
 			
@@ -186,6 +192,11 @@ int scanf(const char *fmt, int argQty, ...){
 	}
 	va_end(valist);
 	return totalReadChars;
+}
+
+void sendEOF(){
+	char buf[1] = {EOF};
+	_sys_write(1, buf, 1);
 }
 
 void formatPrint(const char* fmt,  uint32_t color, uint16_t row, uint16_t col, int argQty, ...) {

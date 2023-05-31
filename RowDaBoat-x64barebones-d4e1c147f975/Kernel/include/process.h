@@ -52,13 +52,11 @@ typedef struct ProcessCDT
 
 typedef struct ProcessCDT *Process;
 
-int fork();
-Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID);
+Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe* pipes, char pipeQty);
 //void killProcess(pid_t pid);
 void emptyProcess();
 void freeStack(Process process);
-Process dupProcess(Process parentProcess);
-int openProcessPipe(char *name, int fds[2]);
+Pipe openProcessPipe(char *name, int fds[2]);
 int closeProcessPipe(int fd);
 int readProcessPipe(int fd, char *buffer, int bytes);
 int writeProcessPipe(int fd, char *buffer, int size);

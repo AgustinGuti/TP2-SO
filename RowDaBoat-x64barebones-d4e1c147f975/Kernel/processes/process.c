@@ -69,19 +69,45 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     return process;
 }
 
-Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID)
+Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe* pipes, char pipeQty)
 {
     Process process = initProcess(name, priority, foreground, parentPID);
     //Pipe stdPipe = createPipe(NULL);
     process->stdio = getKeyboardBuffer();
     process->fds[STDIN] = process->stdio;
     process->fds[STDOUT] = process->stdio;
-    for(int i = 2; i < process->fdLimit; i++){
-        process->fds[i] = NULL;
-    }
     process->pipeTypes[STDIN] = READ;
     process->pipeTypes[STDOUT] = WRITE;
-    for(int i = 2; i < process->fdLimit; i++){
+
+    if (pipeQty > 0){
+        if (pipes[0] != NULL){
+            process->fds[STDIN] = pipes[0];
+        }
+    }
+    if (pipeQty > 1){
+        if (pipes[1] != NULL){
+            process->fds[STDOUT] = pipes[1];
+        }
+    }
+    int j = 0;
+    for (j = 2; j < pipeQty; j++)
+    {
+        if (j > process->fdLimit)
+        {
+            return -10;
+            // process->fds = (Pipe *)realloc(process->fds, process->fdLimit * 2 * sizeof(Pipe));
+            // process->pipeTypes = (PipeType *)realloc(process->pipeTypes, process->fdLimit * 2 * sizeof(PipeType));
+            // process->fdLimit *= 2;
+        }
+        process->fds[j] = pipes[j];
+        process->fds[j] = pipes[j];
+        process->pipeTypes[j] = j % 2 == 0 ? READ : WRITE;
+    }
+
+    for(int i = j; i < process->fdLimit; i++){
+        process->fds[i] = NULL;
+    }
+    for(int i = j; i < process->fdLimit; i++){
         process->pipeTypes[i] = EMPTY;
     }
 
@@ -147,17 +173,20 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     return process;
 }
 
-int openProcessPipe(char *name, int fds[2]){
+Pipe openProcessPipe(char *name, int fds[2]){
     Process process = getCurrentProcess();
     Pipe pipe = openPipe(name);
     if(pipe == NULL){
-        return -1;
+        return NULL;
+    }
+    if (fds == NULL){
+        return pipe;
     }
     int fd = 0;
     while(process->fds[fd] != NULL){
         if (fd == process->fdLimit){
             // TODO realloc
-            return -1;
+            return NULL;
         }
         fd++;
     }
@@ -167,13 +196,13 @@ int openProcessPipe(char *name, int fds[2]){
     while(process->fds[fd] != NULL){
         if (fd == process->fdLimit){
             // TODO realloc
-            return -1;
+            return NULL;
         }
         fd++;
     }
     process->fds[fd] = pipe;
     fds[1] = fd;
-    return 0;
+    return pipe;
 }
 
 int closeProcessPipe(int fd){
@@ -233,52 +262,6 @@ void pushToStack(Process process, uint64_t value)
 uint64_t popFromStack(Process process)
 {
     return *(process->stackPointer++);
-}
-
-Process dupProcess(Process parentProcess)
-{
-    Process process = initProcess(parentProcess->name, parentProcess->priority+1, parentProcess->foreground, parentProcess->pid);
-
-    for (int i = 0; i < 15; i++){
-        printf("[0x%x]:  Parent stack %d: %x\n", &parentProcess->stack[STACK_SIZE-i-1],i, parentProcess->stack[STACK_SIZE-i-1]);
-    }
-
-    // printf("\nParent stack: %x\n", parentProcess->stack);
-    // printf("Parent stack base: %x\n", parentProcess->stackBase);
-    // printf("Parent stack pointer: %x\n", parentProcess->stackPointer);
-   // memcpy(process->stack, parentProcess->stack, STACK_SIZE * sizeof(uint64_t));
-
-
-    uint64_t parentStackOffset = parentProcess->stackBase - parentProcess->stackPointer;
-    printf("Parent stack offset: %d\n", parentStackOffset);
-    uint64_t parentStackOffsetFromStack1 = (uint64_t)(parentProcess->stack[STACK_SIZE - 2] - (uint64_t)parentProcess->stackPointer);
-    uint64_t parentStackOffsetFromStack2 = (uint64_t)(parentProcess->stack[STACK_SIZE - 9] - (uint64_t)parentProcess->stackPointer);
-    uint64_t parentStackOffsetFromStack3 = (uint64_t)(parentProcess->stack[STACK_SIZE - 13] - (uint64_t)parentProcess->stackPointer);
-    uint64_t parentStackOffsetFromStack4 = (uint64_t)(parentProcess->stack[STACK_SIZE - 15] - (uint64_t)parentProcess->stackPointer);
-    printf("Parent delta: %x\n", parentStackOffsetFromStack1);
-
-    
-    // printf("\nProcess stack: %x\n", process->stack);
-    // printf("Process stack base: %x\n", process->stackBase);
-    // printf("Process stack pointer: %x\n", process->stackPointer);
-    for (int i = STACK_SIZE - 1; i >= 0; i--){
-        pushToStack(process, parentProcess->stack[i]);
-    }
-
-
-    process->stackPointer = process->stackBase - parentStackOffset;
-    // process->stack[STACK_SIZE-2] = process->stackPointer + parentStackOffsetFromStack1;
-    // process->stack[STACK_SIZE-9] = process->stackPointer + parentStackOffsetFromStack2;
-    // process->stack[STACK_SIZE-13] = process->stackPointer + parentStackOffsetFromStack3;
-    // process->stack[STACK_SIZE-15] = process->stackPointer + parentStackOffsetFromStack4;
-    printf("Child delta: %x\n", process->stack[STACK_SIZE-2] - (uint64_t)process->stackPointer);
-
-    for (int i = 0; i < 15; i++){
-        printf("[0x%x]: Child stack %d: %x\n", &process->stack[STACK_SIZE-i-1] ,i, process->stack[STACK_SIZE-i-1]);
-    }
-    printf("Child RSP: %x\n", process->stackPointer);
-    process->state = READY;
-    return process;
 }
 
 void emptyProcess()

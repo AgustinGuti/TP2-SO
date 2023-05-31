@@ -5,7 +5,7 @@
 
 typedef struct semaphore *sem_t;
 
-typedef struct pipe *Pipe;
+typedef struct PipeCDT *Pipe;
 
 
 #define STDERR 2
@@ -15,7 +15,7 @@ typedef struct pipe *Pipe;
 void _sys_write(int fd, char *str, int length);
 void _sys_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color);
 uint32_t _sys_getMillis();
-int _sys_read(int fd, uint16_t *buf, int count);
+int _sys_read(int fd, char *buf, int count);
 uint16_t _sys_getScreenWidth();
 uint16_t _sys_getScreenHeight();
 void _sys_cleanScreen();
@@ -30,9 +30,8 @@ void _sys_drawSprite(uint16_t xTopLeft, uint16_t yTopLeft, uint16_t width, uint1
 void _sys_exit(int status);
 void _sys_yield();
 int _sys_getpid();
-int _sys_fork();
 void _sys_printProcesses();
-int _sys_execve(void *entryPoint, char *const argv[]);
+int _sys_execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[]);
 void *_sys_malloc(uint64_t size);
 uint64_t _sys_free(void *ptr);
 void _sys_block(int pid);

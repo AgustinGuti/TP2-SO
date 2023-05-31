@@ -8,6 +8,7 @@ typedef struct PipeCDT{
     int writeIndex;
     int attached;
     sem_t sem;
+    sem_t mutex;
 }PipeCDT;
 
 typedef struct PipesCDT{
@@ -59,10 +60,13 @@ Pipe openPipe(char *name){
     pipe->writeIndex = 0;
     pipe->attached = 1;
     pipe->sem = semOpen(NULL, 0);
+    pipe->mutex = semOpen(NULL, 1);
     if(pipe->sem == NULL){
         return NULL;
     }
-    insert(pipes->pipes, pipe);
+    if (newName != NULL){
+        insert(pipes->pipes, pipe);
+    }
     return pipe;
 }
 
@@ -78,105 +82,43 @@ int closePipe(Pipe pipe){
         if (pipe->name != NULL){
             free(pipe->name);
         }
-        remove(pipes->pipes, pipe);
         free(pipe);
     }
     return 0;
 }
 
-// int closePipe(char *name){
-//     if(name == NULL || strlen(name) == 0 || pipes == NULL){
-//         return -1;
-//     }
-//     resetIterator(pipes->it);
-//     while(hasNext(pipes->it)){
-//         Pipe pipe = next(pipes->it);
-//         if(strcmp(pipe->name, name) == 0){
-//             if (pipe->attached > 1){
-//                 pipe->attached--;
-//             }else{
-//                 semClose(pipe->sem);
-//                 free(pipe->buffer);
-//                 free(pipe->name);
-//                 remove(pipes->pipes, pipe);
-//                 free(pipe);
-//             }
-//             return 0;
-//         }
-//     }
-//     return -1;
-// }
-
-int readFromPipe(Pipe pipe, uint16_t *buffer, int size){
-    if(pipe == NULL || buffer == NULL || size < 0){
-        return -1;
-    }
-    if(pipe->readIndex == pipe->writeIndex){
-        semWait(pipe->sem);
-    }
-    int i = 0;
-    while(i < size && pipe->readIndex != pipe->writeIndex){
-        buffer[i] = pipe->buffer[pipe->readIndex];
-        pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
-        i++;
-    }
-    return i;
-}
-
-int writeToPipe(Pipe pipe, uint16_t *buffer, int size){
+int readFromPipe(Pipe pipe, char *buffer, int size){
     if(pipe == NULL || buffer == NULL || size < 0){
         return -1;
     }
     int i = 0;
     while(i < size){
-        pipe->buffer[pipe->writeIndex] = buffer[i];
-        pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
+        if(pipe->readIndex == pipe->writeIndex){
+            semWait(pipe->sem);
+        }
+        semWait(pipe->mutex);
+        buffer[i] = pipe->buffer[pipe->readIndex];
+        pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
         i++;
+        semPost(pipe->mutex);
     }
-    semPost(pipe->sem);
     return i;
 }
 
-// int readFromPipe(int fd, uint16_t *buffer, int size){
-//     if(buffer == NULL || size < 0 ||  pipes == NULL){
-//         return -1;
-//     }
-//     resetIterator(pipes->it);
-//     while(hasNext(pipes->it)){
-//         Pipe pipe = next(pipes->it);
-//         if(pipe->readFD == fd){
-//             if(pipe->readIndex == pipe->writeIndex){
-//                 semWait(pipe->sem);
-//             }
-//             int i = 0;
-//             while(i < size && pipe->readIndex != pipe->writeIndex){
-//                 buffer[i] = pipe->buffer[pipe->readIndex];
-//                 pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
-//                 i++;
-//             }
-//             return i;
-//         }
-//     }
-//     return -1;
-// }
-
-// int writeToPipe(int fd, uint16_t *buffer, int size){
-//     if(buffer == NULL || size < 0 || pipes == NULL){
-//         return -1;
-//     }
-//     resetIterator(pipes->it);
-//     while(hasNext(pipes->it)){
-//         Pipe pipe = next(pipes->it);
-//         if(pipe->writeFD == fd){
-//             int i = 0;
-//             while(i < size){
-//                 pipe->buffer[pipe->writeIndex] = buffer[i];
-//                 pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
-//                 i++;
-//             }
-//             semPost(pipe->sem);
-//             return i;
-//         }
-//     }
-//     return -1;
-// }
+int writeToPipe(Pipe pipe, char *buffer, int size){
+    if(pipe == NULL || buffer == NULL || size < 0){
+        return -1;
+    }
+    int i = 0;
+    while(i < size){
+        semWait(pipe->mutex);
+        pipe->buffer[pipe->writeIndex] = buffer[i];
+        pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
+        i++;
+        if (pipe->readIndex == (pipe->writeIndex - 1) % pipe->size){
+            semPost(pipe->sem);
+        }
+        semPost(pipe->mutex);
+    }
+    return i;
+}

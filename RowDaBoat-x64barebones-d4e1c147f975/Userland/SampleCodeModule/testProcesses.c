@@ -1,6 +1,8 @@
 #include <testProcesses.h>
 #include <stdio.h>
 
+#define EOF -1
+
 int a[1] = {100};
 sem_t sem;
 
@@ -15,7 +17,7 @@ void processB() {
     pid_t pidC;
     for (int i = 0; i < 2; i++)
     {
-        pidC = execve(&processC, args);
+        pidC = execve(&processC, NULL, 0, args);
         waitpid(pidC);
     }
     printf("In B\n");
@@ -29,13 +31,13 @@ void processC() {
 }
 
 void cat() {
-    char buffer[2];
-    char c;
-    while((c=getChar()) != EOF){
-        printf("%c", c);
+    char buffer[1];
+    do {
+        _sys_read(0,buffer, 1);
+        printf("%c", buffer[0]);
     }
+    while(buffer[0] != EOF);
 }
-
 void wc() {
     int count = 1;
     char c;

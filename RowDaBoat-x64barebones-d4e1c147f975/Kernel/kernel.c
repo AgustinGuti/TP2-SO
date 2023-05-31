@@ -63,7 +63,7 @@ int main()
 	initScheduler();
 	char *argv[] = {"shell", "1", NULL};
 	// createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv, &startWrapper);
-	execve(sampleCodeModuleAddress, argv);
+	execve(sampleCodeModuleAddress, NULL, 0, argv);
 	triggerTimer();
 	// ((EntryPoint)sampleCodeModuleAddress)();
 	drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
