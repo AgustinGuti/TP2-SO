@@ -8,6 +8,7 @@
 
 #define BACKSPACE 0x08
 #define NEWLINE 0x0A
+#define EOF -1
 
 void printText(char *string);
 

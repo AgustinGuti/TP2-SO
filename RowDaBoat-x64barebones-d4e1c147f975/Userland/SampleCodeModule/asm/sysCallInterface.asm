@@ -32,6 +32,7 @@ GLOBAL _sys_waitpid
 GLOBAL _sys_realloc
 GLOBAL _sys_openProcessPipe
 GLOBAL _sys_closeProcessPipe
+GLOBAL _sys_sleep
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -439,3 +440,26 @@ _sys_closeProcessPipe:
     mov rsp, rbp
     pop rbp
     ret
+;void sys_sleep
+_sys_sleep:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 33    ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+;void sys_sleep
+_sys_sleep:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 33    ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+    

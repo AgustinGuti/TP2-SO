@@ -49,6 +49,7 @@ pid_t sys_waitpid(pid_t pid);
 void * sys_realloc(void *ptr, uint64_t newSize);
 Pipe sys_openProcessPipe(char *name, int fds[2]);
 int sys_closeProcessPipe(int fd);
+void sys_sleep(int millis);
 
 static uint64_t sysCalls[] = {
     (uint64_t)&sys_write,
@@ -84,7 +85,8 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_waitpid,
     (uint64_t)&sys_realloc,
     (uint64_t)&sys_openProcessPipe,
-    (uint64_t)&sys_closeProcessPipe
+    (uint64_t)&sys_closeProcessPipe,
+    (uint64_t)&sys_sleep
 };
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
@@ -302,4 +304,10 @@ Pipe sys_openProcessPipe(char *name, int fds[2])
 int sys_closeProcessPipe(int fd)
 {
     closeProcessPipe(fd);
+}
+
+void sys_sleep(int millis)
+{
+    printf("Sleeping for %d millis\n", millis);
+    sleep(millis);
 }

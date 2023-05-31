@@ -38,12 +38,15 @@ char callTestMM(uint8_t argumentQty, const char **arguments);
 char callPhylo(uint8_t argumentQty, const char **arguments);
 char callCat(uint8_t argumentQty, const char **arguments);
 char callTestSync(uint8_t argumentQty, char **arguments);
+char callWC(uint8_t argumentQty, const char** arguments);
+char callSleep(uint8_t argumentQty, const char** arguments);
 char callRealloc(uint8_t argumentQty, const char **arguments);
 
-#define COMMAND_QTY 25
 
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "realloc", "cat", "test-sync"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callRealloc, &callCat, &callTestSync};
+#define COMMAND_QTY 27
+
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "cat", "test-sync", "wc", "sleep", "realloc"};
+static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callCat, &callTestSync,  &callWC, &callSleep, &callRealloc};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -319,7 +322,7 @@ char callExec(uint8_t argumentQty, const char **arguments)
         }
         char *args[3] = {"processA", foreground, NULL};
         pid_t pidA;
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 1; i++)
         {
             pidA = execve(&processA, args);
         }
@@ -561,7 +564,7 @@ char callCat(uint8_t argumentQty, const char **arguments)
     return 0;
 }
 
-char callTestMM(uint8_t argumentQty, const char **arguments)
+char callTestMM(uint8_t argumentQty, const char** arguments)
 {
     if (argumentQty != 1)
     {
@@ -587,6 +590,28 @@ char callTestSync(uint8_t argumentQty, char **arguments)
     }
     return 0;
 }
+
+char callWC(uint8_t argumentQty, const char** arguments)
+{
+    char foreground[2] = "1";
+    if (argumentQty == 1)
+    {
+        if (arguments[1] == '&')
+        {
+            strcpy(foreground, "0");
+        }
+        else
+        {
+            printf("Argumento invalido para wc\n");
+            return 0;
+        }
+    }
+    char *args[3] = {"wc", foreground, NULL};
+    pid_t pid;
+    pid = execve(&wc, args);
+    return 0;
+}
+
 
 char time(uint8_t argumentQty, const char **arguments)
 {
@@ -700,6 +725,20 @@ char callPrintProcesses(uint8_t argumentQty, const char **arguments)
     else
     {
         printProcesses();
+    }
+    return 0;
+}
+
+char callSleep(uint8_t argumentQty, const char **arguments)
+{
+    if (argumentQty != 1)
+    {
+        printf("Argumento invalido para sleep\n");
+    }
+    else
+    {
+        int num = strToNum(arguments[0], strlen(arguments[0]));
+        _sys_sleep(num);
     }
     return 0;
 }

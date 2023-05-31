@@ -19,6 +19,7 @@ extern char get_key();
 #define PAGE_DOWN 268
 #define INSERT 269
 #define CTRL_C 270
+#define EOF 271
 #define DELETE 127
 
 #define LSHIFT_BREAK 0xAA
@@ -137,6 +138,9 @@ int getKeyMake(uint8_t event)
                     if(isCtrDown && key == 'c'){
                         return CTRL_C;
                     }
+                    if(isCtrDown && key == 'd'){
+                        return EOF;
+                    }
                     return keyMapping[event];
                 }
                 return -1;
@@ -194,6 +198,10 @@ void keyboard_handler(uint8_t event)
                 break;
             case CTRL_C:
                 killForegroundProcess();
+                break;
+            case EOF:
+                newChar[0] = -1;
+                writeToPipe(buffer, newChar, 1);
                 break;
             default:
                 newChar[0] = key;

@@ -45,6 +45,6 @@ void * _sys_realloc(void *ptr, uint64_t newSize);
 uint64_t * sys_getMemoryStatus();
 Pipe _sys_openProcessPipe(char *name, int fds[2]);
 int _sys_closeProcessPipe(int fd);
-
+void _sys_sleep(int millis);
 
 #endif
