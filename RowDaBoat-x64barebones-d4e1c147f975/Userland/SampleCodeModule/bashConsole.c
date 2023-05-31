@@ -20,48 +20,51 @@ char getCommandIndex(char *commandName);
 int getFullCommand(char *str, int length, int *argc,char **args);
 
 char help(char argc, char **argv);
-char clean(uint8_t argumentQty, const char** arguments);
-char startTron(uint8_t argumentQty, const char** arguments);
-char callMemoryDump(uint8_t argumentQty, const char** arguments);
-char time(uint8_t argumentQty, const char** arguments);
-char callZeroDivision(uint8_t argumentQty, const char** arguments);
-char callInvalidOpcode(uint8_t argumentQty, const char** arguments);
-char callSetFontSize(uint8_t argumentQty, const char** arguments);
+char setFontSize(char argc, const char** argv);
 char exitConsole(uint8_t argumentQty, const char** arguments);
-char callInforeg(uint8_t argumentQty, const char** arguments);
-char callHimnoAlegria(uint8_t argumentQty, const char** arguments);
-char callMalloc(uint8_t argumentQty, const char** arguments);
-char callFree(uint8_t argumentQty, const char** arguments);
-char callExec(uint8_t argumentQty, const char** arguments);
-char callPrintProcesses(uint8_t argumentQty, const char** arguments);
-char callGetMemoryStatus(uint8_t argumentQty, const char** arguments);
-char callBlock(uint8_t argumentQty, const char** arguments);
-char callKill(uint8_t argumentQty, const char** arguments);
-char callNice(uint8_t argumentQty, const char** arguments);
-char callTestMM(uint8_t argumentQty, const char** arguments);
-char callCat(uint8_t argumentQty, const char** arguments);
-char callTestSync(uint8_t argumentQty, char **arguments);
+char callMalloc(char argc, const char** argv);
+char callFree(char argc, const char** argv);
+char callGetMemoryStatus(char argc, const char** argv);
+char callBlock(char argc, const char** argv);
+char callKill(char argc, const char** argv);
+char callNice(char argc, const char** argv);
+char callTestMM(char argc, const char** argv);
 
+typedef struct command {
+    char *name;
+    char (*function)(char argc, char **argv);
+    char argMaxQty;
+    char argMinQty;
+    char *description;
+    char executable;
+} command;
 
 #define COMMAND_QTY 24
 
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "test-mm", "phylo", "cat", "test-sync"};
-static char (*commands[])(uint8_t, char *) = {&help, &cleanScreen, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callTestMM, &phylos, &cat, &callTestSync};
-static char executableCommands[COMMAND_QTY] = { 1,      1,      1,      1,              1,          1,                  1,                  0,              1,              0,          1,                0,           0,       0,              1,                      1,              0,          0,        0,           1,          1,        1,          1};
-static char argMaxQtys[COMMAND_QTY] = {          1,     0,      0,      1,              0,          0,                  0,                  1,              0,              0,          0,                1,           1,       0,              0,                      0,              1,          1,        1,           1,          0,        0,          1};    
-static char argMinQtys[COMMAND_QTY] = {          0,     0,      0,      1,              0,          0,                  0,                  1,              0,              0,          0,                1,           1,       0,              0,                      0,              1,          1,        1,           1,          0,        0,          1};
-static char *commandDescriptions[COMMAND_QTY] =
-    {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
-     "Vacia la consola.",
-     "Ejecuta el juego \"Tron Light Cycles\" para dos jugadores.",
-     "Recibe como parametro una direccion de memoria e imprime los 32 bytes de memoria posteriores a la misma.",
-     "Imprime en pantalla la hora del sistema.",
-     "Genera la excepcion zero division y muestra en pantalla los registros en el momento del error.",
-     "Genera la excepcion invalid opcode y muestra en pantalla los registros en el momento del error.",
-     "Permite agrandar o achicar la dimension de del texto en pantalla por argumento.",
-     "Imprime el valor de los ultimos registros guardados. Para guardar los registros se debe presionar la tecla LCTRL.",
-     "Termina la ejecucion de la consola.",
-     "Reproduce el himno de la alegria."};
+static command commands[COMMAND_QTY] = {
+    {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
+    {"clear", &cleanScreen, 0, 0, "Vacia la consola.", 1},
+    {"tron", &tron, 0, 0, "Ejecuta el juego \"Tron Light Cycles\" para dos jugadores.", 1},
+    {"memory-dump", &memoryDump, 1, 1, "Recibe como parametro una direccion de memoria e imprime los 32 bytes de memoria posteriores a la misma.", 1},
+    {"time", &displayTime, 0, 0, "Imprime en pantalla la hora del sistema.", 1},
+    {"zero-division", &zeroDivision, 0, 0, "Genera la excepcion zero division y muestra en pantalla los registros en el momento del error.", 1},
+    {"invalid-opcode", &invalidOpcode, 0, 0, "Genera la excepcion invalid opcode y muestra en pantalla los registros en el momento del error.", 1},
+    {"set-font-size", &setFontSize, 1, 1, "Permite agrandar o achicar la dimension de del texto en pantalla por argumento.", 1},
+    {"inforeg", &printRegs, 0, 0, "Imprime el valor de los ultimos registros guardados. Para guardar los registros se debe presionar la tecla LCTRL.", 1},
+    {"exit", &exitConsole, 0, 0, "Termina la ejecucion de la consola.", 0},
+    {"himno-alegria", &himnoAlegria, 0, 0, "Reproduce el himno de la alegria.", 1},
+    {"malloc", &callMalloc, 1, 1, "Reserva una cantidad de memoria dada por parametro.", 1},
+    {"free", &callFree, 1, 1, "Libera la memoria reservada en la direccion dada por parametro.", 1},
+    {"ps", &printProcesses, 0, 0, "Imprime en pantalla los procesos en ejecucion.", 1},
+    {"mem", &callGetMemoryStatus, 0, 0, "Imprime en pantalla el estado de la memoria.", 1},
+    {"block", &callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1},
+    {"kill", &callKill, 1, 1, "Elimina un proceso dado por parametro.", 1},
+    {"nice", &callNice, 2, 2, "Modifica la prioridad de un proceso dado por parametro.", 1},
+    {"test-mm", &callTestMM, 1, 1, "Ejecuta el test de memoria.", 1},
+    {"phylo", &phylos, 0, 0, "Ejecuta el problema de los filosofos comensales.", 1},
+    {"cat", &cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1},
+    {"test-sync", &test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1}
+};
 
 int startConsole()
 {
@@ -131,11 +134,11 @@ char parseAndExecuteCommands(uint8_t *str, int length)
         {
             return 0;
         }
-        if (executableCommands[command] == 0)
+        if (commands[command].executable == 0)
         {
-            commands[command](0, argv);
+            commands[command].function(0, argv);
         }
-        execve(commands[command], NULL, 0, argv);
+        execve(commands[command].function, NULL, 0, argv);
         return 0;
     }
 
@@ -159,14 +162,14 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     {
         return 0;
     }
-    if (executableCommands[command1] == 0 || executableCommands[command2] == 0)
+    if (commands[command1].executable == 0 || commands[command2].executable == 0)
     {
         printText("Error: one of the commands is not executable.\n");
         return 0;
     }
 
-    execve(commands[command1], pipes1, pipeQty, argv1);
-    execve(commands[command2], pipes2, pipeQty,argv2);
+    execve(commands[command1].function, pipes1, pipeQty, argv1);
+    execve(commands[command2].function, pipes2, pipeQty,argv2);
 
     return 0;
 }
@@ -189,7 +192,7 @@ int getFullCommand(char *str, int length, int *argc, char **args)
         return -1;
     }
     memcpy(args[0], commandName, length + 1);
-    if (executableCommands[commandIndex]){
+    if (commands[commandIndex].executable){
         int hasBackground = 0;
         if (*argc > 0){
             if (strcmp(args[*argc-1], "&") == 0){
@@ -201,7 +204,7 @@ int getFullCommand(char *str, int length, int *argc, char **args)
         }else{
             strcpy(args[1], "1");
         }
-        if (*argc - hasBackground > argMaxQtys[commandIndex] || *argc + hasBackground < argMinQtys[commandIndex]){
+        if (*argc - hasBackground > commands[commandIndex].argMaxQty || *argc + hasBackground < commands[commandIndex].argMinQty){
             printf("Cantidad de argumentos invalida para %s\n", commandName);
             return -1;
         }
@@ -211,7 +214,7 @@ int getFullCommand(char *str, int length, int *argc, char **args)
         }
         args[*argc + 2] = NULL;
     }else{
-        if (*argc > argMaxQtys[commandIndex] || *argc < argMinQtys[commandIndex]){
+        if (*argc > commands[commandIndex].argMaxQty || *argc < commands[commandIndex].argMinQty){
             printf("Cantidad de argumentos invalida para %s\n", commandName);
             return -1;
         }
@@ -222,7 +225,7 @@ int getFullCommand(char *str, int length, int *argc, char **args)
 char getCommandIndex(char *commandName){
     int commandIndex;
     for (commandIndex = 0; commandIndex < COMMAND_QTY; commandIndex++){
-        if (strcmp(commandName, commandNames[commandIndex]) == 0){
+        if (strcmp(commandName, commands[commandIndex].name) == 0){
             break;
         }
     }
@@ -275,44 +278,6 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
     args[*argQty][argLen] = 0;
 }
 
-// Returns exit status
-char processCommand(uint8_t *str, int length)
-{
-    char arguments[MAX_ARGS][1024];
-    int argQty = 0;
-    char command[length + 1];
-    getCommandAndArgs(str, arguments, &argQty, command, length + 1);
-
-    for (int i = 0; i < COMMAND_QTY; i++)
-    {
-        if (strcmp(command, commandNames[i]) == 0)
-        {
-            return (*commands[i])(argQty, (const char**)arguments);
-        }
-    }
-    printf("Comando no reconocido\n");
-    return 0;
-}
-
-char callTron(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty == 0)
-    {
-        printf("No se puede llamar a tron sin argumentos\n");
-        return 0;
-    }
-    else if (argumentQty > 1)
-    {
-        printf("Demasiados argumentos para tron\n");
-        return 0;
-    }
-    else
-    {
-        printf("Llamando a %s...\n", arguments[0]);
-        return 0;
-    }
-}
-
 char help(char argc, char **argv)
 {
     if (argc == 0)
@@ -320,7 +285,7 @@ char help(char argc, char **argv)
         printf("Los comandos disponibles son:\n");
         for (int i = 0; i < COMMAND_QTY; i++)
         {
-            printf("%s\n", commandNames[i]);
+            printf("%s\n", commands[i].name);
         }
     }
     else if (argc > 1)
@@ -339,7 +304,7 @@ char help(char argc, char **argv)
         {
             for (int i = 0; i < COMMAND_QTY; i++)
             {
-                printf("%s: %s\n\n", commandNames[i], commandDescriptions[i]);
+                printf("%s: %s\n", commands[i].name, commands[i].description);
             }
             sendEOF();
             return 0;
@@ -351,69 +316,12 @@ char help(char argc, char **argv)
 }
 
 
-char clean(uint8_t argumentQty, const char** arguments)
+char callFree(char argc, const char** argv)
 {
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para clean\n");
-    }
-    else
-    {
-        cleanScreen();
-    }
-    return 0;
-}
-
-char startTron(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para tron\n");
-    }
-    else
-    {
-        tron();
-    }
-    return 0;
-}
-
-char callExec(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty <= 1)
-    {
-        char foreground[2] = "1";
-        if (argumentQty == 1)
-        {
-            if (strcmp(arguments[0], "&") == 0)
-            {
-                strcpy(foreground, "0");
-            }
-            else
-            {
-                printf("Argumento invalido para exec\n");
-                return 0;
-            }
-        }
-        char *args[3] = {"processA", foreground, NULL};
-        pid_t pidA;
-        for (int i = 0; i < 2; i++)
-        {
-            pidA = execve(&processA, NULL, 0, args);
-        }
-    }
-    else
-    {
-        printf("Argumentos invalidos para exec\n");
-    }
-    return 0;
-}
-
-char callFree(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty == 1 && isHexaNumber(arguments[0]))
+    if (argc == 1 && isHexaNumber(argv[0]))
     {
         char flag = 0;
-        uint64_t ptr = hexaStrToNum(arguments[0], strlen(arguments[0]), &flag);
+        uint64_t ptr = hexaStrToNum(argv[0], strlen(argv[0]), &flag);
         if (flag == 1)
         {
             printf("Numero muy grande. Overflow\n");
@@ -431,12 +339,12 @@ char callFree(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callMalloc(uint8_t argumentQty, const char** arguments)
+char callMalloc(char argc, const char** argv)
 {
-    if (argumentQty == 1 && isHexaNumber(arguments[0]))
+    if (argc == 1 && isHexaNumber(argv[0]))
     {
         char flag = 0;
-        uint64_t size = hexaStrToNum(arguments[0], strlen(arguments[0]), &flag);
+        uint64_t size = hexaStrToNum(argv[0], strlen(argv[0]), &flag);
         if (flag == 1)
         {
             printf("Numero muy grande. Overflow\n");
@@ -461,23 +369,23 @@ char callMalloc(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callKill(uint8_t argumentQty, const char** arguments)
+char callKill(char argc, const char** argv)
 {
-    if (argumentQty != 1)
+    if (argc != 1)
     {
         printf("Argumento invalido para kill\n");
     }
     else
     {
-        int pid = strToNum(arguments[0], strlen(arguments[0]));
+        int pid = strToNum(argv[0], strlen(argv[0]));
         kill(pid);
     }
     return 0;
 }
 
-char callGetMemoryStatus(uint8_t argumentQty, const char** arguments)
+char callGetMemoryStatus(char argc, const char** argv)
 {
-    if (argumentQty != 0)
+    if (argc != 0)
     {
         printf("Argumento invalido para get-memory-status\n");
     }
@@ -492,20 +400,19 @@ char callGetMemoryStatus(uint8_t argumentQty, const char** arguments)
         printf("Memoria total: %x\n", memStatus[0]);
         printf("Memoria reservada: %x\n", memStatus[1]);
         printf("Memoria libre: %x\n", memStatus[2]);
-        free(memStatus);
     }
     return 0;
 }
 
-char callBlock(uint8_t argumentQty, const char** arguments)
+char callBlock(char argc, const char** argv)
 {
-    if (argumentQty != 1)
+    if (argc != 1)
     {
         printf("Argumento invalido para block. Debe recibir el PID del proceso a bloquear.\n");
     }
     else
     {
-        int num = strToNum(arguments[0], strlen(arguments[0]));
+        int num = strToNum(argv[0], strlen(argv[0]));
         blockProcess(num);
     }
     return 0;
@@ -534,16 +441,16 @@ char callMemoryDump(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callNice(uint8_t argumentQty, const char** arguments)
+char callNice(char argc, const char** argv)
 {
-    if (argumentQty != 2)
+    if (argc != 2)
     {
         printf("Argumento invalido para nice\n");
     }
     else
     {
-        int pid = strToNum(arguments[0], strlen(arguments[0]));
-        int priority = strToNum(arguments[1], strlen(arguments[1]));
+        int pid = strToNum(argv[0], strlen(argv[0]));
+        int priority = strToNum(argv[1], strlen(argv[1]));
         int returnValue = _sys_nice(pid, priority);
         if (returnValue < 0)
         {
@@ -557,106 +464,33 @@ char callNice(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callCat(uint8_t argumentQty, const char** arguments)
+char callTestMM(char argc, const char** argv)
 {
-    char foreground[2] = "1";
-    if (argumentQty == 1)
-    {
-        if (arguments[1] == '&')
-        {
-            strcpy(foreground, "0");
-        }
-        else
-        {
-            printf("Argumento invalido para cat\n");
-            return 0;
-        }
-    }
-    char *args[3] = {"cat", foreground, NULL};
-    pid_t pid;
-    pid = execve(&cat, NULL, 0, args);
-    return 0;
-}
-
-char callTestMM(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty != 1)
+    if (argc != 1)
     {
         printf("Argumento invalido para test-mm\n");
     }
     else
     {
-        uint64_t memorySize = strToNum(arguments[0], strlen(arguments[0]));
+        uint64_t memorySize = strToNum(argv[0], strlen(argv[0]));
         test_mm(memorySize);
     }
     return 0;
 }
 
-char callTestSync(uint8_t argumentQty, char **arguments)
+char setFontSize(char argc, const char** argv)
 {
-    if (argumentQty != 2)
-    {
-        printf("Argumento invalido para test-sync\n");
-    }
-    else
-    {
-        test_sync(argumentQty, arguments);
-    }
-    return 0;
-}
-
-char time(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para time\n");
-    }
-    else
-    {
-        displayTime();
-    }
-    return 0;
-}
-
-char callZeroDivision(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para zero-division\n");
-    }
-    else
-    {
-        zeroDivision();
-    }
-    return 0;
-}
-
-char callInvalidOpcode(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para invalid-opcode\n");
-    }
-    else
-    {
-        invalidOpcode();
-    }
-    return 0;
-}
-
-char callSetFontSize(uint8_t argumentQty, const char** arguments)
-{
-    if (argumentQty < 1)
+    if (argc < 1)
     {
         printf("Ingrese una fuente entre 1 y 4\n");
     }
-    else if (argumentQty > 1)
+    else if (argc > 1)
     {
         printf("Demasiados argumentos\n");
     }
     else
     {
-        int num = strToNum(arguments[0], strlen(arguments[0]));
+        int num = strToNum(argv[0], strlen(argv[0]));
         if (num > 4 || num < 1)
         {
             printf("Ingrese una fuente entre 1 y 4\n");
@@ -682,19 +516,6 @@ char exitConsole(uint8_t argumentQty, const char** arguments)
     return 0;
 }
 
-char callInforeg(uint8_t argumentQty, const char **arguments)
-{
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para time\n");
-    }
-    else
-    {
-        printRegs();
-    }
-    return 0;
-}
-
 char callHimnoAlegria(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
@@ -704,19 +525,6 @@ char callHimnoAlegria(uint8_t argumentQty, const char **arguments)
     else
     {
         himnoAlegria();
-    }
-    return 0;
-}
-
-char callPrintProcesses(uint8_t argumentQty, const char **arguments)
-{
-    if (argumentQty != 0)
-    {
-        printf("Argumento invalido para time\n");
-    }
-    else
-    {
-        printProcesses();
     }
     return 0;
 }
