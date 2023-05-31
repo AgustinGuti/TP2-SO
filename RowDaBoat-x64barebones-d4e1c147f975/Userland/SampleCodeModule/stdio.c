@@ -100,8 +100,8 @@ void putChar(char character){
 }
 
 uint8_t getChar() {
-	uint16_t buf[1];
-	uint8_t c = _sys_read(0, buf, 1);
+	char buf[1];
+	char c = _sys_read(0, buf, 1);
 	if (buf[0] > UINT8_MAX || c != 1){
 		return EOF;
 	}

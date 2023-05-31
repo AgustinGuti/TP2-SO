@@ -41,7 +41,7 @@ typedef struct command {
     char executable;
 } command;
 
-#define COMMAND_QTY 23
+#define COMMAND_QTY 24
 
 static command commands[COMMAND_QTY] = {
     {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
@@ -66,7 +66,8 @@ static command commands[COMMAND_QTY] = {
     {"phylo", &phylos, 0, 0, "Ejecuta el problema de los filosofos comensales.", 1},
     {"cat", &cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1},
     {"test-sync", &test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1},
-    {"sleep", &callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1}
+    {"sleep", &callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1},
+    {"wc", &wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1}
 
 };
 

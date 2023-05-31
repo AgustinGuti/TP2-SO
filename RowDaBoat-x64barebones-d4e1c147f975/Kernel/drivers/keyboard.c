@@ -28,7 +28,9 @@ extern char get_key();
 #define LALT_BREAK 0xB8
 
 // Ctrl when shell is running
+
 #define LCTRL_MAKE_1 0xC2
+#define LCTL_MAKE_LINUX 0xD2
 // Ctrl when shell is not running
 #define LCTRL_MAKE_2 0x1D
 
@@ -39,7 +41,7 @@ extern char get_key();
 
 #define ESCAPE 27
 
-#define MAX_MAPPED 0x40
+#define MAX_MAPPED 0x41
 
 #define MIN_SPECIAL_MAPPED 0xE047
 #define MAX_SPECIAL_MAPPED 0xE053
@@ -52,7 +54,7 @@ static const uint16_t keyMapping[] =
     // 00,01   , 02 ,03 ,04 ,05 ,06 ,07 ,08 ,09 ,0A ,0B ,0C ,0D ,0E,0F,10       ,11 ,12 ,13 ,14 ,15 ,16 ,17 ,18 ,19 ,1A ,1B ,1C, 1D,
     {-1, ESCAPE, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', BACKSPACE, TAB, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', NEWLINE, LCTRL,
      // 1E,1F ,20 ,21 ,22 ,23 ,24 ,25 ,26 ,27 ,28  ,29,  2A,  2B,2C ,2D ,2E ,2F ,30 ,31 ,32 ,33 ,34 ,35 ,  36,  37, 8,  39,  3A
-     'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', -1, LSHIFT, -1, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', RSHIFT, -1, LALT, ' ', BLOCK_MAYUS};
+     'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', -1, LSHIFT, -1, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', RSHIFT, -1, LALT, ' ', BLOCK_MAYUS, '|'};
 
 // uppercase map
 static const uint16_t shiftKeyMapping[] =
@@ -111,6 +113,9 @@ int getKeyMake(uint8_t event)
     case LCTRL_MAKE_2:
         isCtrDown = 1;
         break;
+    case LCTL_MAKE_LINUX:
+        isCtrDown = 1;
+        break;
     default:
         if (event == 0xE0)
         { // 2 part command
@@ -119,6 +124,7 @@ int getKeyMake(uint8_t event)
         }
         if (isKeyMake(event) && isMapped(event))
         {
+            printf("keyMappgin %d\n", keyMapping[event]);
             uint16_t key = keyMapping[event];
             switch (key)
             {
@@ -181,6 +187,7 @@ static writeFD = 1;
 
 void keyboard_handler(uint8_t event)
 {
+    printf("%d\n", event);
     if (buffer == NULL){
         buffer = openPipe(NULL);
     }
