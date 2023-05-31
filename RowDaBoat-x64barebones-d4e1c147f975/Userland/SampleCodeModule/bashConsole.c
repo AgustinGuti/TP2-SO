@@ -6,6 +6,8 @@
 #include <memory.h>
 #include <phylos.h>
 
+#define EOF -1
+
 #define MAX_ARGS 10
 #define MAX_ARG_LENGTH 100
 #define MAX_COMMAND_NAME_LENGTH 50
@@ -15,6 +17,7 @@ extern void displayTime();
 char parseAndExecuteCommands(uint8_t *str, int length);
 void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length);
 char getCommandIndex(char *commandName);
+int getFullCommand(char *str, int length, int *argc,char **args);
 
 char help(char argc, char **argv);
 char clean(uint8_t argumentQty, const char** arguments);
@@ -118,146 +121,102 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     if (pipePos == -1)
     {
         // No pipe, execute a single command
-        char command[length + 1];
-        int command1Length = length;
-        char arguments1[MAX_ARGS][MAX_ARG_LENGTH + 1];
-        int argumentQty1 = 0;
-        char command1Name[command1Length + 1][MAX_COMMAND_NAME_LENGTH + 1];
-        memcpy(command, str, command1Length);
-        command[command1Length] = '\0';
-
-        getCommandAndArgs(command, arguments1, &argumentQty1, command1Name, command1Length + 1);
-        int command1Index = getCommandIndex(command1Name);
-        if (command1Index == -1)
+        char **argv = malloc(sizeof(char *) * (MAX_ARGS + 2));
+        for (int i = 0; i < MAX_ARGS + 2; i++){
+            argv[i] = malloc(MAX_ARG_LENGTH + 1);
+        }
+        int argc = 0;
+        int command = getFullCommand(str, length, &argc, argv);
+        if (command == -1)
         {
             return 0;
         }
-
-        char *argv1[MAX_ARGS + 2];
-        for(int i = 0; i < MAX_ARGS + 2; i++){
-            argv1[i] = malloc(MAX_ARG_LENGTH + 1);
-        }
-        argv1[0] = commandNames[command1Index];
-        if (executableCommands[command1Index]){
-            int hasBackground = 0;
-            if (argumentQty1 > 0){
-                if (strcmp(arguments1[argumentQty1-1], "&") == 0){
-                    hasBackground = 1;
-                    strcpy(arguments1[1], "0");
-                }else{
-                    strcpy(arguments1[1], "1");
-                }
-            }else{
-                strcpy(arguments1[1], "1");
-            }
-            if (argumentQty1 - hasBackground > argMaxQtys[command1Index] || argumentQty1 + hasBackground < argMinQtys[command1Index]){
-                printf("Cantidad de argumentos invalida para %s\n", command1Name);
-                return 0;
-            }
-
-            for (int i = 0; i < argumentQty1; i++){
-                strcpy(argv1[i + 2], arguments1[i]);
-            }
-            argv1[argumentQty1 + 2] = NULL;
-
-            execve(commands[command1Index], NULL, 0, argv1);
-        }else{
-            if (argumentQty1 > argMaxQtys[command1Index] || argumentQty1 < argMinQtys[command1Index]){
-                printf("Cantidad de argumentos invalida para %s\n", command1Name);
-                return 0;
-            }
-            commands[command1Index](argumentQty1, arguments1);
-        }
-
-        return 0;
-    }
-
-
-    // Split the string at the pipe position
-    int command1Length = pipePos;
-    int command2Length = length - command1Length - 1;
-
-    char command1[command1Length + 1];
-    char command2[command2Length + 1];
-    memcpy(command1, str, command1Length);
-    command1[command1Length] = '\0';
-    memcpy(command2, str + pipePos + 1, command2Length);
-    command2[command2Length] = '\0';
-
-    char arguments1[MAX_ARGS][MAX_ARG_LENGTH];
-    int argumentQty1 = 0;
-    char command1Name[command1Length + 1][MAX_COMMAND_NAME_LENGTH + 1];
-    getCommandAndArgs(command1, arguments1, &argumentQty1, command1Name, command1Length + 1);
-    int command1Index = getCommandIndex(command1Name);
-    if (argumentQty1 > argMaxQtys[command1Index] || argumentQty1 < argMinQtys[command1Index]){
-        printf("Cantidad de argumentos invalida para %s\n", command1Name);
-        return 0;
-    }
-
-    char arguments2[MAX_ARGS][MAX_ARG_LENGTH];
-    int argumentQty2 = 0;
-    char command2Name[command2Length + 1][MAX_COMMAND_NAME_LENGTH + 1];
-    getCommandAndArgs(command2, arguments2, &argumentQty2, command2Name, command2Length + 1);
-    printf("Pipe found\n");
-    int command2Index = getCommandIndex(command2Name);
-    if (argumentQty2 > argMaxQtys[command2Index] || argumentQty2 < argMinQtys[command2Index]){
-        printf("Cantidad de argumentos invalida para %s\n", command2Name);
-        return 0;
-    }
-
-
-    if(command1Index == -1 || command2Index == -1){
-        return 0;
-    }
-
-    Pipe connectingPipe = NULL;
-
-    if (executableCommands[command1Index] == 1 && executableCommands[command2Index] == 1){
-        connectingPipe = pipe(NULL, NULL);
-        if (connectingPipe == NULL)
+        if (executableCommands[command] == 0)
         {
-            printf("Error al crear el pipe\n");
-            return 0;
+            commands[command](0, argv);
         }
+        execve(commands[command], NULL, 0, argv);
+        return 0;
     }
 
-    char *argv1[MAX_ARGS + 2];
+    Pipe connectingPipe = pipe(NULL, NULL);
+    Pipe pipes1[2] = {NULL, connectingPipe};
+    Pipe pipes2[2] = {connectingPipe, NULL};
+    int pipeQty = 2;
+
+    char **argv1 = malloc(sizeof(char *) * (MAX_ARGS + 2));
     for (int i = 0; i < MAX_ARGS + 2; i++){
         argv1[i] = malloc(MAX_ARG_LENGTH + 1);
     }
-    strcpy(argv1[0], command1Name);
-    if (strcmp(arguments1[argumentQty1-1], "&") == 0){
-        strcpy(argv1[1], "0");
-    }else{
-        strcpy(argv1[1], "1");
-    }
-    for (int i = 0; i < argumentQty1; i++){
-        strcpy(argv1[i + 2], arguments1[i]);
-    }
-    argv1[argumentQty1 + 2] = NULL;
-
-    char *argv2[MAX_ARGS + 2];
+    char **argv2 = malloc(sizeof(char *) * (MAX_ARGS + 2));
     for (int i = 0; i < MAX_ARGS + 2; i++){
         argv2[i] = malloc(MAX_ARG_LENGTH + 1);
     }
-    strcpy(argv2[0], command2Name);
-    if (strcmp(arguments2[argumentQty2-1], "&") == 0){
-        strcpy(argv2[1], "0");
-    }else{
-        strcpy(argv2[1], "1");
+    int argc = 0;
+    int command1 = getFullCommand(str, pipePos,&argc, argv1);
+    int command2 = getFullCommand(str + pipePos + 1, length - pipePos - 1, &argc, argv2);
+    if (command1 == -1 || command2 == -1)
+    {
+        return 0;
     }
-    for (int i = 0; i < argumentQty2; i++){
-        strcpy(argv2[i + 2], arguments2[i]);
+    if (executableCommands[command1] == 0 || executableCommands[command2] == 0)
+    {
+        printText("Error: one of the commands is not executable.\n");
+        return 0;
     }
-    argv2[argumentQty2 + 2] = NULL;
 
-    Pipe pipes1[2] = {NULL, connectingPipe};
-    Pipe pipes2[2] = {connectingPipe, NULL};
-    char pipeQty = 2;
+    execve(commands[command1], pipes1, pipeQty, argv1);
+    execve(commands[command2], pipes2, pipeQty,argv2);
 
-    execve(commands[command1Index], pipes1, pipeQty, argv1);
-    execve(commands[command2Index], pipes2, pipeQty, argv2);
     return 0;
+}
+
+int getFullCommand(char *str, int length, int *argc, char **args)
+{
+    char command[length + 1];
+    char *arguments[MAX_ARGS];
+    for (int i = 0; i < MAX_ARGS; i++)
+    {
+        arguments[i] = malloc(MAX_ARG_LENGTH + 1);
+    }
+    *argc = 0;
+    char commandName[length + 1];
+    memcpy(command, str, length);
+    command[length] = 0;
+    getCommandAndArgs(command, arguments, argc, commandName, length + 1);
+    int commandIndex = getCommandIndex(commandName);
+    if (commandIndex == -1){
+        return -1;
+    }
+    memcpy(args[0], commandName, length + 1);
+    if (executableCommands[commandIndex]){
+        int hasBackground = 0;
+        if (*argc > 0){
+            if (strcmp(args[*argc-1], "&") == 0){
+                hasBackground = 1;
+                strcpy(args[1], "0");
+            }else{
+                strcpy(args[1], "1");
+            }
+        }else{
+            strcpy(args[1], "1");
+        }
+        if (*argc - hasBackground > argMaxQtys[commandIndex] || *argc + hasBackground < argMinQtys[commandIndex]){
+            printf("Cantidad de argumentos invalida para %s\n", commandName);
+            return -1;
+        }
+
+        for (int i = 0; i < *argc; i++){
+            strcpy(args[i + 2], arguments[i]);
+        }
+        args[*argc + 2] = NULL;
+    }else{
+        if (*argc > argMaxQtys[commandIndex] || *argc < argMinQtys[commandIndex]){
+            printf("Cantidad de argumentos invalida para %s\n", commandName);
+            return -1;
+        }
+    }
+    return commandIndex;
 }
 
 char getCommandIndex(char *commandName){
@@ -276,7 +235,6 @@ char getCommandIndex(char *commandName){
 
 void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length)
 {
-    printf("Getting command and args %s\n", str);
     int i = 0;
     while (str[i] == ' ')
     {
@@ -284,23 +242,23 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
     }
     int offset = i;
     int cmd_idx = 0;
-    while (str[i] != ' ' && str[i] != '\0')
+    while (str[i] != ' ' && str[i] != 0)
     {
         i++;
         cmd_idx++;
     }
     memcpy(command, str+offset, cmd_idx);
-    command[cmd_idx+1] = '\0';
+    command[cmd_idx] = 0;
     int argIdx = 0;
     *argQty = 0;
     int argLen = 0;
-    while (str[i] != '\0')
+    while (str[i] != 0)
     {
         if (str[i] == ' ')
         {
             if (argLen > 0)
             {
-                args[*argQty][argLen] = '\0';
+                args[*argQty][argLen] = 0;
                 (*argQty)++;
                 argLen = 0;
             }
@@ -314,7 +272,7 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
     
     if (argLen > 0)
         (*argQty)++;
-    args[*argQty][argLen] = '\0';    
+    args[*argQty][argLen] = 0;
 }
 
 // Returns exit status
@@ -357,7 +315,6 @@ char callTron(uint8_t argumentQty, const char** arguments)
 
 char help(char argc, char **argv)
 {
-    printf("Help\n");
     if (argc == 0)
     {
         printf("Los comandos disponibles son:\n");
@@ -375,6 +332,7 @@ char help(char argc, char **argv)
         if (strcmp(argv[0], "please") == 0)
         {
             printf("No.\n");
+            sendEOF();
             return 0;
         }
         else if (strcmp(argv[0], "all") == 0)
@@ -383,21 +341,12 @@ char help(char argc, char **argv)
             {
                 printf("%s: %s\n\n", commandNames[i], commandDescriptions[i]);
             }
+            sendEOF();
             return 0;
-        }
-        else
-        {
-            for (int i = 0; i < COMMAND_QTY; i++)
-            {
-                if (strcmp(argv[0], commandNames[i]) == 0)
-                {
-                    printf("%s\n", commandDescriptions[i]);
-                    return 0;
-                }
-            }
         }
         printf("Argumento invalido para help\n");
     }
+    sendEOF();
     return 0;
 }
 

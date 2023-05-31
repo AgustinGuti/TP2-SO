@@ -183,12 +183,12 @@ void keyboard_handler(uint8_t event)
     int key = getKeyMake(event);
     if (key != -1)
     {
-        int newChar[1];
+        char newChar[1];
         switch (key){
             case TAB:
                 writeToPipe(buffer, "   ", 3);
                 break;
-            case NEWLINE: // Enter
+            case NEWLINE:
                 newChar[0] = NEWLINE;
                 writeToPipe(buffer, newChar, 1);
                 break;
@@ -196,7 +196,7 @@ void keyboard_handler(uint8_t event)
                 killForegroundProcess();
                 break;
             default:
-                newChar[0] = key;
+                newChar[0] = (char)key;
                 writeToPipe(buffer, newChar, 1);
                 break;
         }

@@ -13,7 +13,7 @@ typedef struct PipeCDT *Pipe;
 
 Pipe openPipe(char *name);
 int closePipe(Pipe pipe);
-int readFromPipe(Pipe pipe, uint16_t *buffer, int size);
-int writeToPipe(Pipe pipe, uint16_t *buffer, int size);
+int readFromPipe(Pipe pipe, char *buffer, int size);
+int writeToPipe(Pipe pipe, char *buffer, int size);
 
 #endif

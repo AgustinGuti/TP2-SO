@@ -16,7 +16,7 @@
 
 // prints until a 0 is found or count is reached
 void sys_write(int fd, const char *buf, uint64_t count);
-int sys_read(int fd, const uint16_t *buf, uint32_t count);
+int sys_read(int fd, const char *buf, uint32_t count);
 void sys_drawSprite(uint16_t xTopLeft, uint16_t yTopLeft, uint16_t width, uint16_t height, uint8_t sprite[height][width * getScreenBpp() / 8]);
 uint32_t sys_getMillis();
 void sys_cleanScreen();
@@ -104,7 +104,7 @@ void sys_write(int fd, const char *buf, uint64_t count)
 }
 
 // Read up to count chars to buf, returns amount of chars
-int sys_read(int fd, const uint16_t *buf, uint32_t count)
+int sys_read(int fd, const char *buf, uint32_t count)
 {
     return readProcessPipe(fd, buf, count);
 }

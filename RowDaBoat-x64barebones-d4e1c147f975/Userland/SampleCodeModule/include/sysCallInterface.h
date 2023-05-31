@@ -15,7 +15,7 @@ typedef struct PipeCDT *Pipe;
 void _sys_write(int fd, char *str, int length);
 void _sys_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color);
 uint32_t _sys_getMillis();
-int _sys_read(int fd, uint16_t *buf, int count);
+int _sys_read(int fd, char *buf, int count);
 uint16_t _sys_getScreenWidth();
 uint16_t _sys_getScreenHeight();
 void _sys_cleanScreen();

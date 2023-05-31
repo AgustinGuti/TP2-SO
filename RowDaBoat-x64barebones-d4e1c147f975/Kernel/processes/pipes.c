@@ -8,6 +8,7 @@ typedef struct PipeCDT{
     int writeIndex;
     int attached;
     sem_t sem;
+    sem_t mutex;
 }PipeCDT;
 
 typedef struct PipesCDT{
@@ -59,6 +60,7 @@ Pipe openPipe(char *name){
     pipe->writeIndex = 0;
     pipe->attached = 1;
     pipe->sem = semOpen(NULL, 0);
+    pipe->mutex = semOpen(NULL, 1);
     if(pipe->sem == NULL){
         return NULL;
     }
@@ -73,7 +75,6 @@ int closePipe(Pipe pipe){
         return -1;
     }
     if (pipe->attached > 1){
-        printf("Pipe %s is still attached\n", pipe->name);
         pipe->attached--;
     }else{
         semClose(pipe->sem);
@@ -86,32 +87,38 @@ int closePipe(Pipe pipe){
     return 0;
 }
 
-int readFromPipe(Pipe pipe, uint16_t *buffer, int size){
-    if(pipe == NULL || buffer == NULL || size < 0){
-        return -1;
-    }
-    if(pipe->readIndex == pipe->writeIndex){
-        semWait(pipe->sem);
-    }
-    int i = 0;
-    while(i < size && pipe->readIndex != pipe->writeIndex){
-        buffer[i] = pipe->buffer[pipe->readIndex];
-        pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
-        i++;
-    }
-    return i;
-}
-
-int writeToPipe(Pipe pipe, uint16_t *buffer, int size){
+int readFromPipe(Pipe pipe, char *buffer, int size){
     if(pipe == NULL || buffer == NULL || size < 0){
         return -1;
     }
     int i = 0;
     while(i < size){
+        if(pipe->readIndex == pipe->writeIndex){
+            semWait(pipe->sem);
+        }
+        semWait(pipe->mutex);
+        buffer[i] = pipe->buffer[pipe->readIndex];
+        pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
+        i++;
+        semPost(pipe->mutex);
+    }
+    return i;
+}
+
+int writeToPipe(Pipe pipe, char *buffer, int size){
+    if(pipe == NULL || buffer == NULL || size < 0){
+        return -1;
+    }
+    int i = 0;
+    while(i < size){
+        semWait(pipe->mutex);
         pipe->buffer[pipe->writeIndex] = buffer[i];
         pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
         i++;
+        if (pipe->readIndex == (pipe->writeIndex - 1) % pipe->size){
+            semPost(pipe->sem);
+        }
+        semPost(pipe->mutex);
     }
-    semPost(pipe->sem);
     return i;
 }

@@ -1,6 +1,8 @@
 #include <testProcesses.h>
 #include <stdio.h>
 
+#define EOF -1
+
 int a[1] = {100};
 sem_t sem;
 
@@ -50,8 +52,9 @@ void processC() {
 
 void cat() {
     char buffer[2];
-    while(1){
+    do {
         _sys_read(0,buffer, 1);
         printf("%c", buffer[0]);
     }
+    while(buffer[0] != EOF);
 }

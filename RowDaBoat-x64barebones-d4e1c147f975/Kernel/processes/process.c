@@ -70,7 +70,6 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
 
 Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe* pipes, char pipeQty)
 {
-    printf("Creating process %s\n", name);
     Process process = initProcess(name, priority, foreground, parentPID);
     //Pipe stdPipe = createPipe(NULL);
     process->stdio = getKeyboardBuffer();
@@ -82,7 +81,6 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     if (pipeQty > 0){
         if (pipes[0] != NULL){
             process->fds[STDIN] = pipes[0];
-            printf ("Name %s, fd %d\n", name, process->fds[STDIN]);
         }
     }
     if (pipeQty > 1){
