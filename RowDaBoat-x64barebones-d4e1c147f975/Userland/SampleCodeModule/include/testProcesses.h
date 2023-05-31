@@ -14,3 +14,5 @@ void processC();
 void cat();
 
 void wc();
+
+void loop(int sec);

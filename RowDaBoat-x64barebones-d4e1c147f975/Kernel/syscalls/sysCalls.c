@@ -68,7 +68,7 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_malloc,
     (uint64_t)&sys_free,
     (uint64_t)&sys_kill,
-    (uint64_t)sys_execve,
+    (uint64_t)&sys_execve,
     (uint64_t)&sys_printProcesses,
     (uint64_t)&sys_exit,
     (uint64_t)&sys_yield,
@@ -301,6 +301,5 @@ int sys_closeProcessPipe(int fd)
 
 void sys_sleep(int millis)
 {
-    printf("Sleeping for %d millis\n", millis);
     sleep(millis);
 }
