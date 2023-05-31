@@ -11,7 +11,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 33 // functions quantity in sysCalls[]
+#define READY_CALLS 34 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -48,6 +48,7 @@ int sys_nice(pid_t pid, int priority);
 pid_t sys_waitpid(pid_t pid);
 Pipe sys_openProcessPipe(char *name, int fds[2]);
 int sys_closeProcessPipe(int fd);
+void sys_sleep(int millis);
 
 static uint64_t sysCalls[] = {
     (uint64_t)&sys_write,
@@ -82,7 +83,8 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_nice,
     (uint64_t)&sys_waitpid,
     (uint64_t)&sys_openProcessPipe,
-    (uint64_t)&sys_closeProcessPipe
+    (uint64_t)&sys_closeProcessPipe,
+    (uint64_t)&sys_sleep
 };
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
@@ -295,4 +297,10 @@ Pipe sys_openProcessPipe(char *name, int fds[2])
 int sys_closeProcessPipe(int fd)
 {
     closeProcessPipe(fd);
+}
+
+void sys_sleep(int millis)
+{
+    printf("Sleeping for %d millis\n", millis);
+    sleep(millis);
 }

@@ -38,11 +38,12 @@ char callPhylo(uint8_t argumentQty, const char** arguments);
 char callCat(uint8_t argumentQty, const char** arguments);
 char callTestSync(uint8_t argumentQty, char **arguments);
 char callWC(uint8_t argumentQty, const char** arguments);
+char callSleep(uint8_t argumentQty, const char** arguments);
 
-#define COMMAND_QTY 25
+#define COMMAND_QTY 26
 
-static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "cat", "test-sync", "wc"};
-static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callCat, &callTestSync, &callWC};
+static char *commandNames[COMMAND_QTY] = {"help", "clear", "tron", "memory-dump", "time", "zero-division", "invalid-opcode", "set-font-size", "inforeg", "exit", "himno-alegria", "malloc", "free", "exec", "ps", "mem-status", "block", "kill", "nice", "fork", "test-mm", "phylo", "cat", "test-sync", "wc", "sleep"};
+static char (*commands[])(uint8_t, char *) = {&help, &clean, &tron, &callMemoryDump, &time, &callZeroDivision, &callInvalidOpcode, &callSetFontSize, &callInforeg, &exitConsole, &callHimnoAlegria, &callMalloc, &callFree, &callExec, &callPrintProcesses, &callGetMemoryStatus, &callBlock, &callKill, &callNice, &callFork, &callTestMM, &callPhylo, &callCat, &callTestSync, &callWC, &callSleep};
 static char *commandDescriptions[COMMAND_QTY] =
     {"Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.",
      "Vacia la consola.",
@@ -673,6 +674,20 @@ char callPrintProcesses(uint8_t argumentQty, const char **arguments)
     else
     {
         printProcesses();
+    }
+    return 0;
+}
+
+char callSleep(uint8_t argumentQty, const char **arguments)
+{
+    if (argumentQty != 1)
+    {
+        printf("Argumento invalido para sleep\n");
+    }
+    else
+    {
+        int num = strToNum(arguments[0], strlen(arguments[0]));
+        _sys_sleep(num);
     }
     return 0;
 }

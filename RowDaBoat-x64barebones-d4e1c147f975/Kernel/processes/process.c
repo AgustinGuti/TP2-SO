@@ -46,6 +46,7 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     process->parentPID = parentPID;
     process->waitingForPID = -1;
     process->waitingSem = NULL;
+    process->sleepTime = 0;
     process->fds = (Pipe *)malloc(INITIAL_FD_LIMIT*sizeof(Pipe));
     process->fdLimit = INITIAL_FD_LIMIT;
     process->pipeTypes = (PipeType *)malloc(INITIAL_FD_LIMIT*sizeof(PipeType));

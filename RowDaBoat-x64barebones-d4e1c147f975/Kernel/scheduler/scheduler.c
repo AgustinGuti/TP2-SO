@@ -17,6 +17,9 @@ typedef struct SchedulerCDT
     char skipQuantum;
     LinkedList processesToFree;
     Iterator itProcessesToFree;
+    LinkedList sleepingProcesses;
+    Iterator itSleepingProcesses;
+    uint64_t prevMillis;
 } SchedulerCDT;
 
 static Scheduler scheduler = NULL;
@@ -57,6 +60,9 @@ void initScheduler()
     scheduler->quantumCounter = BURST_TIME - 1;
     scheduler->skipPID = KERNEL_PID;
     scheduler->skipQuantum = 0;
+    scheduler->sleepingProcesses = createLinkedList();
+    scheduler->itSleepingProcesses = iterator(scheduler->sleepingProcesses);
+    scheduler->prevMillis = getMillis();
     ready = 1;
 }
 
@@ -65,8 +71,22 @@ void *schedule(void *rsp)
     if (scheduler != NULL && ready)
     {
         scheduler->quantumCounter++;
+        // enter if scheduler needs to change process
         if (scheduler->quantumCounter >= scheduler->quantum || scheduler->skipQuantum || scheduler->skipPID == scheduler->currentProcess->pid)
         {
+            resetIterator(scheduler->itSleepingProcesses);
+            uint64_t millis = getMillis();
+            while(hasNext(scheduler->itSleepingProcesses))
+            {
+                Process p = (Process)next(scheduler->itSleepingProcesses);
+                p->sleepTime -= millis - scheduler->prevMillis;
+                if (p->sleepTime <= 0)
+                {
+                    remove(scheduler->sleepingProcesses, p);
+                    unblockProcessFromProcess(p);
+                }
+            }
+            scheduler->prevMillis = millis;
             // if process skipped quantum, its priority is raised
             if (scheduler->currentProcess->state != ZOMBIE && scheduler->currentProcess->pid != EMPTY_PID)
             {
@@ -425,4 +445,10 @@ pid_t waitpid(pid_t pid)
 Process getCurrentProcess()
 {
     return scheduler->currentProcess;
+}
+
+void sleep(int millis) {
+    scheduler->currentProcess->sleepTime = millis + getMillis() - scheduler->prevMillis;
+    insert(scheduler->sleepingProcesses, scheduler->currentProcess);
+    blockProcessFromProcess(scheduler->currentProcess);
 }

@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "functions.h"
 #include "process.h"
+#include "time.h"
 
 #define STACK_SIZE 4096
 #define BURST_TIME 5
@@ -34,5 +35,6 @@ int nice(pid_t pid, int priority);
 void startWrapper(void *entryPoint, char argc, char *argv[]);
 pid_t waitpid(pid_t pid);
 Process getCurrentProcess();
+void sleep(int millis);
 
 #endif /* SCHEDULER_H */
