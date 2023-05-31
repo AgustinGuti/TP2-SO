@@ -11,7 +11,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 33 // functions quantity in sysCalls[]
+#define READY_CALLS 34 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 // prints until a 0 is found or count is reached
@@ -45,6 +45,7 @@ uint64_t *sys_getMemoryStatus();
 void sys_kill(int pid);
 int sys_nice(pid_t pid, int priority);
 pid_t sys_waitpid(pid_t pid);
+void * sys_realloc(void *ptr, uint64_t newSize);
 Pipe sys_openProcessPipe(char *name, int fds[2]);
 int sys_closeProcessPipe(int fd);
 void sys_sleep(int millis);
@@ -82,7 +83,8 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_waitpid,
     (uint64_t)&sys_openProcessPipe,
     (uint64_t)&sys_closeProcessPipe,
-    (uint64_t)&sys_sleep
+    (uint64_t)&sys_sleep,
+    (uint64_t)&sys_realloc
 };
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
@@ -122,6 +124,11 @@ uint64_t sys_free(void *ptr)
         return free(ptr);
     }
     return 0;
+}
+
+void *sys_realloc(void *ptr, uint64_t newSize)
+{
+    return realloc(ptr, newSize);
 }
 
 int sys_execve(void* entryPoint, Pipe *pipes, char pipeQty, char *const argv[])

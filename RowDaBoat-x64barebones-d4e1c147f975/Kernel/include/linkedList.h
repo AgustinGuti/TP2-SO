@@ -24,5 +24,7 @@ void headToBack(LinkedList list);
 void resetIterator(Iterator iterator);
 void moveToBack(LinkedList list, void* data);
 void printList(LinkedList list);
+void * removeFirst(LinkedList list);
+void switchList(LinkedList origin, LinkedList dest);
 
 #endif /* LINKED_LIST_H */

@@ -17,6 +17,8 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 
 uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree);
 
+void * reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, uint64_t *const allocatedMemorySize);
+
 uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap);
 
 #endif

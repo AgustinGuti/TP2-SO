@@ -30,6 +30,7 @@ char callKill(char argc, const char** argv);
 char callNice(char argc, const char** argv);
 char callTestMM(char argc, const char** argv);
 char callSleep(char argc, const char **argv);
+char callRealloc(char argc, const char **argv);
 
 
 typedef struct command {
@@ -41,7 +42,7 @@ typedef struct command {
     char executable;
 } command;
 
-#define COMMAND_QTY 24
+#define COMMAND_QTY 25
 
 static command commands[COMMAND_QTY] = {
     {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
@@ -67,8 +68,8 @@ static command commands[COMMAND_QTY] = {
     {"cat", &cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1},
     {"test-sync", &test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1},
     {"sleep", &callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1},
-    {"wc", &wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1}
-
+    {"wc", &wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1},
+    {"realloc", &callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1}
 };
 
 int startConsole()
@@ -387,7 +388,7 @@ char callMalloc(char argc, const char** argv)
         }
         else
         {
-            uint64_t* ptr = malloc(size);
+            uint64_t *ptr = malloc(size);
             if (ptr == NULL)
             {
                 printf("No se reservo memoria\n");
@@ -405,7 +406,34 @@ char callMalloc(char argc, const char** argv)
     return 0;
 }
 
-char callKill(char argc, const char** argv)
+char callRealloc(char argc, const char **argv)
+{
+    if (argc != 2 || !isHexaNumber(argv[0]) || !isHexaNumber(argv[1]))
+    {
+        printf("Argumento invalido para realloc\n");
+        return 0;
+    }
+    int flag1 = 0, flag2 = 0;
+    uint64_t *ptr = (uint64_t *)hexaStrToNum(argv[0], strlen(argv[0]), &flag1);
+
+    uint64_t newSize = (uint64_t)hexaStrToNum(argv[1], strlen(argv[1]), &flag2);
+    if (flag1 == 1 || flag2 == 1)
+    {
+        printerr("Argumento inválido\n", 0);
+        return 0;
+    }
+    uint64_t *newPtr = realloc(ptr, newSize);
+    if (newPtr == NULL)
+    {
+        printf("No se reservo memoria\n");
+    }
+    else
+    {
+        printf("Se reservo memoria en la direccion %x\n", newPtr);
+    }
+}
+
+char callKill(char argc, const char **argv)
 {
     if (argc != 1)
     {
@@ -427,7 +455,7 @@ char callGetMemoryStatus(char argc, const char** argv)
     }
     else
     {
-        uint64_t* memStatus = getMemoryStatus();
+        uint64_t *memStatus = getMemoryStatus();
         if (memStatus == NULL)
         {
             printf("No se pudo obtener el estado de la memoria\n");
@@ -454,7 +482,7 @@ char callBlock(char argc, const char** argv)
     return 0;
 }
 
-char callMemoryDump(uint8_t argumentQty, const char** arguments)
+char callMemoryDump(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty == 1 && isHexaNumber(arguments[0]))
     {
@@ -539,7 +567,7 @@ char setFontSize(char argc, const char** argv)
     return 0;
 }
 
-char exitConsole(uint8_t argumentQty, const char** arguments)
+char exitConsole(uint8_t argumentQty, const char **arguments)
 {
     if (argumentQty != 0)
     {

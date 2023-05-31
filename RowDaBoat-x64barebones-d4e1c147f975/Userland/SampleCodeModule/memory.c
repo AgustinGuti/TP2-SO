@@ -12,3 +12,7 @@ uint64_t free(void *ptr){
 uint64_t * getMemoryStatus(){
     return _sys_getMemoryStatus();
 }
+
+void *realloc(void *ptr, uint64_t newSize){
+    return _sys_realloc(ptr, newSize);
+}

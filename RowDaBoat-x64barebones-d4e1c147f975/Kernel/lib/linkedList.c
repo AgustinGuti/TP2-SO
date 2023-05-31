@@ -134,6 +134,57 @@ void remove(LinkedList list, void *data)
     }
 }
 
+void *removeFirst(LinkedList list){
+    NodeCTD *current = list->head;
+    if (current == NULL)
+        return NULL;
+
+    if (current == list->head)
+        list->head = current->next;
+
+    if (current == list->tail)
+        list->tail = current->prev;
+
+    if (current->prev != NULL)
+        current->prev->next = current->next;
+
+    if (current->next != NULL)
+        current->next->prev = current->prev;
+
+    list->size--;
+    return current->data;
+}
+
+void switchList(LinkedList origin, LinkedList dest){
+    if (origin == NULL || dest == NULL)
+        return;
+    NodeCTD *current = origin->head;
+    if (current == NULL)
+        return;
+
+    if (current == origin->head)
+        origin->head = current->next;
+
+    if (current == origin->tail)
+        origin->tail = current->prev;
+
+    if (current->prev != NULL)
+        current->prev->next = current->next;
+
+    if (current->next != NULL)
+        current->next->prev = current->prev;
+
+    if (dest->tail != NULL)
+        dest->tail->next = current;
+    dest->tail = current;
+
+    if (dest->head == NULL)
+        dest->head = current;
+
+    dest->size++;
+    origin->size--;
+}
+
 // Function to get an element at a specific index
 void *get(LinkedList list, int index)
 {

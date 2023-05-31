@@ -29,6 +29,7 @@ GLOBAL _sys_semPost
 GLOBAL _sys_kill
 GLOBAL _sys_nice
 GLOBAL _sys_waitpid
+GLOBAL _sys_realloc
 GLOBAL _sys_openProcessPipe
 GLOBAL _sys_closeProcessPipe
 GLOBAL _sys_sleep
@@ -391,6 +392,7 @@ _sys_waitpid:
     mov rsp, rbp
     pop rbp
     ret
+
 ;Pipe sys_openProcessPipe(char *name, int fds[2]);
 _sys_openProcessPipe:
     push rbp
@@ -424,4 +426,16 @@ _sys_sleep:
 
     mov rsp, rbp
     pop rbp
+
+;void * sys_realloc(void * ptr, uint64_t size);
+_sys_realloc:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 33     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
     ret
