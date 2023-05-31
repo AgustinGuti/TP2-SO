@@ -172,7 +172,6 @@ Process getNextProcess()
 pid_t execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[])
 {
     int foreground = strToNum(argv[1], 1);
-
     Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, foreground, &argv[2] , &startWrapper, getpid(), pipes, pipeQty);
     if(foreground){
         int currentForeground = scheduler->currentProcess->foreground;

@@ -17,7 +17,7 @@ extern void displayTime();
 char parseAndExecuteCommands(uint8_t *str, int length);
 void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length);
 char getCommandIndex(char *commandName);
-int getFullCommand(char *str, int length, int *argc,char **args);
+int getFullCommand(char *str, int length,char **args);
 
 char help(char argc, char **argv);
 char setFontSize(char argc, const char** argv);
@@ -121,7 +121,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     char pipePos = -1;
     for (int i = 0; i < length; i++)
     {
-        if (str[i] == '_')
+        if (str[i] == '|')
         {
             pipePos = i;
             break;
@@ -134,8 +134,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
         for (int i = 0; i < MAX_ARGS + 2; i++){
             argv[i] = malloc(MAX_ARG_LENGTH + 1);
         }
-        int argc = 0;
-        int command = getFullCommand(str, length, &argc, argv);
+        int command = getFullCommand(str, length, argv);
         if (command == -1)
         {
             return 0;
@@ -165,9 +164,8 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     for (int i = 0; i < MAX_ARGS + 2; i++){
         argv2[i] = malloc(MAX_ARG_LENGTH + 1);
     }
-    int argc = 0;
-    int command1 = getFullCommand(str, pipePos,&argc, argv1);
-    int command2 = getFullCommand(str + pipePos + 1, length - pipePos - 1, &argc, argv2);
+    int command1 = getFullCommand(str, pipePos, argv1);
+    int command2 = getFullCommand(str + pipePos + 1, length - pipePos - 1, argv2);
     if (command1 == -1 || command2 == -1)
     {
         return 0;
@@ -196,7 +194,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     return 0;
 }
 
-int getFullCommand(char *str, int length, int *argc, char **args)
+int getFullCommand(char *str, int length, char **args)
 {
     char command[length + 1];
     char *arguments[MAX_ARGS];
@@ -204,11 +202,11 @@ int getFullCommand(char *str, int length, int *argc, char **args)
     {
         arguments[i] = malloc(MAX_ARG_LENGTH + 1);
     }
-    *argc = 0;
+    int argc = 0;
     char commandName[length + 1];
     memcpy(command, str, length);
     command[length] = 0;
-    getCommandAndArgs(command, arguments, argc, commandName, length + 1);
+    getCommandAndArgs(command, arguments, &argc, commandName, length + 1);
     int commandIndex = getCommandIndex(commandName);
     if (commandIndex == -1){
         return -1;
@@ -216,8 +214,8 @@ int getFullCommand(char *str, int length, int *argc, char **args)
     memcpy(args[0], commandName, length + 1);
     if (commands[commandIndex].executable){
         int hasBackground = 0;
-        if (*argc > 0){
-            if (strcmp(args[*argc-1], "&") == 0){
+        if (argc > 0){
+            if (strcmp(arguments[argc-1], "&") == 0){
                 hasBackground = 1;
                 strcpy(args[1], "0");
             }else{
@@ -226,8 +224,7 @@ int getFullCommand(char *str, int length, int *argc, char **args)
         }else{
             strcpy(args[1], "1");
         }
-        if (*argc - hasBackground > commands[commandIndex].argMaxQty || *argc + hasBackground < commands[commandIndex].argMinQty){
-            printf("Cantidad de argumentos invalida para %s\n", commandName);
+        if (argc - hasBackground > commands[commandIndex].argMaxQty || argc + hasBackground < commands[commandIndex].argMinQty){
             for (int i = 0; i < MAX_ARGS; i++)
             {
                 free(arguments[i]);
@@ -236,12 +233,12 @@ int getFullCommand(char *str, int length, int *argc, char **args)
             return -1;
         }
 
-        for (int i = 0; i < *argc; i++){
+        for (int i = 0; i < argc - hasBackground; i++){
             strcpy(args[i + 2], arguments[i]);
         }
-        args[*argc + 2] = NULL;
+        args[argc + 2 - hasBackground] = NULL;
     }else{
-        if (*argc > commands[commandIndex].argMaxQty || *argc < commands[commandIndex].argMinQty){
+        if (argc > commands[commandIndex].argMaxQty || argc < commands[commandIndex].argMinQty){
             printf("Cantidad de argumentos invalida para %s\n", commandName);
             for (int i = 0; i < MAX_ARGS; i++)
             {
@@ -345,6 +342,15 @@ char help(char argc, char **argv)
             }
             sendEOF();
             return 0;
+        } else{
+            for (int i = 0; i < COMMAND_QTY; i++)
+            {
+                if (strcmp(argv[0], commands[i].name) == 0)
+                {
+                    printf("%s\n", commands[i].description);
+                    return 0;
+                }
+            }
         }
         printf("Argumento invalido para help\n");
     }
@@ -382,6 +388,7 @@ char callMalloc(char argc, const char** argv)
     {
         char flag = 0;
         uint64_t size = hexaStrToNum(argv[0], strlen(argv[0]), &flag);
+
         if (flag == 1)
         {
             printf("Numero muy grande. Overflow\n");
