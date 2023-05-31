@@ -181,21 +181,6 @@ void printMemoryState(){
 
 void* allocMemory(MemoryManagerADT buddy, uint64_t size, uint64_t *allocatedMemorySize) {
     void* res= allocMemoryRec(buddy, size, 0, allocatedMemorySize);
-
-    // printf("Allocated %x bytes at 0x%x\n", size, res);
-    // long bit = getBlockIndex(buddy, res);
-    // if (bit < 0) {
-    //     return 0;
-    // }
-    // // Traverse up the tree until we find a block that has a set bit (i.e., allocated memory)
-    // while (bit > 0  && getBlockState(buddy->memory, bit) == 0) {
-    //     bit = PARENT(bit);
-    // }
-
-    // uint64_t block_size = getBlockSize(buddy, bit);
-
-    // printf("Allocated between %x and %x\n", getBlockStart(buddy, bit), getBlockStart(buddy, bit) + block_size - 1);
-    //printTree(buddy, 6);
     return res;
 }
 
@@ -227,4 +212,51 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr) {
   //  printf("Freeing %d bytes at 0x%x\n", block_size, ptr);
 
     return block_size;
+}
+
+void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, uint64_t* allocatedMemorySize) {
+    // Check if the memory manager and memory to reallocate are valid
+    if (memoryManager == NULL || memoryToRealloc == NULL) {
+        return NULL;
+    }
+
+    // Get the index of the block that contains the memory pointed to by address
+    long bit = getBlockIndex(memoryManager, memoryToRealloc);
+    if (bit < 0) {
+        return 0;
+    }
+    // Traverse up the tree until we find a block that has a set bit (i.e., allocated memory)
+    while (bit > 0  && getBlockState(memoryManager->memory, bit) == 0) {
+        bit = PARENT(bit);
+    }
+
+    uint64_t currentSize = getBlockSize(memoryManager, bit);
+
+
+    // If the new size is smaller than the current size, just return the current memory block
+    if (newSize <= currentSize) {
+        return memoryToRealloc;
+    }
+
+    // Allocate a new block of memory with the requested size
+    void *newMemory = allocMemory(memoryManager, newSize, &allocatedMemorySize);
+
+    // If the allocation failed, return NULL
+    if (newMemory == NULL) {
+        return NULL;
+    }
+
+    // Copy the contents of the old memory block to the new memory block
+    memcpy(newMemory, memoryToRealloc, currentSize);
+
+    // Free the old memory block
+    freeMemory(memoryManager, memoryToRealloc);
+
+    // Update the allocated memory size if a pointer to it was provided
+    if (allocatedMemorySize != NULL) {
+        *allocatedMemorySize = newSize;
+    }
+
+    // Return a pointer to the new memory block
+    return newMemory;
 }

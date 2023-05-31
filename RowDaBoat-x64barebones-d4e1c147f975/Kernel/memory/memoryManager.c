@@ -110,7 +110,7 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 	return 0;
 }
 
-void * reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, uint64_t *const allocatedMemorySize)
+void * reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, uint64_t * allocatedMemorySize)
 {
 	void *newMemory = allocMemory(memoryManager, newSize, allocatedMemorySize);
 	if (newMemory == NULL)
