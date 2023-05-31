@@ -426,7 +426,7 @@ _sys_sleep:
 
     mov rsp, rbp
     pop rbp
-
+    ret
 ;void * sys_realloc(void * ptr, uint64_t size);
 _sys_realloc:
     push rbp
@@ -437,5 +437,4 @@ _sys_realloc:
 
     mov rsp, rbp
     pop rbp
-    ret
     ret
