@@ -181,7 +181,7 @@ void printMemoryState(){
 
 void* allocMemory(MemoryManagerADT buddy, uint64_t size, uint64_t *allocatedMemorySize) {
     void* res= allocMemoryRec(buddy, size, 0, allocatedMemorySize);
-
+    
     // printf("Allocated %x bytes at 0x%x\n", size, res);
     // long bit = getBlockIndex(buddy, res);
     // if (bit < 0) {

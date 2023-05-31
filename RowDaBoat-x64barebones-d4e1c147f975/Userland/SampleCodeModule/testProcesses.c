@@ -59,6 +59,14 @@ void wc()
     printf("\nLineas: %d\n", count);
 }
 
+void loop(int sec)
+{
+    while (1)
+    {
+        _sys_sleep(sec * 1000);
+        printf("Hola mundo desde el proceso %d\n", _sys_getpid());
+    }
+}
 void filter()
 {
     char c;
