@@ -32,14 +32,16 @@ void processC() {
 
 void cat() {
     char buffer[1];
+
     do {
         _sys_read(0,buffer, 1);
         printf("%c", buffer[0]);
     }
     while(buffer[0] != EOF);
 }
+
 void wc() {
-    int count = 1;
+    int count = 0;
     char c;
     while ((c = getChar()) != EOF) {
         printf("%c", c);

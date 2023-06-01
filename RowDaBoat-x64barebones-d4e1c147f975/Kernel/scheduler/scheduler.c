@@ -3,6 +3,8 @@
 
 #define SHELL_PID 0
 
+#define EOF -1
+
 typedef struct SchedulerCDT
 {
     LinkedList queue[MAX_PRIORITY];
@@ -25,7 +27,6 @@ typedef struct SchedulerCDT
 static Scheduler scheduler = NULL;
 
 Process getNextProcess();
-void printProcesses();
 Process getProcess(pid_t pid);
 void * changeProcess(void *rsp);
 
@@ -235,7 +236,7 @@ int nice(pid_t pid, int priority)
 }
 
 // Tenemos que usar una carpeta tipo /proc, o alcanza con esto?
-void printProcesses()
+void printProcesses(char showKilled)
 {
     int currentPriority = MAX_PRIORITY - 1;
     printf(" Nombre    PID  ParentPID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n");
@@ -277,37 +278,39 @@ void printProcesses()
         }
         currentPriority--;
     }
+    if (showKilled){
     resetIterator(scheduler->itDeleted);
-    while (hasNext(scheduler->itDeleted))
-    {
-        Process proc = next(scheduler->itDeleted);
-        if (proc->pid != KERNEL_PID)
+        while (hasNext(scheduler->itDeleted))
         {
-            int nameLenght = strlen(proc->name);
-            printf(" %s  ", proc->name);
-            if (nameLenght < 10)
+            Process proc = next(scheduler->itDeleted);
+            if (proc->pid != KERNEL_PID)
             {
-                for (int i = 0; i < 10 - nameLenght; i++)
+                int nameLenght = strlen(proc->name);
+                printf(" %s  ", proc->name);
+                if (nameLenght < 10)
                 {
-                    printf(" ");
+                    for (int i = 0; i < 10 - nameLenght; i++)
+                    {
+                        printf(" ");
+                    }
                 }
-            }
-            printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
-            char state = proc->state;
-            switch (state)
-            {
-            case READY:
-                printf("    READY\n");
-                break;
-            case RUNNING:
-                printf("    RUNNING\n");
-                break;
-            case BLOCKED:
-                printf("    BLOCKED\n");
-                break;
-            case ZOMBIE:
-                printf("    KILLED\n");
-                break;
+                printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
+                char state = proc->state;
+                switch (state)
+                {
+                case READY:
+                    printf("    READY\n");
+                    break;
+                case RUNNING:
+                    printf("    RUNNING\n");
+                    break;
+                case BLOCKED:
+                    printf("    BLOCKED\n");
+                    break;
+                case ZOMBIE:
+                    printf("    KILLED\n");
+                    break;
+                }
             }
         }
     }
@@ -373,19 +376,24 @@ void killProcess(pid_t pid)
             semPost(parent->waitingSem);
         }
         process->state = ZOMBIE;
+        char newChar[1] = {EOF};
+        writeProcessPipe(STDOUT, newChar, 1);
         semClose(process->waitingSem);
-        insert(scheduler->deleted, process);
         remove(scheduler->queue[process->priority], process);
-        if (process->pid == scheduler->currentProcess->pid)
-        {
-            insert(scheduler->processesToFree, process);
-            yield();
+        if (parent->state == ZOMBIE){
+            deleteProcess(process);
         }else{
-            free(process->stack);
+            insert(scheduler->deleted, process);
+            if (process->pid == scheduler->currentProcess->pid)
+            {
+                insert(scheduler->processesToFree, process);
+                yield();
+            }else{
+                free(process->stack);
+            }
         }
     } else{
         printerr("Process %d not found\n", pid);
-        printProcesses();
     }
 }
 

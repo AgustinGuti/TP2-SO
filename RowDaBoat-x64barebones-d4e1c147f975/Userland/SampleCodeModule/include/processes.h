@@ -6,7 +6,7 @@
 typedef int pid_t;
 
 int execve(void* entryPoint, Pipe* pipes, char pipeQty, char * const argv[]);
-void printProcesses();
+void printProcesses(char argc, char **argv);
 int getpid();
 void yield();
 void exit(int value);

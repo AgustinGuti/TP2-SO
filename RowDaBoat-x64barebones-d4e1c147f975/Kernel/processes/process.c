@@ -226,6 +226,9 @@ int readProcessPipe(int fd, char *buffer, int size){
     if(process->fds[fd] == NULL || process->pipeTypes[fd] != READ){
         return -1;
     }
+    if (process->fds[fd] == process->stdio && process->pipeTypes[fd] == READ && !process->foreground){
+        return 0;
+    }
     return readFromPipe(process->fds[fd], buffer, size);
 }
 
@@ -269,5 +272,22 @@ void emptyProcess()
     while (1)
     {
         _hlt();
+    }
+}
+
+void deleteProcess(Process process){
+    if(process == NULL){
+        return;
+    }
+    closePipes(process);
+    freeStack(process);
+    free(process);
+}
+
+void closePipes(Process process){
+    for(int i = 0; i < process->fdLimit; i++){
+        if(process->fds[i] != process->stdio){
+            closePipe(process->fds[i]);
+        }
     }
 }

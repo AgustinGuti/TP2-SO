@@ -58,7 +58,7 @@ static command commands[COMMAND_QTY] = {
     {"himno-alegria", &himnoAlegria, 0, 0, "Reproduce el himno de la alegria.", 1},
     {"malloc", &callMalloc, 1, 1, "Reserva una cantidad de memoria dada por parametro.", 1},
     {"free", &callFree, 1, 1, "Libera la memoria reservada en la direccion dada por parametro.", 1},
-    {"ps", &printProcesses, 0, 0, "Imprime en pantalla los procesos en ejecucion.", 1},
+    {"ps", &printProcesses, 1, 0, "Imprime en pantalla los procesos en ejecucion.", 1},
     {"mem", &callGetMemoryStatus, 0, 0, "Imprime en pantalla el estado de la memoria.", 1},
     {"block", &callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1},
     {"kill", &callKill, 1, 1, "Elimina un proceso dado por parametro.", 1},
@@ -178,12 +178,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     }
 
     int pid1 = execve(commands[command1].function, pipes1, pipeQty, argv1);
-    int pid2 = execve(commands[command2].function, pipes2, pipeQty,argv2);
- 
-    waitpid(pid1);
-    waitpid(pid2);
-
-    close(connectingPipe);
+    int pid2 = execve(commands[command2].function, pipes2, pipeQty, argv2);
 
     for(int i = 0; i < MAX_ARGS + 2; i++){
         free(argv1[i]);
@@ -226,6 +221,7 @@ int getFullCommand(char *str, int length, char **args)
             strcpy(args[1], "1");
         }
         if (argc - hasBackground > commands[commandIndex].argMaxQty || argc + hasBackground < commands[commandIndex].argMinQty){
+            printf("Cantidad de argumentos invalida para %s\n", commandName);
             for (int i = 0; i < MAX_ARGS; i++)
             {
                 free(arguments[i]);
@@ -332,7 +328,6 @@ char help(char argc, char **argv)
         if (strcmp(argv[0], "please") == 0)
         {
             printf("No.\n");
-            sendEOF();
             return 0;
         }
         else if (strcmp(argv[0], "all") == 0)
@@ -341,7 +336,6 @@ char help(char argc, char **argv)
             {
                 printf("%s: %s\n", commands[i].name, commands[i].description);
             }
-            sendEOF();
             return 0;
         } else{
             for (int i = 0; i < COMMAND_QTY; i++)
@@ -355,7 +349,6 @@ char help(char argc, char **argv)
         }
         printf("Argumento invalido para help\n");
     }
-    sendEOF();
     return 0;
 }
 

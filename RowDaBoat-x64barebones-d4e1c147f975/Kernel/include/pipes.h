@@ -7,7 +7,7 @@
 #include <semaphores.h>
 #include <videoDriver.h>
 
-#define PIPE_SIZE 1024
+#define PIPE_SIZE 0x1000
 
 typedef struct PipeCDT *Pipe;
 

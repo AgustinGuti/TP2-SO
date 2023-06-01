@@ -249,7 +249,7 @@ _sys_execve:
     pop rbp
     ret
 
-;void sys_printProcesses();
+;void sys_printProcesses(char showKilled);
 _sys_printProcesses:
     push rbp
     mov rbp, rsp

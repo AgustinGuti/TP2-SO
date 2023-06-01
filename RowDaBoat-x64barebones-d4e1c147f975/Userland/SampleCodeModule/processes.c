@@ -4,8 +4,16 @@ int execve(void* entryPoint, Pipe *pipes, char pipeQty, char *const argv[]){
     return _sys_execve(entryPoint, pipes, pipeQty, argv);
 }
 
-void printProcesses(){
-    _sys_printProcesses();
+void printProcesses(char argc, char **argv){
+    if (argc == 0){
+        _sys_printProcesses(0);
+    }
+    else if (argc == 1 && strcmp(argv[0], "-k") == 0){
+        _sys_printProcesses(1);
+    }
+    else{
+        printf("Invalid arguments\n");
+    }
 }
 
 int getpid(){
