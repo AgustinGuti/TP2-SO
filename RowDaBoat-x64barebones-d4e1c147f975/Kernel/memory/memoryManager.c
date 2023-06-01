@@ -78,6 +78,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 		}
 		currentFreeBlock = currentFreeBlock->nextBlock;
 	}
+	printBlocks(memoryManager);
 	return NULL;
 }
 
@@ -110,7 +111,7 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 	return 0;
 }
 
-void * reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, uint64_t *const allocatedMemorySize)
+void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, uint64_t *const allocatedMemorySize)
 {
 	void *newMemory = allocMemory(memoryManager, newSize, allocatedMemorySize);
 	if (newMemory == NULL)
@@ -126,14 +127,14 @@ void * reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToR
 		}
 		currentBlock = currentBlock->nextBlock;
 	}
-	if(currentBlock == NULL){
+	if (currentBlock == NULL)
+	{
 		return NULL;
 	}
 	memcpy(newMemory, memoryToRealloc, currentBlock->size);
 	freeMemory(memoryManager, memoryToRealloc);
 	return newMemory;
 }
-
 
 void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
 {
@@ -145,46 +146,49 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 		memoryManager->firstFreeBlock = newBlock;
 		return;
 	}
-	MemoryBlock * prevBlock = NULL;
-	
+	MemoryBlock *prevBlock = NULL;
+
 	while (currentBlock != NULL && currentBlock->startAddress < startAddress)
 	{
 		prevBlock = currentBlock;
 		currentBlock = currentBlock->nextBlock;
 	}
 
-	if(currentBlock==NULL){
+	if (currentBlock == NULL)
+	{
 		prevBlock->nextBlock = newBlock;
 		newBlock->prevBlock = prevBlock;
 		return;
 	}
 
 	newBlock->prevBlock = prevBlock;
-	if(prevBlock!=NULL)
+	if (prevBlock != NULL)
 		prevBlock->nextBlock = newBlock;
 	else
 		memoryManager->firstFreeBlock = newBlock;
 	newBlock->nextBlock = currentBlock;
 	currentBlock->prevBlock = newBlock;
 
-	//merge blocks
-	if(prevBlock!=NULL && (uint64_t)prevBlock->startAddress + prevBlock->size == (uint64_t)newBlock){
+	// merge blocks
+	if (prevBlock != NULL && (uint64_t)prevBlock->startAddress + prevBlock->size == (uint64_t)newBlock)
+	{
 		prevBlock->size += newBlock->size + BLOCK_STRUCT_SIZE;
 		prevBlock->nextBlock = newBlock->nextBlock;
-		if(newBlock->nextBlock!=NULL){
+		if (newBlock->nextBlock != NULL)
+		{
 			newBlock->nextBlock->prevBlock = prevBlock;
 		}
 		newBlock = prevBlock;
 	}
-	if(newBlock->nextBlock!=NULL && (uint64_t)newBlock->startAddress + newBlock->size== (uint64_t)newBlock->nextBlock){
+	if (newBlock->nextBlock != NULL && (uint64_t)newBlock->startAddress + newBlock->size == (uint64_t)newBlock->nextBlock)
+	{
 		newBlock->size += newBlock->nextBlock->size + BLOCK_STRUCT_SIZE;
 		newBlock->nextBlock = newBlock->nextBlock->nextBlock;
-		if(newBlock->nextBlock!=NULL){
+		if (newBlock->nextBlock != NULL)
+		{
 			newBlock->nextBlock->prevBlock = newBlock;
 		}
 	}
-
-
 }
 
 void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
@@ -198,22 +202,23 @@ void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const st
 		memoryManager->firstOccupiedBlock = newBlock;
 		return;
 	}
-	MemoryBlock * prevBlock = NULL;
-	
+	MemoryBlock *prevBlock = NULL;
+
 	while (currentBlock != NULL && currentBlock->startAddress < startAddress)
 	{
 		prevBlock = currentBlock;
 		currentBlock = currentBlock->nextBlock;
 	}
 
-	if(currentBlock==NULL){
+	if (currentBlock == NULL)
+	{
 		prevBlock->nextBlock = newBlock;
 		newBlock->prevBlock = prevBlock;
 		return;
 	}
 
 	newBlock->prevBlock = prevBlock;
-	if(prevBlock!=NULL)
+	if (prevBlock != NULL)
 		prevBlock->nextBlock = newBlock;
 	else
 		memoryManager->firstOccupiedBlock = newBlock;
@@ -251,5 +256,3 @@ void printBlocks(MemoryManagerADT const memoryManager)
 	}
 	printf("DONE\n");
 }
-
-

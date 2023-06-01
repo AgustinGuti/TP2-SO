@@ -22,11 +22,10 @@ enum
 #define WHITE 0x00FFFFFF
 #define GREEN 0x0000FF00
 
-
 static pid_t currentPID = KERNEL_PID; // Static variable to track the current PID
 
-
-Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t parentPID){
+Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t parentPID)
+{
     Process process = (Process)malloc(sizeof(ProcessCDT));
     if (process == NULL)
     {
@@ -47,13 +46,14 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     process->waitingForPID = -1;
     process->waitingSem = NULL;
     process->sleepTime = 0;
-    process->fds = (Pipe *)malloc(INITIAL_FD_LIMIT*sizeof(Pipe));
+    process->waitingTime = 0;
+    process->fds = (Pipe *)malloc(INITIAL_FD_LIMIT * sizeof(Pipe));
     process->fdLimit = INITIAL_FD_LIMIT;
-    process->pipeTypes = (PipeType *)malloc(INITIAL_FD_LIMIT*sizeof(PipeType));
+    process->pipeTypes = (PipeType *)malloc(INITIAL_FD_LIMIT * sizeof(PipeType));
 
     // Process stack is the top of the stack, stack base is process->stack + STACK_SIZE
-    process->stack = (uint64_t *)malloc(STACK_SIZE*sizeof(process->stack[0]));
-    //memset(process->stack, 0, STACK_SIZE);
+    process->stack = (uint64_t *)malloc(STACK_SIZE * sizeof(process->stack[0]));
+    // memset(process->stack, 0, STACK_SIZE);
     if (process->stack == NULL)
     {
         /*not enough memory for process->stack*/
@@ -63,29 +63,34 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     process->stackPointer = process->stackBase;
     process->fds[STDIN] = STDIN;
     process->fds[STDOUT] = STDOUT;
-    for(int i = 2; i < process->fdLimit; i++){
+    for (int i = 2; i < process->fdLimit; i++)
+    {
         process->fds[i] = -1;
     }
     return process;
 }
 
-Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe* pipes, char pipeQty)
+Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe *pipes, char pipeQty)
 {
     Process process = initProcess(name, priority, foreground, parentPID);
-    //Pipe stdPipe = createPipe(NULL);
+    // Pipe stdPipe = createPipe(NULL);
     process->stdio = getKeyboardBuffer();
     process->fds[STDIN] = process->stdio;
     process->fds[STDOUT] = process->stdio;
     process->pipeTypes[STDIN] = READ;
     process->pipeTypes[STDOUT] = WRITE;
 
-    if (pipeQty > 0){
-        if (pipes[0] != NULL){
+    if (pipeQty > 0)
+    {
+        if (pipes[0] != NULL)
+        {
             process->fds[STDIN] = pipes[0];
         }
     }
-    if (pipeQty > 1){
-        if (pipes[1] != NULL){
+    if (pipeQty > 1)
+    {
+        if (pipes[1] != NULL)
+        {
             process->fds[STDOUT] = pipes[1];
         }
     }
@@ -104,10 +109,12 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         process->pipeTypes[j] = j % 2 == 0 ? READ : WRITE;
     }
 
-    for(int i = j; i < process->fdLimit; i++){
+    for (int i = j; i < process->fdLimit; i++)
+    {
         process->fds[i] = NULL;
     }
-    for(int i = j; i < process->fdLimit; i++){
+    for (int i = j; i < process->fdLimit; i++)
+    {
         process->pipeTypes[i] = EMPTY;
     }
 
@@ -118,8 +125,10 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         {
             argc++;
         }
-    }    
+    }
     char **argvAux = (char **)malloc((argc + 1) * sizeof(char *));
+    process->argv = argvAux;
+    process->argc = argc;
     if (argvAux == NULL)
     {
         /*not enough memory for argvAux*/
@@ -135,13 +144,13 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         }
         strcpy(argvAux[i], argv[i]);
     }
-    argvAux[argc] = NULL;    
+    argvAux[argc] = NULL;
 
     pushToStack(process, 0x0);                // ss
     pushToStack(process, process->stackBase); // stackPointer
     pushToStack(process, 0x202);              // rflags
     pushToStack(process, 0x8);                // cs
-    pushToStack(process, startWrapper);      // rip
+    pushToStack(process, startWrapper);       // rip
 
     for (int i = 0; i < 15; i++)
     { // push 15 registries
@@ -173,18 +182,23 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     return process;
 }
 
-Pipe openProcessPipe(char *name, int fds[2]){
+Pipe openProcessPipe(char *name, int fds[2])
+{
     Process process = getCurrentProcess();
     Pipe pipe = openPipe(name);
-    if(pipe == NULL){
+    if (pipe == NULL)
+    {
         return NULL;
     }
-    if (fds == NULL){
+    if (fds == NULL)
+    {
         return pipe;
     }
     int fd = 0;
-    while(process->fds[fd] != NULL){
-        if (fd == process->fdLimit){
+    while (process->fds[fd] != NULL)
+    {
+        if (fd == process->fdLimit)
+        {
             // TODO realloc
             return NULL;
         }
@@ -193,8 +207,10 @@ Pipe openProcessPipe(char *name, int fds[2]){
     process->fds[fd] = pipe;
     fds[0] = fd;
     fd++;
-    while(process->fds[fd] != NULL){
-        if (fd == process->fdLimit){
+    while (process->fds[fd] != NULL)
+    {
+        if (fd == process->fdLimit)
+        {
             // TODO realloc
             return NULL;
         }
@@ -205,12 +221,15 @@ Pipe openProcessPipe(char *name, int fds[2]){
     return pipe;
 }
 
-int closeProcessPipe(int fd){
+int closeProcessPipe(int fd)
+{
     Process process = getCurrentProcess();
-    if(fd < 0 || fd >= process->fdLimit){
+    if (fd < 0 || fd >= process->fdLimit)
+    {
         return -1;
     }
-    if(process->fds[fd] == NULL){
+    if (process->fds[fd] == NULL)
+    {
         return -1;
     }
     closePipe(process->fds[fd]);
@@ -218,30 +237,38 @@ int closeProcessPipe(int fd){
     return 0;
 }
 
-int readProcessPipe(int fd, char *buffer, int size){
+int readProcessPipe(int fd, char *buffer, int size)
+{
     Process process = getCurrentProcess();
-    if(fd < 0 || fd >= process->fdLimit){
+    if (fd < 0 || fd >= process->fdLimit)
+    {
         return -1;
     }
-    if(process->fds[fd] == NULL || process->pipeTypes[fd] != READ){
+    if (process->fds[fd] == NULL || process->pipeTypes[fd] != READ)
+    {
         return -1;
     }
-    if (process->fds[fd] == process->stdio && process->pipeTypes[fd] == READ && !process->foreground){
+    if (process->fds[fd] == process->stdio && process->pipeTypes[fd] == READ && !process->foreground)
+    {
         return 0;
     }
     return readFromPipe(process->fds[fd], buffer, size);
 }
 
-int writeProcessPipe(int fd, char *buffer, int size){
+int writeProcessPipe(int fd, char *buffer, int size)
+{
     Process process = getCurrentProcess();
-    if(fd < 0 || fd >= process->fdLimit){
+    if (fd < 0 || fd >= process->fdLimit)
+    {
         return -1;
     }
-    if(process->fds[fd] == NULL || process->pipeTypes[fd] != WRITE){
+    if (process->fds[fd] == NULL || process->pipeTypes[fd] != WRITE)
+    {
         return -1;
     }
-    if (process->fds[fd] == process->stdio){
-        printStringLimited(WHITE,buffer, size);
+    if (process->fds[fd] == process->stdio)
+    {
+        printStringLimited(WHITE, buffer, size);
         return size;
     }
     return writeToPipe(process->fds[fd], buffer, size);
@@ -275,17 +302,25 @@ void emptyProcess()
     }
 }
 
-void deleteProcess(Process process){
-    if(process == NULL){
+void deleteProcess(Process process)
+{
+    if (process == NULL)
+    {
         return;
     }
     freeStack(process);
+    free(process->name);
+    free(process->fds);
+    free(process->pipeTypes);
     free(process);
 }
 
-void closePipes(Process process){
-    for(int i = 0; i < process->fdLimit; i++){
-        if(process->fds[i] != process->stdio){
+void closePipes(Process process)
+{
+    for (int i = 0; i < process->fdLimit; i++)
+    {
+        if (process->fds[i] != process->stdio)
+        {
             closePipe(process->fds[i]);
         }
     }

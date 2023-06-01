@@ -22,12 +22,22 @@ typedef PipeCDT *Pipe;
 #define KERNEL_PID -2
 #define EMPTY_PID -1
 
-typedef enum{ READY, RUNNING, BLOCKED, ZOMBIE } processState;
+typedef enum
+{
+    READY,
+    RUNNING,
+    BLOCKED,
+    ZOMBIE
+} processState;
 
 typedef int pid_t;
 
-typedef enum {READ, WRITE, EMPTY} PipeType;
-
+typedef enum
+{
+    READ,
+    WRITE,
+    EMPTY
+} PipeType;
 
 typedef struct ProcessCDT
 {
@@ -47,13 +57,15 @@ typedef struct ProcessCDT
     pid_t waitingForPID;
     sem_t waitingSem;
     int sleepTime;
+    uint64_t waitingTime;
+    char **argv;
+    char argc;
 } ProcessCDT;
-
 
 typedef struct ProcessCDT *Process;
 
-Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe* pipes, char pipeQty);
-//void killProcess(pid_t pid);
+Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe *pipes, char pipeQty);
+// void killProcess(pid_t pid);
 void emptyProcess();
 void freeStack(Process process);
 Pipe openProcessPipe(char *name, int fds[2]);
