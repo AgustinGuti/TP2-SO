@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <processes.h>
 #include <testProcesses.h>
-#include <tests.h>
+#include <testMM.h>
 #include <memory.h>
 #include <phylos.h>
 
@@ -186,7 +186,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     int pid1 = execve(commands[command1].function, pipes1, pipeQty, argv1);
     int pid2 = execve(commands[command2].function, pipes2, pipeQty, argv2);
 
-    for(int i = 0; i < MAX_ARGS + 2; i++)
+    for (int i = 0; i < MAX_ARGS + 2; i++)
     {
         free(argv1[i]);
         free(argv2[i]);
