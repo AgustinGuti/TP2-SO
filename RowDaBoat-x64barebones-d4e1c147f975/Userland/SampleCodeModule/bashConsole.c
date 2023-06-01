@@ -17,23 +17,24 @@ extern void displayTime();
 char parseAndExecuteCommands(uint8_t *str, int length);
 void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length);
 char getCommandIndex(char *commandName);
-int getFullCommand(char *str, int length,char **args);
+int getFullCommand(char *str, int length, char **args);
 
 char help(char argc, char **argv);
-char setFontSize(char argc, const char** argv);
-char exitConsole(uint8_t argumentQty, const char** arguments);
-char callMalloc(char argc, const char** argv);
-char callFree(char argc, const char** argv);
-char callGetMemoryStatus(char argc, const char** argv);
-char callBlock(char argc, const char** argv);
-char callKill(char argc, const char** argv);
-char callNice(char argc, const char** argv);
-char callTestMM(char argc, const char** argv);
+char setFontSize(char argc, const char **argv);
+char exitConsole(uint8_t argumentQty, const char **arguments);
+char callMalloc(char argc, const char **argv);
+char callFree(char argc, const char **argv);
+char callGetMemoryStatus(char argc, const char **argv);
+char callBlock(char argc, const char **argv);
+char callKill(char argc, const char **argv);
+char callNice(char argc, const char **argv);
+char callTestMM(char argc, const char **argv);
 char callSleep(char argc, const char **argv);
 char callRealloc(char argc, const char **argv);
 char callLoop(char argc, const char **argv);
 
-typedef struct command {
+typedef struct command
+{
     char *name;
     char (*function)(char argc, char **argv);
     char argMaxQty;
@@ -70,8 +71,8 @@ static command commands[COMMAND_QTY] = {
     {"sleep", &callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1},
     {"wc", &wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1},
     {"realloc", &callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1},
-    {"loop", &callLoop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1}
-};
+    {"loop", &callLoop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1},
+    {"filter", &filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1}};
 
 int startConsole()
 {
@@ -132,7 +133,8 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     {
         // No pipe, execute a single command
         char **argv = malloc(sizeof(char *) * (MAX_ARGS + 2));
-        for (int i = 0; i < MAX_ARGS + 2; i++){
+        for (int i = 0; i < MAX_ARGS + 2; i++)
+        {
             argv[i] = malloc(MAX_ARG_LENGTH + 1);
         }
         int command = getFullCommand(str, length, argv);
@@ -145,7 +147,8 @@ char parseAndExecuteCommands(uint8_t *str, int length)
             commands[command].function(0, argv);
         }
         execve(commands[command].function, NULL, 0, argv);
-        for(int i = 0; i < MAX_ARGS + 2; i++){
+        for (int i = 0; i < MAX_ARGS + 2; i++)
+        {
             free(argv[i]);
         }
         free(argv);
@@ -158,11 +161,13 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     int pipeQty = 2;
 
     char **argv1 = malloc(sizeof(char *) * (MAX_ARGS + 2));
-    for (int i = 0; i < MAX_ARGS + 2; i++){
+    for (int i = 0; i < MAX_ARGS + 2; i++)
+    {
         argv1[i] = malloc(MAX_ARG_LENGTH + 1);
     }
     char **argv2 = malloc(sizeof(char *) * (MAX_ARGS + 2));
-    for (int i = 0; i < MAX_ARGS + 2; i++){
+    for (int i = 0; i < MAX_ARGS + 2; i++)
+    {
         argv2[i] = malloc(MAX_ARG_LENGTH + 1);
     }
     int command1 = getFullCommand(str, pipePos, argv1);
@@ -180,13 +185,14 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     int pid1 = execve(commands[command1].function, pipes1, pipeQty, argv1);
     int pid2 = execve(commands[command2].function, pipes2, pipeQty, argv2);
 
-    for(int i = 0; i < MAX_ARGS + 2; i++){
+    for(int i = 0; i < MAX_ARGS + 2; i++)
+    {
         free(argv1[i]);
         free(argv2[i]);
     }
     free(argv1);
     free(argv2);
-    
+
     return 0;
 }
 
@@ -204,23 +210,32 @@ int getFullCommand(char *str, int length, char **args)
     command[length] = 0;
     getCommandAndArgs(command, arguments, &argc, commandName, length + 1);
     int commandIndex = getCommandIndex(commandName);
-    if (commandIndex == -1){
+    if (commandIndex == -1)
+    {
         return -1;
     }
     memcpy(args[0], commandName, length + 1);
-    if (commands[commandIndex].executable){
+    if (commands[commandIndex].executable)
+    {
         int hasBackground = 0;
-        if (argc > 0){
-            if (strcmp(arguments[argc-1], "&") == 0){
+        if (argc > 0)
+        {
+            if (strcmp(arguments[argc - 1], "&") == 0)
+            {
                 hasBackground = 1;
                 strcpy(args[1], "0");
-            }else{
+            }
+            else
+            {
                 strcpy(args[1], "1");
             }
-        }else{
+        }
+        else
+        {
             strcpy(args[1], "1");
         }
-        if (argc - hasBackground > commands[commandIndex].argMaxQty || argc + hasBackground < commands[commandIndex].argMinQty){
+        if (argc - hasBackground > commands[commandIndex].argMaxQty || argc + hasBackground < commands[commandIndex].argMinQty)
+        {
             printf("Cantidad de argumentos invalida para %s\n", commandName);
             for (int i = 0; i < MAX_ARGS; i++)
             {
@@ -230,12 +245,16 @@ int getFullCommand(char *str, int length, char **args)
             return -1;
         }
 
-        for (int i = 0; i < argc - hasBackground; i++){
+        for (int i = 0; i < argc - hasBackground; i++)
+        {
             strcpy(args[i + 2], arguments[i]);
         }
         args[argc + 2 - hasBackground] = NULL;
-    }else{
-        if (argc > commands[commandIndex].argMaxQty || argc < commands[commandIndex].argMinQty){
+    }
+    else
+    {
+        if (argc > commands[commandIndex].argMaxQty || argc < commands[commandIndex].argMinQty)
+        {
             printf("Cantidad de argumentos invalida para %s\n", commandName);
             for (int i = 0; i < MAX_ARGS; i++)
             {
@@ -253,14 +272,18 @@ int getFullCommand(char *str, int length, char **args)
     return commandIndex;
 }
 
-char getCommandIndex(char *commandName){
+char getCommandIndex(char *commandName)
+{
     int commandIndex;
-    for (commandIndex = 0; commandIndex < COMMAND_QTY; commandIndex++){
-        if (strcmp(commandName, commands[commandIndex].name) == 0){
+    for (commandIndex = 0; commandIndex < COMMAND_QTY; commandIndex++)
+    {
+        if (strcmp(commandName, commands[commandIndex].name) == 0)
+        {
             break;
         }
     }
-    if (commandIndex == COMMAND_QTY){
+    if (commandIndex == COMMAND_QTY)
+    {
         printf("Comando no encontrado. Utilize 'help' para ver los comandos disponibles\n");
         return -1;
     }
@@ -281,7 +304,7 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
         i++;
         cmd_idx++;
     }
-    memcpy(command, str+offset, cmd_idx);
+    memcpy(command, str + offset, cmd_idx);
     command[cmd_idx] = 0;
     int argIdx = 0;
     *argQty = 0;
@@ -303,7 +326,7 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
         }
         i++;
     }
-    
+
     if (argLen > 0)
         (*argQty)++;
     args[*argQty][argLen] = 0;
@@ -337,7 +360,9 @@ char help(char argc, char **argv)
                 printf("%s: %s\n", commands[i].name, commands[i].description);
             }
             return 0;
-        } else{
+        }
+        else
+        {
             for (int i = 0; i < COMMAND_QTY; i++)
             {
                 if (strcmp(argv[0], commands[i].name) == 0)
@@ -352,8 +377,7 @@ char help(char argc, char **argv)
     return 0;
 }
 
-
-char callFree(char argc, const char** argv)
+char callFree(char argc, const char **argv)
 {
     if (argc == 1 && isHexaNumber(argv[0]))
     {
@@ -376,7 +400,7 @@ char callFree(char argc, const char** argv)
     return 0;
 }
 
-char callMalloc(char argc, const char** argv)
+char callMalloc(char argc, const char **argv)
 {
     if (argc == 1 && isHexaNumber(argv[0]))
     {
@@ -448,7 +472,7 @@ char callKill(char argc, const char **argv)
     return 0;
 }
 
-char callGetMemoryStatus(char argc, const char** argv)
+char callGetMemoryStatus(char argc, const char **argv)
 {
     if (argc != 0)
     {
@@ -469,7 +493,7 @@ char callGetMemoryStatus(char argc, const char** argv)
     return 0;
 }
 
-char callBlock(char argc, const char** argv)
+char callBlock(char argc, const char **argv)
 {
     if (argc != 1)
     {
@@ -506,7 +530,7 @@ char callMemoryDump(uint8_t argumentQty, const char **arguments)
     return 0;
 }
 
-char callNice(char argc, const char** argv)
+char callNice(char argc, const char **argv)
 {
     if (argc != 2)
     {
@@ -529,7 +553,7 @@ char callNice(char argc, const char** argv)
     return 0;
 }
 
-char callTestMM(char argc, const char** argv)
+char callTestMM(char argc, const char **argv)
 {
     if (argc != 1)
     {
@@ -543,7 +567,7 @@ char callTestMM(char argc, const char** argv)
     return 0;
 }
 
-char setFontSize(char argc, const char** argv)
+char setFontSize(char argc, const char **argv)
 {
     if (argc < 1)
     {
