@@ -1,8 +1,10 @@
 #include <bashConsole.h>
 #include <stddef.h>
 #include <processes.h>
-#include <testProcesses.h>
 #include <testMM.h>
+#include <testSync.h>
+#include <testProcesses.h>
+#include <testPrio.h>
 #include <memory.h>
 #include <phylos.h>
 
@@ -28,7 +30,6 @@ char callGetMemoryStatus(char argc, const char **argv);
 char callBlock(char argc, const char **argv);
 char callKill(char argc, const char **argv);
 char callNice(char argc, const char **argv);
-char callTestMM(char argc, const char **argv);
 char callSleep(char argc, const char **argv);
 char callRealloc(char argc, const char **argv);
 char callLoop(char argc, const char **argv);
@@ -43,7 +44,7 @@ typedef struct command
     char executable;
 } command;
 
-#define COMMAND_QTY 27
+#define COMMAND_QTY 29
 
 static command commands[COMMAND_QTY] = {
     {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
@@ -64,7 +65,7 @@ static command commands[COMMAND_QTY] = {
     {"block", &callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1},
     {"kill", &callKill, 1, 1, "Elimina un proceso dado por parametro.", 1},
     {"nice", &callNice, 2, 2, "Modifica la prioridad de un proceso dado por parametro.", 1},
-    {"test-mm", &callTestMM, 1, 1, "Ejecuta el test de memoria.", 1},
+    {"test-mm", &test_mm, 1, 1, "Ejecuta el test de memoria.", 1},
     {"phylo", &phylos, 0, 0, "Ejecuta el problema de los filosofos comensales.", 1},
     {"cat", &cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1},
     {"test-sync", &test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1},
@@ -72,7 +73,10 @@ static command commands[COMMAND_QTY] = {
     {"wc", &wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1},
     {"realloc", &callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1},
     {"loop", &callLoop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1},
-    {"filter", &filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1}};
+    {"filter", &filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1},
+    {"test-processes", &test_processes, 1, 1, "Ejecuta el test de procesos.", 1},
+    {"test-prio", &test_prio, 0, 0, "Ejecuta el test de prioridades.", 1},
+};
 
 int startConsole()
 {
@@ -550,20 +554,6 @@ char callNice(char argc, const char **argv)
         {
             printf("Prioridad del proceso con pid %d cambiada a %d\n", pid, returnValue);
         }
-    }
-    return 0;
-}
-
-char callTestMM(char argc, const char **argv)
-{
-    if (argc != 1)
-    {
-        printf("Argumento invalido para test-mm\n");
-    }
-    else
-    {
-        uint64_t memorySize = strToNum(argv[0], strlen(argv[0]));
-        test_mm(memorySize);
     }
     return 0;
 }

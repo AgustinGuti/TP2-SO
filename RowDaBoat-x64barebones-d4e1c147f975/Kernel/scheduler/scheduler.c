@@ -30,11 +30,11 @@ static Scheduler scheduler = NULL;
 
 Process getNextProcess();
 Process getProcess(pid_t pid);
-void * changeProcess(void *rsp);
+void *changeProcess(void *rsp);
 void updateMostWaitingProcess();
 
 static char ready = 0;
-static uint64_t counter = 0; 
+static uint64_t counter = 0;
 
 void initScheduler()
 {
@@ -84,7 +84,7 @@ void *schedule(void *rsp)
         {
             resetIterator(scheduler->itSleepingProcesses);
             uint64_t millis = getMillis();
-            while(hasNext(scheduler->itSleepingProcesses))
+            while (hasNext(scheduler->itSleepingProcesses))
             {
                 Process p = (Process)next(scheduler->itSleepingProcesses);
                 p->sleepTime -= millis - scheduler->prevMillis;
@@ -102,8 +102,9 @@ void *schedule(void *rsp)
                 {
                     scheduler->skipPID = KERNEL_PID;
                     moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                }else if (scheduler->currentProcess->priority > 0 && scheduler->quantumCounter >= scheduler->quantum)
-                {   
+                }
+                else if (scheduler->currentProcess->priority > 0 && scheduler->quantumCounter >= scheduler->quantum)
+                {
                     remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                     scheduler->currentProcess->priority--;
                     insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
@@ -114,14 +115,17 @@ void *schedule(void *rsp)
                     scheduler->currentProcess->priority++;
                     insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
-                else {
+                else
+                {
                     moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
             }
             uint32_t ticks = ticks_elapsed();
             Process mostWaitingProcess = getProcess(scheduler->mostWaitingProcessPID);
-            if(mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE && mostWaitingProcess->pid >= 0){
-                if( ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME && mostWaitingProcess->priority != MAX_PRIORITY-1){
+            if (mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE && mostWaitingProcess->pid >= 0)
+            {
+                if (ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME && mostWaitingProcess->priority != MAX_PRIORITY - 1)
+                {
                     mostWaitingProcess->waitingTime = ticks;
                     remove(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
                     mostWaitingProcess->priority++;
@@ -131,11 +135,14 @@ void *schedule(void *rsp)
                     /*update the waiting time for each process*/
                     updateMostWaitingProcess();
                 }
-            }else{
+            }
+            else
+            {
                 updateMostWaitingProcess();
             }
-            void* newRsp = changeProcess(rsp);
-            if( scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID){
+            void *newRsp = changeProcess(rsp);
+            if (scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID)
+            {
                 updateMostWaitingProcess();
             }
             /* waiting time is set when process starts to run */
@@ -149,12 +156,15 @@ void *schedule(void *rsp)
 void updateMostWaitingProcess()
 {
     int currentPriority = scheduler->currentProcess->priority;
-    for(int i = 0; i < currentPriority-1; i++){
+    for (int i = 0; i < currentPriority - 1; i++)
+    {
         /* add 1 to waitingtime for each process*/
         resetIterator(scheduler->it[i]);
-        while (hasNext(scheduler->it[i])){
+        while (hasNext(scheduler->it[i]))
+        {
             Process proc = next(scheduler->it[i]);
-            if (proc->waitingTime < scheduler->mostWaitingProcessTime){
+            if (proc->waitingTime < scheduler->mostWaitingProcessTime)
+            {
                 scheduler->mostWaitingProcessPID = proc->pid;
                 scheduler->mostWaitingProcessTime = proc->waitingTime;
             }
@@ -162,7 +172,8 @@ void updateMostWaitingProcess()
     }
 }
 
-void * changeProcess(void *rsp){
+void *changeProcess(void *rsp)
+{
     scheduler->skipQuantum = 0;
     scheduler->quantumCounter = 0;
     scheduler->currentProcess->stackPointer = rsp;
@@ -171,11 +182,14 @@ void * changeProcess(void *rsp){
         scheduler->currentProcess->state = READY;
     }
     scheduler->currentProcess = getNextProcess();
-    if (getSize(scheduler->processesToFree) > 0){
+    if (getSize(scheduler->processesToFree) > 0)
+    {
         resetIterator(scheduler->itProcessesToFree);
-        while (hasNext(scheduler->itProcessesToFree)){
+        while (hasNext(scheduler->itProcessesToFree))
+        {
             Process proc = next(scheduler->itProcessesToFree);
-            if (proc->pid != scheduler->currentProcess->pid){
+            if (proc->pid != scheduler->currentProcess->pid)
+            {
                 freeStack(proc);
                 remove(scheduler->processesToFree, proc);
             }
@@ -204,17 +218,20 @@ Process getNextProcess()
     return scheduler->empty;
 }
 
-pid_t execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[])
+pid_t execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
 {
     int foreground = strToNum(argv[1], 1);
-    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, foreground, &argv[2] , &startWrapper, getpid(), pipes, pipeQty);
-    if(foreground){
+    Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, foreground, &argv[2], &startWrapper, getpid(), pipes, pipeQty);
+    if (foreground)
+    {
         int currentForeground = scheduler->currentProcess->foreground;
-        scheduler->currentProcess->foreground = 0;    
+        scheduler->currentProcess->foreground = 0;
         insert(scheduler->queue[process->priority], process);
         waitpid(process->pid);
         scheduler->currentProcess->foreground = currentForeground;
-    }else{
+    }
+    else
+    {
         insert(scheduler->queue[process->priority], process);
     }
     return process->pid;
@@ -237,13 +254,17 @@ pid_t getpid()
     return scheduler->currentProcess->pid;
 }
 
-Process getProcess(pid_t pid) {
+Process getProcess(pid_t pid)
+{
     int currentPriority = MAX_PRIORITY - 1;
-    while(currentPriority >= 0){
+    while (currentPriority >= 0)
+    {
         resetIterator(scheduler->it[currentPriority]);
-        while(hasNext(scheduler->it[currentPriority])){
+        while (hasNext(scheduler->it[currentPriority]))
+        {
             Process proc = next(scheduler->it[currentPriority]);
-            if (proc->pid == pid){
+            if (proc->pid == pid)
+            {
                 return proc;
             }
         }
@@ -279,7 +300,7 @@ void printProcesses(char showKilled)
         resetIterator(scheduler->it[currentPriority]);
         while (hasNext(scheduler->it[currentPriority]))
         {
-            Process proc = next(scheduler->it[currentPriority]); 
+            Process proc = next(scheduler->it[currentPriority]);
             if (proc->pid != KERNEL_PID)
             {
                 int nameLenght = strlen(proc->name);
@@ -312,8 +333,9 @@ void printProcesses(char showKilled)
         }
         currentPriority--;
     }
-    if (showKilled){
-    resetIterator(scheduler->itDeleted);
+    if (showKilled)
+    {
+        resetIterator(scheduler->itDeleted);
         while (hasNext(scheduler->itDeleted))
         {
             Process proc = next(scheduler->itDeleted);
@@ -396,8 +418,9 @@ void unblockProcessFromProcess(Process process)
 }
 
 void killProcess(pid_t pid)
-{   
-    if(pid == SHELL_PID && scheduler->currentProcess->pid != SHELL_PID){
+{
+    if (pid == SHELL_PID && scheduler->currentProcess->pid != SHELL_PID)
+    {
         printerr("No es posible matar la shell desde otro proceso.\n");
         return;
     }
@@ -405,7 +428,8 @@ void killProcess(pid_t pid)
     if (process != NULL)
     {
         Process parent = getProcess(process->parentPID);
-        if(parent->waitingForPID == process->pid){
+        if (parent->waitingForPID == process->pid)
+        {
             parent->waitingForPID = -1;
             semPost(parent->waitingSem);
         }
@@ -414,30 +438,48 @@ void killProcess(pid_t pid)
         writeProcessPipe(STDOUT, newChar, 1);
         semClose(process->waitingSem);
         remove(scheduler->queue[process->priority], process);
-        if (parent->state == ZOMBIE){
+        int i;
+        for (i = 0; i < process->argc; i++)
+        {
+            free(process->argv[i]);
+        }
+        free(process->argv);
+
+        if (parent->state == ZOMBIE)
+        {
             deleteProcess(process);
-        }else{
+        }
+        else
+        {
             insert(scheduler->deleted, process);
             if (process->pid == scheduler->currentProcess->pid)
             {
                 insert(scheduler->processesToFree, process);
                 yield();
-            }else{
+            }
+            else
+            {
                 free(process->stack);
             }
         }
-    } else{
+    }
+    else
+    {
         printerr("Process %d not found\n", pid);
     }
 }
 
-Process getForegroundProcess() {
+Process getForegroundProcess()
+{
     int currentPriority = MAX_PRIORITY - 1;
-    while(currentPriority >= 0){
+    while (currentPriority >= 0)
+    {
         resetIterator(scheduler->it[currentPriority]);
-        while(hasNext(scheduler->it[currentPriority])){
+        while (hasNext(scheduler->it[currentPriority]))
+        {
             Process proc = next(scheduler->it[currentPriority]);
-            if (proc->foreground){
+            if (proc->foreground)
+            {
                 return proc;
             }
         }
@@ -446,7 +488,8 @@ Process getForegroundProcess() {
     return NULL;
 }
 
-void killForegroundProcess() {
+void killForegroundProcess()
+{
     Process process = getForegroundProcess();
     if (process != NULL)
     {
@@ -460,10 +503,10 @@ void startWrapper(void *entryPoint, char argc, char *argv[])
     if (scheduler->currentProcess->pid == 0)
     {
         Process kernel = getProcess(KERNEL_PID);
-        kernel->state = READY;  
+        kernel->state = READY;
         printf("Kernel ready\n");
     }
-    //printf("Process %d finished with return value %d\n", scheduler->currentProcess->pid, ret);
+    // printf("Process %d finished with return value %d\n", scheduler->currentProcess->pid, ret);
     killProcess(scheduler->currentProcess->pid);
 }
 
@@ -480,7 +523,8 @@ pid_t waitpid(pid_t pid)
     }
     Process parent = scheduler->currentProcess;
     parent->waitingForPID = pid;
-    if(parent->waitingSem == NULL){
+    if (parent->waitingSem == NULL)
+    {
         parent->waitingSem = semOpen(NULL, 0);
     }
     semWait(parent->waitingSem);
@@ -492,7 +536,8 @@ Process getCurrentProcess()
     return scheduler->currentProcess;
 }
 
-void sleep(int millis) {
+void sleep(int millis)
+{
     scheduler->currentProcess->sleepTime = millis + getMillis() - scheduler->prevMillis;
     insert(scheduler->sleepingProcesses, scheduler->currentProcess);
     blockProcessFromProcess(scheduler->currentProcess);

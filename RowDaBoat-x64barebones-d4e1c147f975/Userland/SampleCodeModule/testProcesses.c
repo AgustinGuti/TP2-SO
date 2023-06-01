@@ -1,80 +1,105 @@
 #include <testProcesses.h>
 #include <stdio.h>
 
-#define EOF -1
+#include <stdio.h>
+#include "test_util.h"
 
-#define IS_VOWEL(c) (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u')
-
-int a[1] = {100};
-sem_t sem;
-
-int processA()
+enum State
 {
-    _sys_sleep(10000);
-    return 0;
-}
+    RUNNING,
+    BLOCKED,
+    KILLED
+};
 
-void processB()
+typedef struct P_rq
 {
-    char foreground[2] = "1";
-    char *args[3] = {"processC", foreground, NULL};
-    pid_t pidC;
-    for (int i = 0; i < 2; i++)
-    {
-        pidC = execve(&processC, NULL, 0, args);
-        waitpid(pidC);
-    }
-    printf("In B\n");
-    // while(1);
-    return;
-}
+    int32_t pid;
+    enum State state;
+} p_rq;
 
-void processC()
+int64_t test_processes(char argc, char *argv[])
 {
-    printf("In C\n");
-    return;
-}
+    uint8_t rq;
+    uint8_t alive = 0;
+    uint8_t action;
+    uint64_t max_processes;
+    char *argvAux[] = {"endless_loop", "0", NULL};
 
-void cat()
-{
-    char buffer[1];
-    do
-    {
-        _sys_read(0, buffer, 1);
-        printf("%c", buffer[0]);
-    } while (buffer[0] != EOF);
-}
-void wc()
-{
-    int count = 1;
-    char c;
-    while ((c = getChar()) != EOF)
-    {
-      //  printf("%c", c);
-        if (c == '\n')
-        {
-            count++;
-        }
-    }
-    printf("\nLineas: %d\n", count);
-}
+    if (argc != 1)
+        return -1;
 
-void loop(int sec)
-{
+    if ((max_processes = satoi(argv[0])) <= 0)
+        return -1;
+
+    p_rq p_rqs[max_processes];
+
+    int count = 0;
     while (1)
     {
-        _sys_sleep(sec * 1000);
-        printf("Hola mundo desde el proceso %d\n", _sys_getpid());
-    }
-}
-void filter()
-{
-    char c;
-    while ((c = getChar()) != EOF)
-    {
-        if (IS_VOWEL(c))
+        // Create max_processes processes
+        for (rq = 0; rq < max_processes; rq++)
         {
-            printf("%c", c);
+            p_rqs[rq].pid = execve(&endless_loop, NULL, 0, argvAux);
+            if (p_rqs[rq].pid == -1)
+            {
+                printf("test_processes: ERROR creating process\n");
+                return -1;
+            }
+            else
+            {
+                p_rqs[rq].state = RUNNING;
+                alive++;
+            }
         }
+
+        // Randomly kills, blocks or unblocks processes until every one has been killed
+        while (alive > 0)
+        {
+            for (rq = 0; rq < max_processes; rq++)
+            {
+                action = GetUniform(100) % 2;
+
+                switch (action)
+                {
+                case 0:
+                    if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED)
+                    {
+                        if (kill(p_rqs[rq].pid) == -1)
+                        {
+                            printf("test_processes: ERROR killing process\n");
+                            return -1;
+                        }
+                        p_rqs[rq].state = KILLED;
+                        alive--;
+                    }
+                    break;
+
+                case 1:
+                    if (p_rqs[rq].state == RUNNING)
+                    {
+                        if (blockProcess(p_rqs[rq].pid) == -1)
+                        {
+                            printf("test_processes: ERROR blocking process\n");
+                            return -1;
+                        }
+                        p_rqs[rq].state = BLOCKED;
+                    }
+                    break;
+                }
+            }
+
+            // Randomly unblocks processes
+            for (rq = 0; rq < max_processes; rq++)
+                if (p_rqs[rq].state == BLOCKED && GetUniform(100) % 2)
+                {
+                    if (blockProcess(p_rqs[rq].pid) == -1)
+                    {
+                        printf("test_processes: ERROR unblocking process\n");
+                        return -1;
+                    }
+                    p_rqs[rq].state = RUNNING;
+                }
+        }
+        printf("Test %d completado exitosamente\n", count++);
     }
 }
