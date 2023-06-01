@@ -61,7 +61,7 @@ int main()
 							(void *)MEMORY_INITIAL_DIRECTION, 
 							(void *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
 	initScheduler();
-	char *argv[] = {"shell", "1", NULL};
+	char *argv[] = {"sh", "1", NULL};
 	// createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv, &startWrapper);
 	execve(sampleCodeModuleAddress, NULL, 0, argv);
 	triggerTimer();

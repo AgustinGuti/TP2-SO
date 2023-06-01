@@ -308,7 +308,6 @@ void deleteProcess(Process process)
     {
         return;
     }
-    closePipes(process);
     freeStack(process);
     free(process->name);
     free(process->fds);
