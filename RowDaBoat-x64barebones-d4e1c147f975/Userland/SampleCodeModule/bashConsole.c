@@ -155,7 +155,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
         {
             commands[command].function(0, argv);
         }
-        execve(commands[command].function, NULL, 0, argv);
+        int pid = execve(commands[command].function, NULL, 0, argv);
         for (int i = 0; i < MAX_ARGS + 2; i++)
         {
             free(argv[i]);

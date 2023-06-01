@@ -81,6 +81,7 @@ int closePipe(Pipe pipe){
     if (pipe->attached > 1){
         pipe->attached--;
     }else{
+        printf("Cerrando pipe\n");
         semClose(pipe->sem);
         free(pipe->buffer);
         if (pipe->name != NULL){
@@ -105,7 +106,6 @@ int readFromPipe(Pipe pipe, char *buffer, int size){
             semWait(pipe->sem);
         }
         semWait(pipe->mutex);
-        pipe->blocked = 0;
         buffer[i] = pipe->buffer[pipe->readIndex];
         pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
         if (buffer[i] == EOF){
@@ -130,10 +130,19 @@ int writeToPipe(Pipe pipe, char *buffer, int size){
         i++;
         if (pipe->readIndex == (pipe->writeIndex - 1) % pipe->size){
             if(pipe->blocked){
+                pipe->blocked = 0;
                 semPost(pipe->sem);
             }
         }
         if (buffer[i-1] == EOF){
+            printf("EOF\n");
+            pipe->readIndex = 0;
+            pipe->writeIndex = 0;
+            memset(pipe->buffer, 0, pipe->size*sizeof(pipe->buffer[0]));
+            if(pipe->blocked){
+                pipe->blocked = 0;
+                semPost(pipe->sem);
+            }
             semPost(pipe->mutex);
             return i;
         }

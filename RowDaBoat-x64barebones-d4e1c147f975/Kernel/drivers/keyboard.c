@@ -181,8 +181,6 @@ char isKeyMake(unsigned char data)
 #define BUFFER_SIZE 1024
 
 static Pipe buffer = NULL;
-static readFD = 0;
-static writeFD = 1;
 
 void keyboard_handler(uint8_t event)
 {
@@ -222,16 +220,4 @@ Pipe getKeyboardBuffer()
         buffer = openPipe(NULL);
     }
     return buffer;
-}
-
-// Puts count chars from the buffer on out, or occupiedBuffer chars if its less. Returns amount of chars read
-int getBuffer(int *out, uint32_t count)
-{
-    if (buffer == NULL){
-        buffer = openPipe(NULL);
-    }
-    int size = readFromPipe(readFD, out, count);
-    return size;
-
-   // printf("End of buffer %d\n", bufferSem->value);
 }
