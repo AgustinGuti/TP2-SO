@@ -43,7 +43,7 @@ typedef struct command
     char executable;
 } command;
 
-#define COMMAND_QTY 26
+#define COMMAND_QTY 27
 
 static command commands[COMMAND_QTY] = {
     {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
@@ -182,6 +182,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
         return 0;
     }
 
+    strcpy(argv1[1], "0"); // El primer proceso no puede estar en foreground
     int pid1 = execve(commands[command1].function, pipes1, pipeQty, argv1);
     int pid2 = execve(commands[command2].function, pipes2, pipeQty, argv2);
 
