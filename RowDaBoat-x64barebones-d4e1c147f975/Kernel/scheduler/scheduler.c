@@ -122,8 +122,10 @@ void *schedule(void *rsp)
             }
             uint32_t ticks = ticks_elapsed();
             Process mostWaitingProcess = getProcess(scheduler->mostWaitingProcessPID);
-            if(mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE){
-                if( ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME){
+            if (mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE)
+            {
+                if (ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME)
+                {
                     mostWaitingProcess->waitingTime = ticks;
                     remove(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
                     mostWaitingProcess->priority = MAX_PRIORITY - 1;
@@ -134,10 +136,11 @@ void *schedule(void *rsp)
                     updateMostWaitingProcess();
                 }
             }
-            void* newRsp = changeProcess(rsp);
+            void *newRsp = changeProcess(rsp);
             /* waiting time is set when process starts to run */
             scheduler->currentProcess->waitingTime = ticks;
-            if( scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID){
+            if (scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID)
+            {
                 updateMostWaitingProcess();
             }
             return newRsp;
@@ -149,13 +152,15 @@ void *schedule(void *rsp)
 void updateMostWaitingProcess()
 {
     int currentPriority = scheduler->currentProcess->priority;
-    for(int i = 0; i < MAX_PRIORITY; i++){
+    for (int i = 0; i < MAX_PRIORITY; i++)
+    {
         /* add 1 to waitingtime for each process*/
         resetIterator(scheduler->it[i]);
         while (hasNext(scheduler->it[i]))
         {
             Process proc = next(scheduler->it[i]);
-            if (proc->waitingTime < scheduler->mostWaitingProcessTime && proc->pid >= 0 ||scheduler->mostWaitingProcessPID == EMPTY_PID && proc->pid != KERNEL_PID){
+            if (proc->waitingTime < scheduler->mostWaitingProcessTime && proc->pid >= 0 || scheduler->mostWaitingProcessPID == EMPTY_PID && proc->pid != KERNEL_PID)
+            {
                 scheduler->mostWaitingProcessPID = proc->pid;
                 scheduler->mostWaitingProcessTime = proc->waitingTime;
             }
