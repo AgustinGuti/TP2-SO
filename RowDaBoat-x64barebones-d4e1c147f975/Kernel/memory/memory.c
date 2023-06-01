@@ -33,14 +33,15 @@ uint64_t free(void *ptr)
 
 void * realloc(void *ptr, uint64_t newSize)
 {
-    uint64_t allocatedMemory = newSize;
-    void * res = reallocMemory(myMemoryManager, ptr, newSize, &allocatedMemory);
-    if( res != NULL){
-        occupiedMem += allocatedMemory;
-    }else {
-        printerr("Realloc failed\n");
-    }
-    return res;
+    // uint64_t allocatedMemory = newSize;
+    // void * res = reallocMemory(myMemoryManager, ptr, newSize, &allocatedMemory);
+    // if( res != NULL){
+    //     occupiedMem += allocatedMemory;
+    // }else {
+    //     printerr("Realloc failed\n");
+    // }
+    // return res;
+    return NULL;
 }
 
 

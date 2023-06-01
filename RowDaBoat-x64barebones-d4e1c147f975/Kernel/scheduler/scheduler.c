@@ -113,14 +113,14 @@ void *schedule(void *rsp)
                     moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
             }
-            counter++;
-            if (counter%MAX_PRIORITY != MAX_PRIORITY - 1){
-                Process auxNode = removeFirst(scheduler->queue[counter%MAX_PRIORITY]);
-                if (auxNode != NULL){
-                    insert(scheduler->queue[MAX_PRIORITY - 1], auxNode);
-                }
-                auxNode->priority = MAX_PRIORITY - 1;
-            }
+            //counter++;
+            // if (counter%MAX_PRIORITY != MAX_PRIORITY - 1){
+            //     Process auxNode = removeFirst(scheduler->queue[counter%MAX_PRIORITY]);
+            //     if (auxNode != NULL){
+            //         insert(scheduler->queue[MAX_PRIORITY - 1], auxNode);
+            //     }
+            //     auxNode->priority = MAX_PRIORITY - 1;
+            // }
             void* newRsp = changeProcess(rsp);
             return newRsp;
         }
@@ -380,6 +380,7 @@ void killProcess(pid_t pid)
         writeProcessPipe(STDOUT, newChar, 1);
         semClose(process->waitingSem);
         remove(scheduler->queue[process->priority], process);
+        closePipes(process);
         if (parent->state == ZOMBIE){
             deleteProcess(process);
         }else{

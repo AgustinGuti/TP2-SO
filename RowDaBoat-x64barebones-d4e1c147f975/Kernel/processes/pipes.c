@@ -84,6 +84,7 @@ int closePipe(Pipe pipe){
         semClose(pipe->sem);
         free(pipe->buffer);
         if (pipe->name != NULL){
+            remove(pipes->pipes, pipe);
             free(pipe->name);
         }
         free(pipe);

@@ -279,7 +279,6 @@ void deleteProcess(Process process){
     if(process == NULL){
         return;
     }
-    closePipes(process);
     freeStack(process);
     free(process);
 }

@@ -140,6 +140,11 @@ char parseAndExecuteCommands(uint8_t *str, int length)
         int command = getFullCommand(str, length, argv);
         if (command == -1)
         {
+            for (int i = 0; i < MAX_ARGS + 2; i++)
+            {
+                free(argv[i]);
+            }
+            free(argv);
             return 0;
         }
         if (commands[command].executable == 0)
@@ -174,10 +179,26 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     int command2 = getFullCommand(str + pipePos + 1, length - pipePos - 1, argv2);
     if (command1 == -1 || command2 == -1)
     {
+        for(int i = 0; i < MAX_ARGS + 2; i++)
+        {
+            free(argv1[i]);
+            free(argv2[i]);
+        }
+        free(argv1);
+        free(argv2);
+
         return 0;
     }
     if (commands[command1].executable == 0 || commands[command2].executable == 0)
     {
+        for(int i = 0; i < MAX_ARGS + 2; i++)
+        {
+            free(argv1[i]);
+            free(argv2[i]);
+        }
+        free(argv1);
+        free(argv2);
+
         printText("Error: one of the commands is not executable.\n");
         return 0;
     }
@@ -200,7 +221,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
 int getFullCommand(char *str, int length, char **args)
 {
     char command[length + 1];
-    char *arguments[MAX_ARGS];
+    char **arguments = malloc(sizeof(char *) * MAX_ARGS);
     for (int i = 0; i < MAX_ARGS; i++)
     {
         arguments[i] = malloc(MAX_ARG_LENGTH + 1);
@@ -407,7 +428,6 @@ char callMalloc(char argc, const char **argv)
     {
         char flag = 0;
         uint64_t size = hexaStrToNum(argv[0], strlen(argv[0]), &flag);
-
         if (flag == 1)
         {
             printf("Numero muy grande. Overflow\n");
