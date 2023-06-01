@@ -188,17 +188,18 @@ void eat(int phil)
 {
     //long for so it takes a while
     int i=0;
-    while(i<10000000){
+    while(i<1000000){
         i++;
     }
 	printState();
+    // printProcesses(0, NULL);
 }
 
 void think(int phil)
 {
     //long for so it takes a while
     int i=0;
-    while(i<10000000){
+    while(i<1000000){
         i++;
     }
 }
