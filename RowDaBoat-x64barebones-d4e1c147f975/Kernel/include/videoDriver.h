@@ -51,6 +51,7 @@ void backspace();
 void cleanScreen();
 void clearCharBuffer();
 void startPage();
+void sendEOF();
 
 /*	
 	Draws draws width * height * bpp/8 bytes from sprite to the screen, begining in coord.

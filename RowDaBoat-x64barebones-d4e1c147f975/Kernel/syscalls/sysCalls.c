@@ -32,7 +32,7 @@ char sys_getSavedRegisters(uint64_t registers[REGISTER_QTY]);
 void *sys_malloc(uint64_t size);
 uint64_t sys_free(void *ptr);
 int sys_execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[]);
-void sys_printProcesses();
+void sys_printProcesses(char showKilled);
 void sys_exit(int status);
 void sys_yield();
 pid_t sys_getpid();
@@ -239,9 +239,9 @@ char sys_getSavedRegisters(uint64_t registers[REGISTER_QTY])
     return 1;
 }
 
-void sys_printProcesses()
+void sys_printProcesses(char showKilled)
 {
-    printProcesses();
+    printProcesses(showKilled);
 }
 
 void sys_exit(int status)

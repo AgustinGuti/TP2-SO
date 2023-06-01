@@ -22,7 +22,7 @@ typedef int pid_t;
 void initScheduler();
 void *schedule(void *stackPointer);
 pid_t execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[]);
-void printProcesses();
+void printProcesses(char showKilled);
 pid_t getpid();
 void yield();
 void exit(int value);

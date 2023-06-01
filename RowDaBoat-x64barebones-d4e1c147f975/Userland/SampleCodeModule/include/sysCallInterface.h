@@ -30,7 +30,7 @@ void _sys_drawSprite(uint16_t xTopLeft, uint16_t yTopLeft, uint16_t width, uint1
 void _sys_exit(int status);
 void _sys_yield();
 int _sys_getpid();
-void _sys_printProcesses();
+void _sys_printProcesses(char showKilled);
 int _sys_execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[]);
 void *_sys_malloc(uint64_t size);
 uint64_t _sys_free(void *ptr);

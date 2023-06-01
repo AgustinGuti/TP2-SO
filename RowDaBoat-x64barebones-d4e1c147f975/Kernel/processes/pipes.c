@@ -1,5 +1,7 @@
 #include <pipes.h>
 
+#define EOF -1
+
 typedef struct PipeCDT{
     char *buffer;
     char *name;
@@ -7,6 +9,7 @@ typedef struct PipeCDT{
     int readIndex;
     int writeIndex;
     int attached;
+    int blocked;
     sem_t sem;
     sem_t mutex;
 }PipeCDT;
@@ -59,6 +62,7 @@ Pipe openPipe(char *name){
     pipe->readIndex = 0;
     pipe->writeIndex = 0;
     pipe->attached = 1;
+    pipe->blocked = 0;
     pipe->sem = semOpen(NULL, 0);
     pipe->mutex = semOpen(NULL, 1);
     if(pipe->sem == NULL){
@@ -94,11 +98,19 @@ int readFromPipe(Pipe pipe, char *buffer, int size){
     int i = 0;
     while(i < size){
         if(pipe->readIndex == pipe->writeIndex){
+            semWait(pipe->mutex);
+            pipe->blocked = 1;
+            semPost(pipe->mutex);
             semWait(pipe->sem);
         }
         semWait(pipe->mutex);
+        pipe->blocked = 0;
         buffer[i] = pipe->buffer[pipe->readIndex];
         pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
+        if (buffer[i] == EOF){
+            semPost(pipe->mutex);
+            return i;
+        }
         i++;
         semPost(pipe->mutex);
     }
@@ -116,7 +128,13 @@ int writeToPipe(Pipe pipe, char *buffer, int size){
         pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
         i++;
         if (pipe->readIndex == (pipe->writeIndex - 1) % pipe->size){
-            semPost(pipe->sem);
+            if(pipe->blocked){
+                semPost(pipe->sem);
+            }
+        }
+        if (buffer[i-1] == EOF){
+            semPost(pipe->mutex);
+            return i;
         }
         semPost(pipe->mutex);
     }

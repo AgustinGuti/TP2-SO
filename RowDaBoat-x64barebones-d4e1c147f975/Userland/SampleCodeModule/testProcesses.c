@@ -50,7 +50,7 @@ void wc()
     char c;
     while ((c = getChar()) != EOF)
     {
-        printf("%c", c);
+      //  printf("%c", c);
         if (c == '\n')
         {
             count++;
