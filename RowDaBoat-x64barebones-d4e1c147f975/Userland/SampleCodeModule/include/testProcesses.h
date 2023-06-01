@@ -1,20 +1,7 @@
-#include <stdio.h>
-#include <sysCallInterface.h>
-#include <semaphores.h>
+#ifndef _TESTPROCESSES_H_
+#define _TESTPROCESSES_H_
+
+#include <stdint.h>
 #include <stddef.h>
-#include <processes.h>
-#include <pipes.h>
-
-int processA();
-
-void processB();
-
-void processC();
-
-void cat();
-
-void wc();
-
-void loop(int sec);
-
-void filter();
+int64_t test_processes(char argc, char *argv[]);
+#endif

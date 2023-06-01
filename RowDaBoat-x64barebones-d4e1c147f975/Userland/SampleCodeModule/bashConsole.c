@@ -1,8 +1,10 @@
 #include <bashConsole.h>
 #include <stddef.h>
 #include <processes.h>
+#include <testMM.h>
+#include <testSync.h>
 #include <testProcesses.h>
-#include <tests.h>
+#include <testPrio.h>
 #include <memory.h>
 #include <phylos.h>
 
@@ -28,7 +30,6 @@ char callGetMemoryStatus(char argc, const char **argv);
 char callBlock(char argc, const char **argv);
 char callKill(char argc, const char **argv);
 char callNice(char argc, const char **argv);
-char callTestMM(char argc, const char **argv);
 char callSleep(char argc, const char **argv);
 char callRealloc(char argc, const char **argv);
 char callLoop(char argc, const char **argv);
@@ -43,7 +44,7 @@ typedef struct command
     char executable;
 } command;
 
-#define COMMAND_QTY 27
+#define COMMAND_QTY 29
 
 static command commands[COMMAND_QTY] = {
     {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
@@ -64,7 +65,7 @@ static command commands[COMMAND_QTY] = {
     {"block", &callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1},
     {"kill", &callKill, 1, 1, "Elimina un proceso dado por parametro.", 1},
     {"nice", &callNice, 2, 2, "Modifica la prioridad de un proceso dado por parametro.", 1},
-    {"test-mm", &callTestMM, 1, 1, "Ejecuta el test de memoria.", 1},
+    {"test-mm", &test_mm, 1, 1, "Ejecuta el test de memoria.", 1},
     {"phylo", &phylos, 0, 0, "Ejecuta el problema de los filosofos comensales.", 1},
     {"cat", &cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1},
     {"test-sync", &test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1},
@@ -72,7 +73,10 @@ static command commands[COMMAND_QTY] = {
     {"wc", &wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1},
     {"realloc", &callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1},
     {"loop", &callLoop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1},
-    {"filter", &filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1}};
+    {"filter", &filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1},
+    {"test-processes", &test_processes, 1, 1, "Ejecuta el test de procesos.", 1},
+    {"test-prio", &test_prio, 0, 0, "Ejecuta el test de prioridades.", 1},
+};
 
 int startConsole()
 {
@@ -140,6 +144,11 @@ char parseAndExecuteCommands(uint8_t *str, int length)
         int command = getFullCommand(str, length, argv);
         if (command == -1)
         {
+            for (int i = 0; i < MAX_ARGS + 2; i++)
+            {
+                free(argv[i]);
+            }
+            free(argv);
             return 0;
         }
         if (commands[command].executable == 0)
@@ -174,10 +183,26 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     int command2 = getFullCommand(str + pipePos + 1, length - pipePos - 1, argv2);
     if (command1 == -1 || command2 == -1)
     {
+        for(int i = 0; i < MAX_ARGS + 2; i++)
+        {
+            free(argv1[i]);
+            free(argv2[i]);
+        }
+        free(argv1);
+        free(argv2);
+
         return 0;
     }
     if (commands[command1].executable == 0 || commands[command2].executable == 0)
     {
+        for(int i = 0; i < MAX_ARGS + 2; i++)
+        {
+            free(argv1[i]);
+            free(argv2[i]);
+        }
+        free(argv1);
+        free(argv2);
+
         printText("Error: one of the commands is not executable.\n");
         return 0;
     }
@@ -186,7 +211,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     int pid1 = execve(commands[command1].function, pipes1, pipeQty, argv1);
     int pid2 = execve(commands[command2].function, pipes2, pipeQty, argv2);
 
-    for(int i = 0; i < MAX_ARGS + 2; i++)
+    for (int i = 0; i < MAX_ARGS + 2; i++)
     {
         free(argv1[i]);
         free(argv2[i]);
@@ -200,7 +225,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
 int getFullCommand(char *str, int length, char **args)
 {
     char command[length + 1];
-    char *arguments[MAX_ARGS];
+    char **arguments = malloc(sizeof(char *) * MAX_ARGS);
     for (int i = 0; i < MAX_ARGS; i++)
     {
         arguments[i] = malloc(MAX_ARG_LENGTH + 1);
@@ -407,7 +432,6 @@ char callMalloc(char argc, const char **argv)
     {
         char flag = 0;
         uint64_t size = hexaStrToNum(argv[0], strlen(argv[0]), &flag);
-
         if (flag == 1)
         {
             printf("Numero muy grande. Overflow\n");
@@ -550,20 +574,6 @@ char callNice(char argc, const char **argv)
         {
             printf("Prioridad del proceso con pid %d cambiada a %d\n", pid, returnValue);
         }
-    }
-    return 0;
-}
-
-char callTestMM(char argc, const char **argv)
-{
-    if (argc != 1)
-    {
-        printf("Argumento invalido para test-mm\n");
-    }
-    else
-    {
-        uint64_t memorySize = strToNum(argv[0], strlen(argv[0]));
-        test_mm(memorySize);
     }
     return 0;
 }
