@@ -47,6 +47,7 @@ typedef struct ProcessCDT
     pid_t waitingForPID;
     sem_t waitingSem;
     int sleepTime;
+    uint64_t waitingTime;
 } ProcessCDT;
 
 

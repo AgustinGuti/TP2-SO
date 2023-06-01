@@ -20,6 +20,8 @@ typedef struct SchedulerCDT
     LinkedList sleepingProcesses;
     Iterator itSleepingProcesses;
     uint64_t prevMillis;
+    pid_t mostWaitingProcessPID;
+    uint64_t mostWaitingProcessTime;
 } SchedulerCDT;
 
 static Scheduler scheduler = NULL;
@@ -28,6 +30,7 @@ Process getNextProcess();
 void printProcesses();
 Process getProcess(pid_t pid);
 void * changeProcess(void *rsp);
+void updateMostWaitingProcess();
 
 static char ready = 0;
 static uint64_t counter = 0; 
@@ -65,6 +68,8 @@ void initScheduler()
     scheduler->sleepingProcesses = createLinkedList();
     scheduler->itSleepingProcesses = iterator(scheduler->sleepingProcesses);
     scheduler->prevMillis = getMillis();
+    scheduler->mostWaitingProcessPID = EMPTY_PID;
+    scheduler->mostWaitingProcessTime = 0;
     ready = 1;
 }
 
@@ -112,19 +117,48 @@ void *schedule(void *rsp)
                     moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
             }
-            counter++;
-            if (counter%MAX_PRIORITY != MAX_PRIORITY - 1){
-                Process auxNode = removeFirst(scheduler->queue[counter%MAX_PRIORITY]);
-                if (auxNode != NULL){
-                    insert(scheduler->queue[MAX_PRIORITY - 1], auxNode);
+            uint32_t ticks = ticks_elapsed();
+            Process mostWaitingProcess = getProcess(scheduler->mostWaitingProcessPID);
+            if(mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE && mostWaitingProcess->pid >= 0){
+                if( ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME && mostWaitingProcess->priority != MAX_PRIORITY-1){
+                    mostWaitingProcess->waitingTime = ticks;
+                    remove(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
+                    mostWaitingProcess->priority++;
+                    insert(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
+                    scheduler->mostWaitingProcessPID = EMPTY_PID;
+                    scheduler->mostWaitingProcessTime = ticks;
+                    /*update the waiting time for each process*/
+                    updateMostWaitingProcess();
                 }
-                auxNode->priority = MAX_PRIORITY - 1;
+            }else{
+                updateMostWaitingProcess();
             }
             void* newRsp = changeProcess(rsp);
+            if( scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID){
+                updateMostWaitingProcess();
+            }
+            /* waiting time is set when process starts to run */
+            scheduler->currentProcess->waitingTime = ticks;
             return newRsp;
         }
     }
     return rsp;
+}
+
+void updateMostWaitingProcess()
+{
+    int currentPriority = scheduler->currentProcess->priority;
+    for(int i = 0; i < currentPriority-1; i++){
+        /* add 1 to waitingtime for each process*/
+        resetIterator(scheduler->it[i]);
+        while (hasNext(scheduler->it[i])){
+            Process proc = next(scheduler->it[i]);
+            if (proc->waitingTime < scheduler->mostWaitingProcessTime){
+                scheduler->mostWaitingProcessPID = proc->pid;
+                scheduler->mostWaitingProcessTime = proc->waitingTime;
+            }
+        }
+    }
 }
 
 void * changeProcess(void *rsp){
