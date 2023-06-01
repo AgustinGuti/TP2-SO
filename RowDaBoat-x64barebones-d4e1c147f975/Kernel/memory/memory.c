@@ -31,12 +31,13 @@ void *malloc(uint64_t size)
 
 uint64_t free(void *ptr)
 {
-    freeMemory(myMemoryManager, ptr);
+    uint64_t freedMemory = freeMemory(myMemoryManager, ptr);
+    occupiedMem -= freedMemory;
 }
 
 void *realloc(void *ptr, uint64_t newSize)
 {
-    uint64_t allocatedMemory = newSize;
+    int64_t allocatedMemory = newSize;
     void *res = reallocMemory(myMemoryManager, ptr, newSize, &allocatedMemory);
     if (res != NULL)
     {
@@ -51,6 +52,7 @@ void *realloc(void *ptr, uint64_t newSize)
 
 uint64_t *getMemoryStatus()
 {
+    printerr("Ocuppied memory: %x\n", occupiedMem);
     memoryStatus[0] = totalMem;
     memoryStatus[1] = occupiedMem;
     memoryStatus[2] = totalMem - occupiedMem;

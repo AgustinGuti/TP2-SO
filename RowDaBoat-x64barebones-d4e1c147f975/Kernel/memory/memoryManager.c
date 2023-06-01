@@ -111,8 +111,12 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 	return 0;
 }
 
-void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, uint64_t *const allocatedMemorySize)
+void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRealloc, const uint64_t newSize, int64_t *const allocatedMemorySize)
 {
+	if (memoryToRealloc == NULL)
+	{
+		return NULL;
+	}
 	void *newMemory = allocMemory(memoryManager, newSize, allocatedMemorySize);
 	if (newMemory == NULL)
 	{
@@ -131,7 +135,8 @@ void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRe
 	{
 		return NULL;
 	}
-	memcpy(newMemory, memoryToRealloc, currentBlock->size);
+	memcpy(newMemory, memoryToRealloc, currentBlock->size < newSize ? currentBlock->size : newSize);
+	*allocatedMemorySize -= currentBlock->size;
 	freeMemory(memoryManager, memoryToRealloc);
 	return newMemory;
 }
