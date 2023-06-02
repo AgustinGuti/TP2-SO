@@ -279,7 +279,8 @@ int writeProcessPipe(int fd, char *buffer, int size)
             putChar(WHITE, buffer[index]);
             index++;
         }
-        if (buffer[index] == -1){
+        if (buffer[index] == -1)
+        {
             writeToPipe(process->fds[fd], buffer, 1);
         }
         return size;
@@ -289,7 +290,8 @@ int writeProcessPipe(int fd, char *buffer, int size)
 
 void freeStack(Process process)
 {
-    if (process->hasStack){
+    if (process->hasStack)
+    {
         free(process->stack);
         process->hasStack = 0;
     }

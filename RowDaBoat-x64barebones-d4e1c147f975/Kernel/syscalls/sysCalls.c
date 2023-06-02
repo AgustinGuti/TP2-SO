@@ -34,7 +34,7 @@ uint8_t sys_getScreenBpp();
 char sys_getSavedRegisters(uint64_t registers[REGISTER_QTY]);
 void *sys_malloc(uint64_t size);
 uint64_t sys_free(void *ptr);
-int sys_execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[]);
+int sys_execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[]);
 void sys_printProcesses(char showKilled);
 void sys_exit(int status);
 void sys_yield();
@@ -48,7 +48,7 @@ uint64_t *sys_getMemoryStatus();
 pid_t sys_kill(int pid);
 int sys_nice(pid_t pid, int priority);
 pid_t sys_waitpid(pid_t pid);
-void * sys_realloc(void *ptr, uint64_t newSize);
+void *sys_realloc(void *ptr, uint64_t newSize);
 Pipe sys_openProcessPipe(char *name, int fds[2]);
 int sys_closeProcessPipe(int fd);
 void sys_sleep(int millis);
@@ -87,8 +87,7 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_openProcessPipe,
     (uint64_t)&sys_closeProcessPipe,
     (uint64_t)&sys_sleep,
-    (uint64_t)&sys_realloc
-};
+    (uint64_t)&sys_realloc};
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
 extern void _speaker_tune(uint16_t tune);
@@ -134,7 +133,7 @@ void *sys_realloc(void *ptr, uint64_t newSize)
     return realloc(ptr, newSize);
 }
 
-int sys_execve(void* entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
+int sys_execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
 {
     return execve(entryPoint, pipes, pipeQty, argv);
 }

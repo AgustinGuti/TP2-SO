@@ -143,10 +143,12 @@ int getKeyMake(uint8_t event)
                     {
                         return shiftKeyMapping[event];
                     }
-                    if(isCtrDown && key == 'c'){
+                    if (isCtrDown && key == 'c')
+                    {
                         return CTRL_C;
                     }
-                    if(isCtrDown && key == 'd'){
+                    if (isCtrDown && key == 'd')
+                    {
                         return EOF;
                     }
                     return keyMapping[event];
@@ -186,40 +188,43 @@ char isKeyMake(unsigned char data)
 static Pipe buffer = NULL;
 
 void keyboard_handler(uint8_t event)
-{   
-    if (buffer == NULL){
+{
+    if (buffer == NULL)
+    {
         buffer = openPipe(NULL);
     }
     int key = getKeyMake(event);
     if (key != -1)
     {
         char newChar[1];
-        switch (key){
-            case TAB:
-                writeToPipe(buffer, "   ", 3);
-                break;
-            case NEWLINE:
-                newChar[0] = NEWLINE;
-                writeToPipe(buffer, newChar, 1);
-                break;
-            case CTRL_C:
-                killForegroundProcess();
-                break;
-            case EOF:
-                newChar[0] = -1;
-                writeToPipe(buffer, newChar, 1);
-                break;
-            default:
-                newChar[0] = (char)key;
-                writeToPipe(buffer, newChar, 1);
-                break;
+        switch (key)
+        {
+        case TAB:
+            writeToPipe(buffer, "   ", 3);
+            break;
+        case NEWLINE:
+            newChar[0] = NEWLINE;
+            writeToPipe(buffer, newChar, 1);
+            break;
+        case CTRL_C:
+            killForegroundProcess();
+            break;
+        case EOF:
+            newChar[0] = -1;
+            writeToPipe(buffer, newChar, 1);
+            break;
+        default:
+            newChar[0] = (char)key;
+            writeToPipe(buffer, newChar, 1);
+            break;
         }
     }
 }
 
 Pipe getKeyboardBuffer()
 {
-    if (buffer == NULL){
+    if (buffer == NULL)
+    {
         buffer = openPipe(NULL);
     }
     return buffer;

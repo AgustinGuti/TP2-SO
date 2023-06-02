@@ -76,7 +76,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 			{
 				*allocatedMemorySize = memoryToAllocate + BLOCK_STRUCT_SIZE;
 			}
-			//printf("Allocated %x bytes of memory at: %x\n",memoryToAllocate+BLOCK_STRUCT_SIZE, allocatedMemorystartAddress);
+			// printf("Allocated %x bytes of memory at: %x\n",memoryToAllocate+BLOCK_STRUCT_SIZE, allocatedMemorystartAddress);
 			return (uint64_t *)((uint64_t)allocatedMemorystartAddress);
 		}
 		currentFreeBlock = currentFreeBlock->nextBlock;

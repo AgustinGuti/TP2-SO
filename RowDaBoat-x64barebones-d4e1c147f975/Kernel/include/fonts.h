@@ -1,4 +1,4 @@
-#include <stdint.h> 
+#include <stdint.h>
 #define CHAR_HEIGHT 16
 #define CHAR_WIDTH 8
 #define FIRST_CHAR 32

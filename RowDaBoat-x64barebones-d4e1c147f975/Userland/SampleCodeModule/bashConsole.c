@@ -166,7 +166,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
             freeArray(argv, MAX_ARGS + 2);
             return res;
         }
-    
+
         execve(commands[command].function, NULL, 0, argv);
 
         freeArray(argv, MAX_ARGS + 2);

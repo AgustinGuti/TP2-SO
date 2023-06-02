@@ -7,7 +7,7 @@
 
 void *malloc(uint64_t size);
 uint64_t free(void *ptr);
-uint64_t * getMemoryStatus();
+uint64_t *getMemoryStatus();
 void *realloc(void *ptr, uint64_t newSize);
 
 #endif /* MEMORY_H_ */
