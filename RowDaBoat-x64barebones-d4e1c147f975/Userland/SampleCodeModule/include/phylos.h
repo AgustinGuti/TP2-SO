@@ -9,6 +9,6 @@
 #include <stddef.h>
 #include <memory.h>
 
-void phylos();
+char phylos(char argc, char *argv[]);
 
 #endif /* PHYLOS_H_ */

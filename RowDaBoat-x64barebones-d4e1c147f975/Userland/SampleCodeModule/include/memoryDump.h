@@ -4,9 +4,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sysCallInterface.h>
+#include <functions.h>
 
-void memoryDump(uint64_t direction);
-void printRegs();
+char memoryDump(char argc, char **argv);
+char printRegs(char argc, char **argv);
 void saveRegs();
 
 #endif /* MEMORYDUMP_H_ */

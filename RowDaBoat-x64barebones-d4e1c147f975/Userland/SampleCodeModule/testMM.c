@@ -11,7 +11,7 @@ typedef struct MM_rq
   uint32_t size;
 } mm_rq;
 
-int64_t test_mm(char argc, char *argv[])
+char test_mm(char argc, char *argv[])
 {
 
   mm_rq mm_rqs[MAX_BLOCKS];
@@ -22,13 +22,13 @@ int64_t test_mm(char argc, char *argv[])
   if (argc != 1)
   {
     printf("test_mm: ERROR: Invalid number of arguments\n");
-    return -1;
+    return 1;
   }
 
   if ((max_memory = satoi(argv[0])) <= 0)
   {
     printf("test_mm: ERROR: Invalid argument\n");
-    return -1;
+    return 1;
   }
 
   int count = 0;

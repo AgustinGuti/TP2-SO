@@ -1,3 +1,4 @@
+#include <testSync.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "sysCallInterface.h"
@@ -62,13 +63,13 @@ uint64_t my_process_inc(uint64_t argc, char *argv[])
   return 0;
 }
 
-uint64_t test_sync(char argc, char *argv[])
+char test_sync(char argc, char *argv[])
 { //{n, use_sem}
   int pids[2 * TOTAL_PAIR_PROCESSES];
 
   if (argc != 2)
   {
-    return -1;
+    return 1;
   }
 
   char *argvDec[] = {"my_process_inc", "1", argv[0], "-1", argv[1], NULL};

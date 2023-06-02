@@ -1,9 +1,9 @@
+#include <testPrio.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <sysCallInterface.h>
 #include <processes.h>
 #include "test_util.h"
-#include <testPrio.h>
 
 #define MINOR_WAIT 1000000 // TODO: Change this value to prevent a process from flooding the screen
 #define WAIT 10000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
@@ -15,12 +15,12 @@
 
 int64_t prio[TOTAL_PROCESSES] = {LOWEST, MEDIUM, HIGHEST};
 
-void test_prio(char argc, char *args[])
+char test_prio(char argc, char *args[])
 {
   if (argc > 0)
   {
     printf("test_prio: demasiados argumentos\n");
-    return;
+    return 1;
   }
   int64_t pids[TOTAL_PROCESSES];
   char *argv[] = {"endless_loop_print", "0", NULL};
@@ -58,4 +58,5 @@ void test_prio(char argc, char *args[])
     kill(pids[i]);
 
   printf("Test completado exitosamente\n");
+  return 0;
 }
