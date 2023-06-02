@@ -1,8 +1,10 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <processes.h>
 
 #define EOF -1
 
-#define IS_VOWEL(c) (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u')
+#define IS_VOWEL(c) ((c) == 'a' || (c) == 'e' || (c) == 'i' || (c) == 'o' || (c) == 'u')
 
 int execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
 {
@@ -57,7 +59,7 @@ pid_t waitpid(pid_t pid)
 
 char cat(char argc, char **argv)
 {
-    char c;
+    int c;
     while ((c = getChar()) != EOF)
     {
         printf("%c", c);
@@ -67,7 +69,7 @@ char cat(char argc, char **argv)
 char wc(char argc, char **argv)
 {
     int count = 1;
-    char c;
+    int c;
     while ((c = getChar()) != EOF)
     {
         //  printf("%c", c);
@@ -92,7 +94,7 @@ char loop(char argc, char **argv)
 }
 char filter(char argc, char **argv)
 {
-    char c;
+    int c;
     while ((c = getChar()) != EOF)
     {
         if (IS_VOWEL(c))

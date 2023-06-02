@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <lib.h>
 #include <moduleLoader.h>
@@ -49,7 +51,7 @@ extern void saveRegisters();
 extern void restoreStack();
 
 #define MEMORY_INITIAL_DIRECTION 0x600000
-#define MEMORY_TO_MAP_SIZE 0xFFFFFFF - MEMORY_INITIAL_DIRECTION
+#define MEMORY_TO_MAP_SIZE (0xFFFFFFF - MEMORY_INITIAL_DIRECTION)
 
 int main()
 {

@@ -14,7 +14,7 @@ void printText(char *string);
 
 void putChar(char character);
 
-uint8_t getChar();
+int getChar();
 
 void newline();
 

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <semaphores.h>
 #include <interrupts.h>
 #include <linkedList.h>
@@ -35,6 +37,11 @@ sem_t semOpen(char *name, int value)
     if (semaphores == NULL)
     {
         semaphores = malloc(sizeof(struct semaphoresCDT));
+        if (semaphores == NULL)
+        {
+            leaveCritical();
+            return NULL;
+        }
         semaphores->semaphoresList = createLinkedList();
         semaphores->it = iterator(semaphores->semaphoresList);
     }
@@ -51,12 +58,19 @@ sem_t semOpen(char *name, int value)
                 while (hasNext(sem->itConnectedProcesses))
                 {
                     Process proc = next(sem->itConnectedProcesses);
+                    if (proc == NULL)
+                        continue;
                     if (proc->pid == getpid())
                     {
                         return sem;
                     }
                 }
                 pid_t *pid = malloc(sizeof(pid_t));
+                if (pid == NULL)
+                {
+                    leaveCritical();
+                    return NULL;
+                }
                 *pid = getpid();
                 insert(sem->connectedProcesses, pid);
                 leaveCritical();
@@ -64,10 +78,21 @@ sem_t semOpen(char *name, int value)
             }
         }
         newName = malloc(strlen(name) + 1);
+        if (newName == NULL)
+        {
+            leaveCritical();
+            return NULL;
+        }
         strcpy(newName, name);
     }
 
     sem_t newSem = malloc(sizeof(struct semaphoreCDT));
+    if (newSem == NULL)
+    {
+        leaveCritical();
+        free(newName);
+        return NULL;
+    }
     newSem->name = newName;
     newSem->value = value;
     // printf("Creating semaphore %s with id %d\n", sem->name, sem->id);
@@ -75,6 +100,13 @@ sem_t semOpen(char *name, int value)
     newSem->connectedProcesses = createLinkedList();
     newSem->itConnectedProcesses = iterator(newSem->connectedProcesses);
     pid_t *pid = malloc(sizeof(pid_t));
+    if (pid == NULL)
+    {
+        leaveCritical();
+        free(newName);
+        free(newSem);
+        return NULL;
+    }
     *pid = getpid();
     insert(newSem->connectedProcesses, pid);
 
@@ -138,6 +170,11 @@ void semWait(sem_t sem)
         return;
     }
     pid_t *pid = malloc(sizeof(pid_t));
+    if (pid == NULL)
+    {
+        leaveCritical();
+        return;
+    }
     *pid = getpid();
     insert(sem->waitingList, pid);
 

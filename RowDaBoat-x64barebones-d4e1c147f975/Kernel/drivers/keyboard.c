@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
 #include <semaphores.h>
 #include <videoDriver.h>
@@ -30,7 +32,7 @@ extern char get_key();
 // Ctrl when shell is running
 
 #define LCTRL_MAKE_1 0xC2
-#define LCTRL_MAKE_LINUX 0xD2
+#define LCTRL_MAKE_LINUX 0xE2
 #define LCTRL_MAKE_TEST 0xD0
 #define LCTRL_MAKE_TEST_2 0xCB
 
@@ -98,6 +100,7 @@ char isSpecialKeyMake(uint16_t data)
 // Return ASCII code of char received, or -1 if a char wasn't received
 int getKeyMake(uint8_t event)
 {
+    printf("Event: %d\n", event);
     uint16_t specialEvent = 0;
     switch (event)
     {

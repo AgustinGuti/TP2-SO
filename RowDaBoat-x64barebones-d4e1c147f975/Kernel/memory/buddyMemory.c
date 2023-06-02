@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <memoryManager.h>
 
 #define MAX_MEMORY 0x1000000000 // 64 GB mapped in pure64
