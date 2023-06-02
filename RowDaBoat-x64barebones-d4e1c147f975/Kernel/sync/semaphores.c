@@ -156,7 +156,6 @@ void semPost(sem_t sem)
     if (getSize(sem->waitingList) > 0)
     {
         pid_t *pid = (pid_t *)get(sem->waitingList, 0);
-        printf("Unblocking process %d\n", *pid);
         remove(sem->waitingList, pid);
         leaveCritical();
         unblockProcess(*pid);

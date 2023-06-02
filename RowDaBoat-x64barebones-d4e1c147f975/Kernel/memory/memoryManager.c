@@ -102,10 +102,9 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 			{
 				currentOccupiedBlock->nextBlock->prevBlock = currentOccupiedBlock->prevBlock;
 			}
-			addBlockToFreeList(memoryManager, memoryToFree, currentOccupiedBlock->size);
 			uint64_t size = currentOccupiedBlock->size;
+			addBlockToFreeList(memoryManager, memoryToFree, currentOccupiedBlock->size);
 			// printBlocks(memoryManager);
-			printf("Freed %x bytes of memory at: %x\n",size, memoryToFree);
 			return size;
 		}
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;

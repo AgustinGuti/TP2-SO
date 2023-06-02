@@ -143,7 +143,6 @@ void addPhilo()
 void removePhilo()
 {
     semWait(changingQtyMutex);
-
     if (N > 1)
     {
         put_forks(N - 1);

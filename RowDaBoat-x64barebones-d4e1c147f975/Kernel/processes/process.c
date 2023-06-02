@@ -32,8 +32,10 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
         /*not enough memory to allocate process*/
         return NULL;
     }
+    process->hasStack = 1;
     process->pid = generatePID();
     process->name = (char *)malloc(strlen(name) + 1);
+    process->exitValue = 0;
     if (process->name == NULL)
     {
         /*not enough memory for process->name*/
@@ -126,7 +128,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
             argc++;
         }
     }
-    char **argvAux = (char **)malloc((argc + 1) * sizeof(char *));
+    char **argvAux = (char **)malloc((argc) * sizeof(char *));
     process->argv = argvAux;
     process->argc = argc;
     if (argvAux == NULL)
@@ -285,7 +287,10 @@ int writeProcessPipe(int fd, char *buffer, int size)
 
 void freeStack(Process process)
 {
-    free(process->stack);
+    if (process->hasStack){
+        free(process->stack);
+        process->hasStack = 0;
+    }
 }
 
 pid_t generatePID()

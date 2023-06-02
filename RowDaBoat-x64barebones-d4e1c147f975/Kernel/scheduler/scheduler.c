@@ -8,11 +8,11 @@
 typedef struct SchedulerCDT
 {
     LinkedList queue[MAX_PRIORITY];
+    Iterator it[MAX_PRIORITY];
     LinkedList deleted;
+    Iterator itDeleted;
     Process currentProcess;
     Process empty;
-    Iterator it[MAX_PRIORITY];
-    Iterator itDeleted;
     char skipPID;
     int quantum;
     int quantumCounter;
@@ -32,6 +32,7 @@ Process getNextProcess();
 Process getProcess(pid_t pid);
 void *changeProcess(void *rsp);
 void updateMostWaitingProcess();
+void cleanChildDeletedProcesses(Process process);
 
 static char ready = 0;
 static uint64_t counter = 0;
@@ -72,6 +73,24 @@ void initScheduler()
     scheduler->mostWaitingProcessPID = EMPTY_PID;
     scheduler->mostWaitingProcessTime = 0;
     ready = 1;
+}
+
+void closeScheduler()
+{
+    ready = 0;
+    for (int i = 0; i < MAX_PRIORITY; i++){
+        freeIterator(scheduler->it[i]);
+        destroyLinkedList(scheduler->queue[i]);
+    }
+    freeIterator(scheduler->itDeleted);
+    destroyLinkedList(scheduler->deleted);
+    freeIterator(scheduler->itProcessesToFree);
+    destroyLinkedList(scheduler->processesToFree);
+    freeIterator(scheduler->itSleepingProcesses);
+    destroyLinkedList(scheduler->sleepingProcesses);
+    deleteProcess(scheduler->empty);
+    free(scheduler);
+    scheduler = NULL;
 }
 
 void *schedule(void *rsp)
@@ -442,9 +461,9 @@ pid_t killProcess(pid_t pid)
         writeProcessPipe(STDOUT, newChar, 1);
         semClose(process->waitingSem);
         remove(scheduler->queue[process->priority], process);
+        cleanChildDeletedProcesses(process);
         closePipes(process);
-        int i;
-        for (i = 0; i < process->argc; i++)
+        for (int i = 0; i < process->argc; i++)
         {
             free(process->argv[i]);
         }
@@ -464,13 +483,37 @@ pid_t killProcess(pid_t pid)
             }
             else
             {
-                free(process->stack);
+                freeStack(process);
             }
         }
         return pid;
     }
     printerr("Process %d not found\n", pid);
     return -1;
+}
+
+void cleanChildDeletedProcesses(Process process){
+    LinkedList processesToDelete = createLinkedList();
+
+    resetIterator(scheduler->itDeleted);
+    while (hasNext(scheduler->itDeleted))
+    {
+        Process proc = next(scheduler->itDeleted);
+        if (proc->parentPID == process->pid)
+        {
+            insert(processesToDelete, proc);
+        }
+    }
+    Iterator it = iterator(processesToDelete);
+    while (hasNext(it))
+    {
+        Process proc = next(it);
+        remove(scheduler->deleted, proc);
+        remove(scheduler->processesToFree, proc);
+        deleteProcess(proc);
+    }
+    freeIterator(it);
+    freeLinkedList(processesToDelete);
 }
 
 Process getForegroundProcess()
@@ -504,6 +547,7 @@ void killForegroundProcess()
 void startWrapper(void *entryPoint, char argc, char *argv[])
 {
     int ret = ((int (*)(int, char *[]))entryPoint)(argc, argv);
+    scheduler->currentProcess->exitValue = ret;
     if (scheduler->currentProcess->pid == 0)
     {
         Process kernel = getProcess(KERNEL_PID);

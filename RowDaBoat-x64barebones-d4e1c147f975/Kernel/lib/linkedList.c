@@ -65,6 +65,20 @@ void destroyLinkedList(LinkedList list)
     free(list);
 }
 
+void freeLinkedList(LinkedList list){
+    while(list->freeNodes > 0){
+        int idx = 0;
+        while(list->free[idx] == NULL){
+            idx++;
+        }
+        free(list->free[idx]);
+        list->free[idx] = NULL;
+        list->freeNodes--;
+    }
+    free(list->free);
+    free(list);
+}
+
 // Function to insert an element at the end of the linked list
 void insert(LinkedList list, void *data)
 {
