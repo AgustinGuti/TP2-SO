@@ -429,6 +429,7 @@ void killProcess(pid_t pid)
             parent->waitingForPID = -1;
             semPost(parent->waitingSem);
         }
+        process->foreground = 0;
         process->state = ZOMBIE;
         char newChar[1] = {EOF};
         writeProcessPipe(STDOUT, newChar, 1);
