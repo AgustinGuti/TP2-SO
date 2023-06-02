@@ -28,6 +28,7 @@ char isKeyMake(unsigned char data);
 
 void keyboard_handler(uint8_t event);
 Pipe getKeyboardBuffer();
+void closeKeyboardBuffer();
 
 
 int getBuffer(int* out, uint32_t count);

@@ -130,14 +130,16 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
             argc++;
         }
     }
-    char **argvAux = (char **)malloc((argc) * sizeof(char *));
+    char **argvAux = NULL;
+    if (argc > 0){
+        argvAux = (char **)malloc((argc) * sizeof(char *));
+        if (argvAux == NULL)
+        {
+            return NULL;
+        }
+    }
     process->argv = argvAux;
     process->argc = argc;
-    if (argvAux == NULL)
-    {
-        /*not enough memory for argvAux*/
-        return NULL;
-    }
     for (int i = 0; i < argc; i++)
     {
         argvAux[i] = (char *)malloc(strlen(argv[i]) + 1);
@@ -328,6 +330,13 @@ void deleteProcess(Process process)
     free(process->name);
     free(process->fds);
     free(process->pipeTypes);
+    for (int i = 0; i < process->argc; i++)
+    {
+        free(process->argv[i]);
+    }
+    if (process->argv != NULL){
+        free(process->argv);
+    }
     free(process);
 }
 

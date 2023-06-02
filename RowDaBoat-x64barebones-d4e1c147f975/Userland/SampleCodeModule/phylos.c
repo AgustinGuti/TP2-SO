@@ -195,6 +195,9 @@ void addPhilo()
     args[3] = NULL;
     decToStr(args[2], philoQty - 1);
     philosophersPID[philoQty - 1] = execve(&philosopher, NULL, 0, args);
+    free(args[0]);
+    free(args[1]);
+    free(args[2]);
     semPost(changingQtyMutex);
 }
 

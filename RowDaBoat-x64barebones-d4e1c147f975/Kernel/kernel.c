@@ -76,11 +76,10 @@ int main()
 
 	
 	initScheduler();
-	char *argv[] = {"sh", "1", NULL};
-	// createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv, &startWrapper);
-	
+	char *argv[] = {"sh", "1", NULL};	
 	execve(sampleCodeModuleAddress, NULL, 0, argv);
 	closeScheduler();
+	closeKeyboardBuffer();
 
 	memStatus = getMemoryStatus();
 	// if (memStatus == NULL)

@@ -46,6 +46,10 @@ uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap)
 
 void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToAllocate, uint64_t *allocatedMemorySize)
 {
+	if (memoryToAllocate == 0)
+	{
+		return NULL;
+	}
 	MemoryBlock *currentFreeBlock = memoryManager->firstFreeBlock;
 	while (currentFreeBlock != NULL)
 	{
@@ -70,8 +74,8 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 				}
 			}
 			addBlockToOccupiedList(memoryManager, allocatedMemorystartAddress, memoryToAllocate);
-
-			// printBlocks(memoryManager);
+			if (allocatedMemorystartAddress == (void *)0xFFE319F)
+		   		printBlocks(memoryManager);
 			if (allocatedMemorySize != NULL)
 			{
 				*allocatedMemorySize = memoryToAllocate + BLOCK_STRUCT_SIZE;
@@ -87,6 +91,10 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 
 uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree)
 {
+	if (memoryToFree == NULL)
+	{
+		return 0;
+	}
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
 	{
@@ -106,7 +114,7 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 			}
 			uint64_t size = currentOccupiedBlock->size;
 			addBlockToFreeList(memoryManager, memoryToFree, currentOccupiedBlock->size);
-			// printBlocks(memoryManager);
+		//	printBlocks(memoryManager);
 			return size;
 		}
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
@@ -259,7 +267,8 @@ void printBlocks(MemoryManagerADT const memoryManager)
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
 	{
-		printf("Occupied Block Start address: %x, size: %x\n", currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
+		if (currentOccupiedBlock->startAddress <= (void *)0xFFE319F)
+			printf("Occupied Block Start address: %x, size: %x\n", currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
 	}
 	printf("DONE\n");

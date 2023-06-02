@@ -84,12 +84,19 @@ int closePipe(Pipe pipe){
         pipe->attached--;
     }else{
         semClose(pipe->sem);
+        semClose(pipe->mutex);
         free(pipe->buffer);
         if (pipe->name != NULL){
             remove(pipes->pipes, pipe);
             free(pipe->name);
         }
         free(pipe);
+    }
+    if (getSize(pipes->pipes) == 0){
+        destroyLinkedList(pipes->pipes);
+        freeIterator(pipes->it);
+        free(pipes);
+        pipes = NULL;
     }
     return 0;
 }

@@ -21,4 +21,8 @@ void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRe
 
 uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap);
 
+
+//TODO TESTING
+void printBlocks(MemoryManagerADT const memoryManager);
+
 #endif

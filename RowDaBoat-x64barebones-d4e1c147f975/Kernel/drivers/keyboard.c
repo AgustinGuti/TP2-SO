@@ -224,3 +224,10 @@ Pipe getKeyboardBuffer()
     }
     return buffer;
 }
+
+void closeKeyboardBuffer(){
+    if (buffer != NULL){
+        closePipe(buffer);
+        buffer = NULL;
+    }
+}
