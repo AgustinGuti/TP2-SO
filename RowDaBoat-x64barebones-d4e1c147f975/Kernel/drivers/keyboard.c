@@ -30,7 +30,10 @@ extern char get_key();
 // Ctrl when shell is running
 
 #define LCTRL_MAKE_1 0xC2
-#define LCTL_MAKE_LINUX 0xD2
+#define LCTRL_MAKE_LINUX 0xD2
+#define LCTRL_MAKE_TEST 0xD0
+#define LCTRL_MAKE_TEST_2 0xCB
+
 // Ctrl when shell is not running
 #define LCTRL_MAKE_2 0x1D
 
@@ -108,12 +111,10 @@ int getKeyMake(uint8_t event)
         isAltDown = 0;
         break;
     case LCTRL_MAKE_1:
-        isCtrDown = 1;
-        break;
     case LCTRL_MAKE_2:
-        isCtrDown = 1;
-        break;
-    case LCTL_MAKE_LINUX:
+    case LCTRL_MAKE_LINUX:
+    case LCTRL_MAKE_TEST:
+    case LCTRL_MAKE_TEST_2:
         isCtrDown = 1;
         break;
     default:
@@ -183,7 +184,7 @@ char isKeyMake(unsigned char data)
 static Pipe buffer = NULL;
 
 void keyboard_handler(uint8_t event)
-{
+{   
     if (buffer == NULL){
         buffer = openPipe(NULL);
     }
