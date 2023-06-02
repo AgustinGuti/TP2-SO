@@ -57,12 +57,11 @@ pid_t waitpid(pid_t pid)
 
 void cat()
 {
-    char buffer[1];
-    do
+    char c;
+     while ((c=getChar()) != EOF)
     {
-        _sys_read(0, buffer, 1);
-        printf("%c", buffer[0]);
-    } while (buffer[0] != EOF);
+        printf("%c", c);
+    };
 }
 void wc()
 {

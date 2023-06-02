@@ -137,7 +137,6 @@ void removePhilo(){
         kill(philosophersPID[N-1]);
         semClose(forks[N-1]);
         N--;
-        semPost(changingQtyMutex);
     }else{
         printf("Can't remove more philosophers\n");
     }
