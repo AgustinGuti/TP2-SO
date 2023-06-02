@@ -100,7 +100,6 @@ char isSpecialKeyMake(uint16_t data)
 // Return ASCII code of char received, or -1 if a char wasn't received
 int getKeyMake(uint8_t event)
 {
-    printf("Event: %d\n", event);
     uint16_t specialEvent = 0;
     switch (event)
     {
