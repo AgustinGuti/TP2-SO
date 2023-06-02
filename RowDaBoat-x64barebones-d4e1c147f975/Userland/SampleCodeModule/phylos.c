@@ -1,8 +1,10 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <phylos.h>
 #include <processes.h>
 
-#define LEFT (i + N - 1) % N
-#define RIGHT (i + 1) % N
+#define LEFT (i + philoQty - 1) % philoQty
+#define RIGHT (i + 1) % philoQty
 
 #define THINKING 0
 #define HUNGRY 1
@@ -22,14 +24,14 @@ void removePhilo();
 int left(int i);
 int right(int i);
 
-int N = 0;
+int philoQty = 0;
 int currentMax = BLOCK;
 int processToKill = -1;
 int *state;
 sem_t processToKillMutex;
 sem_t changingQtyMutex;
 sem_t mutex;
-sem_t *s;
+sem_t *philoSemaphores;
 pid_t *philosophersPID;
 int *timesEaten;
 int maxTimesEaten;
@@ -37,16 +39,36 @@ int maxTimesEaten;
 char phylos(char argc, char **argv)
 {
     state = (int *)malloc(BLOCK * sizeof(int));
-    s = (sem_t *)malloc(BLOCK * sizeof(sem_t));
+    if (state == NULL)
+    {
+        printf("Error allocating memory for state\n");
+        return 1;
+    }
+    philoSemaphores = (sem_t *)malloc(BLOCK * sizeof(sem_t));
+    if (philoSemaphores == NULL)
+    {
+        printf("Error allocating memory for philoSemaphores\n");
+        return 1;
+    }
     philosophersPID = (pid_t *)malloc(BLOCK * sizeof(pid_t));
+    if (philosophersPID == NULL)
+    {
+        printf("Error allocating memory for philosophersPID\n");
+        return 1;
+    }
     timesEaten = (int *)malloc(BLOCK * sizeof(int));
+    if (timesEaten == NULL)
+    {
+        printf("Error allocating memory for timesEaten\n");
+        return 1;
+    }
     maxTimesEaten = 0;
 
     int i;
-    for (i = 0; i < N; i++)
+    for (i = 0; i < philoQty; i++)
     {
         state[i] = THINKING;
-        s[i] = semOpen(NULL, 0);
+        philoSemaphores[i] = semOpen(NULL, 0);
     }
 
     if ((mutex = semOpen(NULL, 1)) == NULL)
@@ -90,7 +112,7 @@ char phylos(char argc, char **argv)
         }
     }
 
-    for (i = 0; i < N; i++)
+    for (i = 0; i < philoQty; i++)
     {
         kill(philosophersPID[i]);
     }
@@ -99,11 +121,11 @@ char phylos(char argc, char **argv)
     free(philosophersPID);
     semClose(mutex);
     semClose(processToKillMutex);
-    for (i = 0; i < N; i++)
+    for (i = 0; i < philoQty; i++)
     {
-        semClose(s[i]);
+        semClose(philoSemaphores[i]);
     }
-    free(s);
+    free(philoSemaphores);
 
     return 0;
 }
@@ -111,45 +133,80 @@ char phylos(char argc, char **argv)
 void addPhilo()
 {
     semWait(changingQtyMutex);
-    N++;
-    if (N > currentMax)
+    philoQty++;
+    if (philoQty > currentMax)
     {
         currentMax *= 2;
         state = (int *)realloc(state, currentMax * sizeof(int));
-        s = (sem_t *)realloc(s, currentMax * sizeof(sem_t));
+        if (state == NULL)
+        {
+            printf("Error reallocating memory for state\n");
+            return;
+        }
+        philoSemaphores = (sem_t *)realloc(philoSemaphores, currentMax * sizeof(sem_t));
+        if (philoSemaphores == NULL)
+        {
+            printf("Error reallocating memory for philoSemaphores\n");
+            return;
+        }
         philosophersPID = (pid_t *)realloc(philosophersPID, currentMax * sizeof(pid_t));
+        if (philosophersPID == NULL)
+        {
+            printf("Error reallocating memory for philosophersPID\n");
+            return;
+        }
         timesEaten = (int *)realloc(timesEaten, currentMax * sizeof(int));
+        if (timesEaten == NULL)
+        {
+            printf("Error reallocating memory for timesEaten\n");
+            return;
+        }
     }
-    state[N - 1] = THINKING;
-    if ((s[N - 1] = semOpen(NULL, 1)) == NULL)
+    state[philoQty - 1] = THINKING;
+    if ((philoSemaphores[philoQty - 1] = semOpen(NULL, 1)) == NULL)
     {
-        printf("Error opening semaphore %d\n", N - 1);
+        printf("Error opening semaphore %d\n", philoQty - 1);
         return;
     }
-    timesEaten[N - 1] = maxTimesEaten;
+    timesEaten[philoQty - 1] = maxTimesEaten;
     char foreground[2] = "0";
     char *args[4];
     args[0] = malloc(12 * sizeof(char));
+    if (args[0] == NULL)
+    {
+        printf("Error allocating memory for args[0]\n");
+        return;
+    }
     strcpy(args[0], "philosopher");
     args[1] = malloc(2 * sizeof(char));
+    if (args[1] == NULL)
+    {
+        printf("Error allocating memory for args[1]\n");
+        return;
+    }
     strcpy(args[1], foreground);
 
     args[2] = malloc(10 * sizeof(char));
+    if (args[2] == NULL)
+    {
+        printf("Error allocating memory for args[2]\n");
+        return;
+    }
     args[3] = NULL;
-    decToStr(args[2], N - 1);
-    philosophersPID[N - 1] = execve(&philosopher, NULL, 0, args);
+    decToStr(args[2], philoQty - 1);
+    philosophersPID[philoQty - 1] = execve(&philosopher, NULL, 0, args);
     semPost(changingQtyMutex);
 }
 
 void removePhilo()
 {
     semWait(changingQtyMutex);
-    if (N > 1)
+    if (philoQty > 1)
     {
-        put_forks(N - 1);
-        kill(philosophersPID[N]);
-        semClose(s[N - 1]);
-        N--;
+        put_forks(philoQty - 1);
+        kill(philosophersPID[philoQty]);
+        semClose(philoSemaphores[philoQty - 1]);
+        philoQty--;
     }
     else
     {
@@ -176,7 +233,7 @@ void take_forks(int i)
     state[i] = HUNGRY;
     test(i);
     semPost(mutex);
-    semWait(s[i]);
+    semWait(philoSemaphores[i]);
 }
 
 void put_forks(int i)
@@ -198,7 +255,7 @@ void test(int i)
         {
             maxTimesEaten = timesEaten[i];
         }
-        semPost(s[i]);
+        semPost(philoSemaphores[i]);
     }
 }
 
@@ -212,7 +269,7 @@ void eat(int phil)
     }
     printState();
 
-    if (N > 10)
+    if (philoQty > 10)
     {
         //   printProcesses(0, NULL);
     }
@@ -232,7 +289,7 @@ void printState()
 {
     semWait(changingQtyMutex);
     int i;
-    for (i = 0; i < N; i++)
+    for (i = 0; i < philoQty; i++)
     {
         switch (state[i])
         {
@@ -253,10 +310,10 @@ void printState()
 
 int left(int i)
 {
-    return (i + N - 1) % N;
+    return (i + philoQty - 1) % philoQty;
 }
 
 int right(int i)
 {
-    return (i + 1) % N;
+    return (i + 1) % philoQty;
 }

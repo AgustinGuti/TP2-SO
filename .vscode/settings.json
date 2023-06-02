@@ -43,7 +43,8 @@
         "bashconsole.h": "c",
         "cstdio": "c",
         "processes.h": "c",
-        "phylos.h": "c"
+        "phylos.h": "c",
+        "random": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

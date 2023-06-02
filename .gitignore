@@ -2,6 +2,11 @@
 .gdb*
 .bash_history
 
+strace*
+index.html
+PVS*
+*.tasks
+
 # Prerequisites
 *.d
 

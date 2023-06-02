@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <bashConsole.h>
 
 #define EOF -1
@@ -80,7 +82,7 @@ int startConsole()
         {
             for (int i = 0; i < readQty; i++)
             {
-                if ((commandBufferPos > 0) || (commandBufferPos == 0 && printBuf[i] != BACKSPACE))
+                if ((commandBufferPos > 0) || printBuf[i] != BACKSPACE)
                 {
                     putChar(printBuf[i]);
 
@@ -121,9 +123,18 @@ void freeArray(char **array, int length)
 void **mallocArray(int length)
 {
     void **array = malloc(sizeof(void *) * length);
+    if (array == NULL)
+    {
+        return NULL;
+    }
     for (int i = 0; i < length; i++)
     {
         array[i] = malloc(MAX_ARG_LENGTH + 1);
+        if (array[i] == NULL)
+        {
+            freeArray(array, i);
+            return NULL;
+        }
     }
     return array;
 }
@@ -168,7 +179,16 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     int pipeQty = 2;
 
     char **argv1 = mallocArray(MAX_ARGS + 2);
+    if (argv1 == NULL)
+    {
+        return 0;
+    }
     char **argv2 = mallocArray(MAX_ARGS + 2);
+    if (argv2 == NULL)
+    {
+        freeArray(argv1, MAX_ARGS + 2);
+        return 0;
+    }
 
     int command1 = getFullCommand(str, pipePos, argv1);
     int command2 = getFullCommand(str + pipePos + 1, length - pipePos - 1, argv2);
@@ -200,6 +220,10 @@ int getFullCommand(uint8_t *str, int length, char **args)
 {
     char command[length + 1];
     char **arguments = mallocArray(MAX_ARGS + 2);
+    if (arguments == NULL)
+    {
+        return -1;
+    }
     int argc = 0;
     char commandName[length + 1];
     memcpy(command, str, length);
@@ -373,7 +397,7 @@ char callFree(char argc, char **argv)
         }
         else
         {
-            const uint64_t freedBytes = free(ptr);
+            uint64_t freedBytes = free(ptr);
             printf("%x bytes liberados\n", freedBytes);
         }
     }
@@ -405,6 +429,7 @@ char callMalloc(char argc, char **argv)
             {
                 printf("Se reservo memoria en la direccion %x\n", ptr);
             }
+            free(ptr);
         }
     }
     else
@@ -427,7 +452,7 @@ char callRealloc(char argc, char **argv)
     uint64_t newSize = (uint64_t)hexaStrToNum(argv[1], strlen(argv[1]), &flag2);
     if (flag1 == 1 || flag2 == 1)
     {
-        printf("Argumento inválido\n", 0);
+        printf("Argumento inválido\n");
         return 0;
     }
     uint64_t *newPtr = realloc(ptr, newSize);
