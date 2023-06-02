@@ -13,5 +13,6 @@ char getBit(uint16_t value, int n);
 void strcpy(char *dest, const char *src);
 int strcmp(const char* str1, const char* str2);
 int strToNum(const char * str, int longitud);
+int intComparator(void *a, void *b);
 
 #endif

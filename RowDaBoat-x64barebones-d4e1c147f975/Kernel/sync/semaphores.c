@@ -140,6 +140,7 @@ void semWait(sem_t sem)
     pid_t *pid = malloc(sizeof(pid_t));
     *pid = getpid();
     insert(sem->waitingList, pid);
+
     leaveCritical();
     blockProcess(*pid);
     return;
@@ -155,6 +156,7 @@ void semPost(sem_t sem)
     if (getSize(sem->waitingList) > 0)
     {
         pid_t *pid = (pid_t *)get(sem->waitingList, 0);
+        printf("Unblocking process %d\n", *pid);
         remove(sem->waitingList, pid);
         leaveCritical();
         unblockProcess(*pid);
@@ -165,3 +167,4 @@ void semPost(sem_t sem)
     leaveCritical();
     return;
 }
+

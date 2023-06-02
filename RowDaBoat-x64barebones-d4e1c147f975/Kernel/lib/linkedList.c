@@ -307,3 +307,16 @@ void headToBack(LinkedList list)
         list->tail = newTail;
     }
 }
+
+void * findItem(LinkedList list, void *data, int (*comparator)(void *, void *)){
+    NodeCTD *current = list->head;
+    while (current != NULL)
+    {
+        if (comparator(current->data, data) == 0)
+        {
+            return current->data;
+        }
+        current = current->next;
+    }
+    return NULL;
+}
