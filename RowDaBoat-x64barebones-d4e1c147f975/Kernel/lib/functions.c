@@ -79,7 +79,7 @@ char getBit(uint16_t value, int n)
   return (value & 1 << (n)) != 0;
 }
 
-uint32_t strlen(char *str)
+uint32_t strlen(const char *str)
 {
   uint32_t len = 0;
   while (str[len] != 0)
@@ -89,7 +89,7 @@ uint32_t strlen(char *str)
   return len;
 }
 
-void strcpy(char *dest, char *src){
+void strcpy(char *dest, const char *src){
   memcpy(dest, src, strlen(src) + 1);
 }
 
@@ -98,7 +98,7 @@ int strcmp(const char* str1, const char* str2) {
 	return *str1 - *str2;
 }
 
-int strToNum(char * str, int longitud){
+int strToNum(const char * str, int longitud){
     int neg = 0;
 
     if(str[0] == '-'){

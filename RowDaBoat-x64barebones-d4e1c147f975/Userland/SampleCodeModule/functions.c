@@ -82,7 +82,7 @@ int decNumLength(int num){
  * - Transformacion del string a un int.
  ***/
 
-int strToNum(char * str, int longitud){
+int strToNum(const char * str, int longitud){
     int neg = 0;
 
     if(str[0] == '-'){
@@ -102,7 +102,7 @@ int strToNum(char * str, int longitud){
     return num;
 }
 
-uint64_t hexaStrToNum(char * str, int longitud, char *overflowFlag){
+uint64_t hexaStrToNum(const char * str, int longitud, char *overflowFlag){
     uint64_t num = 0;
     int digit;
     for(int i=0 ; i<longitud ; i++){
@@ -125,7 +125,7 @@ uint64_t hexaStrToNum(char * str, int longitud, char *overflowFlag){
 }
 
 
-uint32_t strlen(char *str){
+uint32_t strlen(const char *str){
     uint32_t len = 0;
     while (str[len] != 0){
       len++;
@@ -142,7 +142,7 @@ void buildRectSprite(uint16_t width, uint16_t height, uint32_t color, uint8_t **
   }
 }
 
-int isHexaNumber(char * str){
+int isHexaNumber(const char * str){
   int i=0;
   while (str[i]!=0){
     if((str[i]<'0'|| str[i]>'9') && (str[i]<'A' || str[i]>'F') && (str[i]<'a' || str[i]>'f')){
@@ -153,7 +153,7 @@ int isHexaNumber(char * str){
   return 1; 
 }
 
-void strcpy(char *dest, char *src){
+void strcpy(char *dest, const char *src){
   memcpy(dest, src, strlen(src) + 1);
 }
 

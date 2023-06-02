@@ -40,14 +40,14 @@ void exit(int value)
     _sys_exit(value);
 }
 
-void blockProcess(int pid)
+pid_t blockProcess(int pid)
 {
-    _sys_block(pid);
+    return _sys_block(pid);
 }
 
-void kill(int pid)
+pid_t kill(int pid)
 {
-    _sys_kill(pid);
+    return _sys_kill(pid);
 }
 
 pid_t waitpid(pid_t pid)

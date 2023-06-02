@@ -257,6 +257,7 @@ int readProcessPipe(int fd, char *buffer, int size)
 
 int writeProcessPipe(int fd, char *buffer, int size)
 {
+
     Process process = getCurrentProcess();
     if (fd < 0 || fd >= process->fdLimit)
     {
@@ -268,7 +269,15 @@ int writeProcessPipe(int fd, char *buffer, int size)
     }
     if (process->fds[fd] == process->stdio)
     {
-        printStringLimited(WHITE, buffer, size);
+        int index = 0;
+        while (buffer[index] != 0 && index < size && buffer[0] != -1)
+        {
+            putChar(WHITE, buffer[index]);
+            index++;
+        }
+        if (buffer[index] == -1){
+            writeToPipe(process->fds[fd], buffer, 1);
+        }
         return size;
     }
     return writeToPipe(process->fds[fd], buffer, size);

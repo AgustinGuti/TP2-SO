@@ -208,8 +208,8 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     }
 
     strcpy(argv1[1], "0"); // El primer proceso no puede estar en foreground
-    int pid1 = execve(commands[command1].function, pipes1, pipeQty, argv1);
-    int pid2 = execve(commands[command2].function, pipes2, pipeQty, argv2);
+    execve(commands[command1].function, pipes1, pipeQty, argv1);
+    execve(commands[command2].function, pipes2, pipeQty, argv2);
 
     for (int i = 0; i < MAX_ARGS + 2; i++)
     {
@@ -332,7 +332,6 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
     }
     memcpy(command, str + offset, cmd_idx);
     command[cmd_idx] = 0;
-    int argIdx = 0;
     *argQty = 0;
     int argLen = 0;
     while (str[i] != 0)
@@ -408,7 +407,7 @@ char callFree(char argc, const char **argv)
     if (argc == 1 && isHexaNumber(argv[0]))
     {
         char flag = 0;
-        uint64_t ptr = hexaStrToNum(argv[0], strlen(argv[0]), &flag);
+        uint64_t *ptr = (uint64_t *)hexaStrToNum(argv[0], strlen(argv[0]), &flag);
         if (flag == 1)
         {
             printf("Numero muy grande. Overflow\n");
@@ -463,13 +462,13 @@ char callRealloc(char argc, const char **argv)
         printf("Argumento invalido para realloc\n");
         return 0;
     }
-    int flag1 = 0, flag2 = 0;
+    char flag1 = 0, flag2 = 0;
     uint64_t *ptr = (uint64_t *)hexaStrToNum(argv[0], strlen(argv[0]), &flag1);
 
     uint64_t newSize = (uint64_t)hexaStrToNum(argv[1], strlen(argv[1]), &flag2);
     if (flag1 == 1 || flag2 == 1)
     {
-        printerr("Argumento inválido\n", 0);
+        printf("Argumento inválido\n", 0);
         return 0;
     }
     uint64_t *newPtr = realloc(ptr, newSize);
@@ -481,6 +480,7 @@ char callRealloc(char argc, const char **argv)
     {
         printf("Se reservo memoria en la direccion %x\n", newPtr);
     }
+    return 0;
 }
 
 char callKill(char argc, const char **argv)

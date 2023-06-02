@@ -73,5 +73,6 @@ int closeProcessPipe(int fd);
 int readProcessPipe(int fd, char *buffer, int bytes);
 int writeProcessPipe(int fd, char *buffer, int size);
 void deleteProcess(Process process);
+void closePipes(Process process);
 
 #endif

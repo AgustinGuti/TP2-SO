@@ -122,8 +122,10 @@ void *schedule(void *rsp)
             }
             uint32_t ticks = ticks_elapsed();
             Process mostWaitingProcess = getProcess(scheduler->mostWaitingProcessPID);
-            if(mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE){
-                if( ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME){
+            if (mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE)
+            {
+                if (ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME)
+                {
                     mostWaitingProcess->waitingTime = ticks;
                     remove(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
                     mostWaitingProcess->priority = MAX_PRIORITY - 1;
@@ -134,10 +136,11 @@ void *schedule(void *rsp)
                     updateMostWaitingProcess();
                 }
             }
-            void* newRsp = changeProcess(rsp);
+            void *newRsp = changeProcess(rsp);
             /* waiting time is set when process starts to run */
             scheduler->currentProcess->waitingTime = ticks;
-            if( scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID){
+            if (scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID)
+            {
                 updateMostWaitingProcess();
             }
             return newRsp;
@@ -149,13 +152,15 @@ void *schedule(void *rsp)
 void updateMostWaitingProcess()
 {
     int currentPriority = scheduler->currentProcess->priority;
-    for(int i = 0; i < MAX_PRIORITY; i++){
+    for (int i = 0; i < MAX_PRIORITY; i++)
+    {
         /* add 1 to waitingtime for each process*/
         resetIterator(scheduler->it[i]);
         while (hasNext(scheduler->it[i]))
         {
             Process proc = next(scheduler->it[i]);
-            if (proc->waitingTime < scheduler->mostWaitingProcessTime && proc->pid >= 0 ||scheduler->mostWaitingProcessPID == EMPTY_PID && proc->pid != KERNEL_PID){
+            if (proc->waitingTime < scheduler->mostWaitingProcessTime && proc->pid >= 0 || scheduler->mostWaitingProcessPID == EMPTY_PID && proc->pid != KERNEL_PID)
+            {
                 scheduler->mostWaitingProcessPID = proc->pid;
                 scheduler->mostWaitingProcessTime = proc->waitingTime;
             }
@@ -363,17 +368,24 @@ void printProcesses(char showKilled)
     }
 }
 
-void blockHandler(pid_t pid)
+pid_t blockHandler(pid_t pid)
 {
     Process process = getProcess(pid);
+    if (process == NULL || process->pid == KERNEL_PID || process->pid == EMPTY_PID)
+    {
+        return -1;
+    }
     if (process->state == READY || process->state == RUNNING)
     {
         blockProcessFromProcess(process);
+        return process->pid;
     }
     else if (process->state == BLOCKED)
     {
         unblockProcessFromProcess(process);
+        return process->pid;
     }
+    return -1;
 }
 
 void blockProcess(pid_t pid)
@@ -408,12 +420,12 @@ void unblockProcessFromProcess(Process process)
     }
 }
 
-void killProcess(pid_t pid)
+pid_t killProcess(pid_t pid)
 {
     if (pid == SHELL_PID && scheduler->currentProcess->pid != SHELL_PID)
     {
         printerr("No es posible matar la shell desde otro proceso.\n");
-        return;
+        return -1;
     }
     Process process = getProcess(pid);
     if (process != NULL)
@@ -424,6 +436,7 @@ void killProcess(pid_t pid)
             parent->waitingForPID = -1;
             semPost(parent->waitingSem);
         }
+        process->foreground = 0;
         process->state = ZOMBIE;
         char newChar[1] = {EOF};
         writeProcessPipe(STDOUT, newChar, 1);
@@ -454,11 +467,10 @@ void killProcess(pid_t pid)
                 free(process->stack);
             }
         }
+        return pid;
     }
-    else
-    {
-        printerr("Process %d not found\n", pid);
-    }
+    printerr("Process %d not found\n", pid);
+    return -1;
 }
 
 Process getForegroundProcess()

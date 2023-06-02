@@ -100,19 +100,18 @@ int readFromPipe(Pipe pipe, char *buffer, int size){
     while(i < size){
         if(pipe->readIndex == pipe->writeIndex){
             semWait(pipe->mutex);
-            pipe->blocked = 1;
+            pipe->blocked++;
             semPost(pipe->mutex);
             semWait(pipe->sem);
         }
         semWait(pipe->mutex);
-        pipe->blocked = 0;
         buffer[i] = pipe->buffer[pipe->readIndex];
         pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
-        if (buffer[i] == EOF){
+        i++;
+        if (buffer[i-1] == EOF){
             semPost(pipe->mutex);
             return i;
         }
-        i++;
         semPost(pipe->mutex);
     }
     return i;
@@ -130,12 +129,9 @@ int writeToPipe(Pipe pipe, char *buffer, int size){
         i++;
         if (pipe->readIndex == (pipe->writeIndex - 1) % pipe->size){
             if(pipe->blocked){
+                pipe->blocked--;
                 semPost(pipe->sem);
             }
-        }
-        if (buffer[i-1] == EOF){
-            semPost(pipe->mutex);
-            return i;
         }
         semPost(pipe->mutex);
     }

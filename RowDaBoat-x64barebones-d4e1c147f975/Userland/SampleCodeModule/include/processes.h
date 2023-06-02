@@ -2,6 +2,7 @@
 #define _PROCESSES_H_
 
 #include <sysCallInterface.h>
+#include <stdio.h>
 
 typedef int pid_t;
 
@@ -10,9 +11,9 @@ void printProcesses(char argc, char **argv);
 int getpid();
 void yield();
 void exit(int value);
-void blockProcess(int pid);
+pid_t blockProcess(int pid);
 pid_t waitpid(pid_t pid);
-void kill(int pid);
+pid_t kill(int pid);
 void cat();
 void wc();
 void filter();
