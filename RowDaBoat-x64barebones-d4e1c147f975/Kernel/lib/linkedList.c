@@ -220,7 +220,7 @@ Iterator iterator(LinkedList list)
     Iterator iterator = (Iterator)malloc(sizeof(IteratorCDT));
     if (iterator == NULL){
         printerr("Error: malloc failed in insert\n");
-        return;
+        return NULL;
     }
     iterator->list = list;
     iterator->current = list->head;

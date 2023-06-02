@@ -368,17 +368,24 @@ void printProcesses(char showKilled)
     }
 }
 
-void blockHandler(pid_t pid)
+pid_t blockHandler(pid_t pid)
 {
     Process process = getProcess(pid);
+    if (process == NULL || process->pid == KERNEL_PID || process->pid == EMPTY_PID)
+    {
+        return -1;
+    }
     if (process->state == READY || process->state == RUNNING)
     {
         blockProcessFromProcess(process);
+        return process->pid;
     }
     else if (process->state == BLOCKED)
     {
         unblockProcessFromProcess(process);
+        return process->pid;
     }
+    return -1;
 }
 
 void blockProcess(pid_t pid)
@@ -413,12 +420,12 @@ void unblockProcessFromProcess(Process process)
     }
 }
 
-void killProcess(pid_t pid)
+pid_t killProcess(pid_t pid)
 {
     if (pid == SHELL_PID && scheduler->currentProcess->pid != SHELL_PID)
     {
         printerr("No es posible matar la shell desde otro proceso.\n");
-        return;
+        return -1;
     }
     Process process = getProcess(pid);
     if (process != NULL)
@@ -460,11 +467,10 @@ void killProcess(pid_t pid)
                 free(process->stack);
             }
         }
+        return pid;
     }
-    else
-    {
-        printerr("Process %d not found\n", pid);
-    }
+    printerr("Process %d not found\n", pid);
+    return -1;
 }
 
 Process getForegroundProcess()

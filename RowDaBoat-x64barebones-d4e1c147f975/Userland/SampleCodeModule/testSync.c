@@ -3,6 +3,8 @@
 #include "sysCallInterface.h"
 #include "test_util.h"
 #include "stddef.h"
+#include <processes.h>
+#include <semaphores.h>
 
 #define SEM_ID "sem"
 #define TOTAL_PAIR_PROCESSES 2

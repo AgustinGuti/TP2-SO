@@ -1,3 +1,4 @@
+#include <videoDriver.h>
 #include <sysCalls.h>
 #include <memory.h>
 #include <scheduler.h>
@@ -36,13 +37,13 @@ void sys_printProcesses(char showKilled);
 void sys_exit(int status);
 void sys_yield();
 pid_t sys_getpid();
-void sys_block(int pid);
-sem_t semOpen(char *name, int value);
-void semClose(sem_t sem);
-void semWait(sem_t sem);
-void semPost(sem_t sem);
+pid_t sys_block(int pid);
+sem_t sys_semOpen(char *name, int value);
+void sys_semClose(sem_t sem);
+void sys_semWait(sem_t sem);
+void sys_semPost(sem_t sem);
 uint64_t *sys_getMemoryStatus();
-void sys_kill(int pid);
+pid_t sys_kill(int pid);
 int sys_nice(pid_t pid, int priority);
 pid_t sys_waitpid(pid_t pid);
 void * sys_realloc(void *ptr, uint64_t newSize);
@@ -74,9 +75,9 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_yield,
     (uint64_t)&sys_getpid,
     (uint64_t)&sys_block,
-    (uint64_t)&semOpen,
-    (uint64_t)&semClose,
-    (uint64_t)&semWait,
+    (uint64_t)&sys_semOpen,
+    (uint64_t)&sys_semClose,
+    (uint64_t)&sys_semWait,
     (uint64_t)&semPost,
     (uint64_t)&sys_getMemoryStatus,
     (uint64_t)&sys_nice,
@@ -136,9 +137,9 @@ int sys_execve(void* entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
     return execve(entryPoint, pipes, pipeQty, argv);
 }
 
-void sys_kill(int pid)
+pid_t sys_kill(int pid)
 {
-    killProcess(pid);
+    return killProcess(pid);
 }
 
 pid_t sys_waitpid(pid_t pid)
@@ -259,9 +260,9 @@ pid_t sys_getpid()
     return getpid();
 }
 
-void sys_block(int pid)
+pid_t sys_block(int pid)
 {
-    blockHandler(pid);
+    return blockHandler(pid);
 }
 
 sem_t sys_semOpen(char *name, int value)
