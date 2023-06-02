@@ -5,7 +5,7 @@
 void hex_to_str(char *char_num, uint64_t num)
 {
   int digits = hex_num_length(num);
-  for (int i = digits - 1 ; i >= 0; --i)
+  for (int i = digits - 1; i >= 0; --i)
   {
     char aux = num % 16;
     if (aux < 10)
@@ -37,7 +37,7 @@ void dec_to_str(char *char_num, int num)
     char_num[i] = num % 10 + '0';
     num /= 10;
   }
-  char_num[digits+isNegative] = 0;
+  char_num[digits + isNegative] = 0;
 }
 
 int hex_num_length(uint64_t num)
@@ -91,36 +91,43 @@ uint32_t strlen(const char *str)
   return len;
 }
 
-void strcpy(char *dest, const char *src){
+void strcpy(char *dest, const char *src)
+{
   memcpy(dest, src, strlen(src) + 1);
 }
 
-int strcmp(const char* str1, const char* str2) {
-	for (; *str1 == *str2 && *str1 != '\0'; str1++, str2++);
-	return *str1 - *str2;
+int strcmp(const char *str1, const char *str2)
+{
+  for (; *str1 == *str2 && *str1 != '\0'; str1++, str2++)
+    ;
+  return *str1 - *str2;
 }
 
-int strToNum(const char * str, int longitud){
-    int neg = 0;
+int strToNum(const char *str, int longitud)
+{
+  int neg = 0;
 
-    if(str[0] == '-'){
-      neg = 1;
-    }
+  if (str[0] == '-')
+  {
+    neg = 1;
+  }
 
-    int num = 0;
+  int num = 0;
 
-    for(int i=neg ; i<longitud ; i++){
-      num = num*10 + str[i] - '0';
-    }
+  for (int i = neg; i < longitud; i++)
+  {
+    num = num * 10 + str[i] - '0';
+  }
 
-    if(neg){
-      num*=-1;
-    }
+  if (neg)
+  {
+    num *= -1;
+  }
 
-    return num;
+  return num;
 }
 
 int intComparator(void *a, void *b)
 {
-    return *(int *)a - *(int *)b;
+  return *(int *)a - *(int *)b;
 }

@@ -227,4 +227,3 @@ void semPost(sem_t sem)
     leaveCritical();
     return;
 }
-

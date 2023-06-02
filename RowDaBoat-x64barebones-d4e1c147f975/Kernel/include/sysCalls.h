@@ -8,8 +8,6 @@
 #include <clockDriver.h>
 #include <stdint.h>
 
-
-
 void _sysCallHandler();
 void setupSysCalls();
 

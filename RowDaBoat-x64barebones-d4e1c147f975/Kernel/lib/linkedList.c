@@ -25,14 +25,14 @@ typedef struct IteratorCDT
     NodeCTD *current;
 } IteratorCDT;
 
-
 // Linked list structure
 
 // Function to create an empty linked list
 LinkedList createLinkedList()
 {
     LinkedList list = (LinkedList)malloc(sizeof(LinkedListCDT));
-    if (list == NULL){
+    if (list == NULL)
+    {
         printerr("Error: malloc failed in insert\n");
         return NULL;
     }
@@ -56,9 +56,11 @@ void destroyLinkedList(LinkedList list)
         free(current);
         current = next;
     }
-    while(list->freeNodes > 0){
+    while (list->freeNodes > 0)
+    {
         int idx = 0;
-        while(list->free[idx] == NULL){
+        while (list->free[idx] == NULL)
+        {
             idx++;
         }
         free(list->free[idx]);
@@ -69,12 +71,15 @@ void destroyLinkedList(LinkedList list)
     free(list);
 }
 
-void freeLinkedList(LinkedList list){
+void freeLinkedList(LinkedList list)
+{
     if (list == NULL)
         return;
-    while(list->freeNodes > 0){
+    while (list->freeNodes > 0)
+    {
         int idx = 0;
-        while(list->free[idx] == NULL){
+        while (list->free[idx] == NULL)
+        {
             idx++;
         }
         free(list->free[idx]);
@@ -92,18 +97,23 @@ void insert(LinkedList list, void *data)
         return NULL;
     }
     Node newNode = NULL;
-    if (list->freeNodes){
+    if (list->freeNodes)
+    {
         int idx = 0;
-        while(list->free[idx] == NULL){
+        while (list->free[idx] == NULL)
+        {
             idx++;
         }
         newNode = list->free[idx];
         list->free[idx] = NULL;
         list->freeNodes--;
-    }else{
+    }
+    else
+    {
         newNode = (NodeCTD *)malloc(sizeof(NodeCTD));
     }
-    if (newNode == NULL){
+    if (newNode == NULL)
+    {
         printerr("Error: malloc failed in insert\n");
         return;
     }
@@ -143,14 +153,18 @@ void remove(LinkedList list, void *data)
             if (current->next != NULL)
                 current->next->prev = current->prev;
 
-            if (list->freeNodes < MAX_FREE_NODES){
+            if (list->freeNodes < MAX_FREE_NODES)
+            {
                 int idx = 0;
-                while (list->free[idx] != NULL){
+                while (list->free[idx] != NULL)
+                {
                     idx++;
-                }                
+                }
                 list->free[idx] = current;
                 list->freeNodes++;
-            }else{
+            }
+            else
+            {
                 free(current);
             }
             list->size--;
@@ -160,7 +174,8 @@ void remove(LinkedList list, void *data)
     }
 }
 
-void *removeFirst(LinkedList list){
+void *removeFirst(LinkedList list)
+{
     if (list == NULL){
         return NULL;
     }
@@ -184,7 +199,8 @@ void *removeFirst(LinkedList list){
     return current->data;
 }
 
-void switchList(LinkedList origin, LinkedList dest){
+void switchList(LinkedList origin, LinkedList dest)
+{
     if (origin == NULL || dest == NULL)
         return;
     NodeCTD *current = origin->head;
@@ -256,7 +272,8 @@ Iterator iterator(LinkedList list)
         return NULL;
     }
     Iterator iterator = (Iterator)malloc(sizeof(IteratorCDT));
-    if (iterator == NULL){
+    if (iterator == NULL)
+    {
         printerr("Error: malloc failed in insert\n");
         return NULL;
     }
@@ -365,7 +382,8 @@ void headToBack(LinkedList list)
     }
 }
 
-void * findItem(LinkedList list, void *data, int (*comparator)(void *, void *)){
+void *findItem(LinkedList list, void *data, int (*comparator)(void *, void *))
+{
     if (list == NULL){
         return NULL;
     }

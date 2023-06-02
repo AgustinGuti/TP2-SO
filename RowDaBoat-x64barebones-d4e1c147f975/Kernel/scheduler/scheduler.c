@@ -82,7 +82,8 @@ void initScheduler()
 void closeScheduler()
 {
     ready = 0;
-    for (int i = 0; i < MAX_PRIORITY; i++){
+    for (int i = 0; i < MAX_PRIORITY; i++)
+    {
         freeIterator(scheduler->it[i]);
         deleteProcessesFromList(scheduler->queue[i]);
         destroyLinkedList(scheduler->queue[i]);
@@ -462,7 +463,12 @@ pid_t killProcess(pid_t pid)
             semPost(parent->waitingSem);
         }
         process->foreground = 0;
+        if (process->state == BLOCKED)
+        {
+            remove(scheduler->sleepingProcesses, process);
+        }
         process->state = ZOMBIE;
+        // printf("Killed process %s in state %d\n", process->name, process->state);
         char newChar[1] = {EOF};
         writeProcessPipe(STDOUT, newChar, 1);
         semClose(process->waitingSem);
@@ -492,7 +498,8 @@ pid_t killProcess(pid_t pid)
     return -1;
 }
 
-void cleanChildDeletedProcesses(Process process){
+void cleanChildDeletedProcesses(Process process)
+{
     // LinkedList processesToDelete = createLinkedList();
 
     resetIterator(scheduler->itDeleted);

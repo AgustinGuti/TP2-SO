@@ -24,7 +24,7 @@ typedef PipeCDT *Pipe;
 
 typedef enum
 {
-    READY,
+    READY = 0,
     RUNNING,
     BLOCKED,
     ZOMBIE

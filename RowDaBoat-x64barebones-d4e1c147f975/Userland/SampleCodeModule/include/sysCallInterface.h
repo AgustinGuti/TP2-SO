@@ -9,7 +9,6 @@ typedef struct PipeCDT *Pipe;
 
 typedef int pid_t;
 
-
 #define STDERR 2
 #define STDOUT 1
 #define STDIN 0
@@ -31,7 +30,7 @@ void _sys_formatWrite(int fd, const char *buf, uint64_t count, uint32_t color, u
 char _sys_getSavedRegisters(uint64_t registers[REGISTER_QTY]);
 void *_sys_malloc(uint64_t size);
 uint64_t _sys_free(void *ptr);
-int _sys_execve(void *entryPoint, Pipe* pipes, char pipeQty, char *const argv[]);
+int _sys_execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[]);
 void _sys_printProcesses(char showKilled);
 void _sys_exit(int status);
 void _sys_yield();
@@ -49,9 +48,5 @@ void *_sys_realloc(void *ptr, uint64_t newSize);
 Pipe _sys_openProcessPipe(char *name, int fds[2]);
 int _sys_closeProcessPipe(int fd);
 void _sys_sleep(int millis);
-
-
-
-
 
 #endif
