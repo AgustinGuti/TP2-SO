@@ -5,20 +5,20 @@
 
 typedef struct semaphoreCDT* sem_t;
 
-// Crea o abre un semáforo y lo identifica con el nombre name.
-// Si no existe un semáforo con ese nombre, lo crea con valor value.
-// Si ya existe un semáforo con ese nombre, lo abre e ignora el valor value.
+// Creates or opens a semaphore and identifies it with the name "name".
+// If a semaphore with that name does not exist, it creates it with value "value".
+// If a semaphore with that name already exists, it opens it and ignores the value "value".
 sem_t semOpen(char *name, int value);
 
-// Cierra el semáforo identificado por sem.
-// Si no hay procesos esperando en el semáforo, lo elimina.
-// Si hay procesos esperando en el semáforo, no lo elimina.
+// Closes the semaphore identified by sem.
+// If there are no processes waiting on the semaphore, it kills it.
+// If there are processes waiting on the semaphore, it does not kill it.
 void semClose(sem_t sem);
 
-// Decrementa en uno el valor del semáforo identificado por sem.
-// Si el valor del semáforo es cero, el proceso que llama queda bloqueado.
+// Decrements the value of the semaphore identified by sem by one.
+// If the value of the semaphore is zero, the calling process is blocked.
 void semWait(sem_t sem);
 
-// Incrementa en uno el valor del semáforo identificado por sem.
-// Si hay procesos bloqueados en el semáforo, desbloquea a uno de ellos.
+// Increases the value of the semaphore identified by sem by one.
+// If there are blocked processes in the semaphore, unblock one of them.
 void semPost(sem_t sem);

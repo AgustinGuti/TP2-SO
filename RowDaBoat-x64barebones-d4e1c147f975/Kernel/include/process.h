@@ -67,7 +67,6 @@ typedef struct ProcessCDT
 typedef struct ProcessCDT *Process;
 
 Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe *pipes, char pipeQty);
-// void killProcess(pid_t pid);
 void emptyProcess();
 void freeStack(Process process);
 Pipe openProcessPipe(char *name, int fds[2]);

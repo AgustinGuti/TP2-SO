@@ -62,36 +62,12 @@ int main()
 							(void *)MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), 
 							(void *)MEMORY_INITIAL_DIRECTION, 
 							(void *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
-
-	 uint64_t *memStatus = getMemoryStatus();
-	 uint64_t occupiedMemory = memStatus[1];
-	// if (memStatus == NULL)
-	// {
-	// 	printf("No se pudo obtener el estado de la memoria\n");
-	// 	return 1;
-	// }
-	// printf("Memoria total: %x\n", memStatus[0]);
-	// printf("Memoria reservada: %x\n", memStatus[1]);
-	// printf("Memoria libre: %x\n", memStatus[2]);
-
-	
 	initScheduler();
 	char *argv[] = {"sh", "1", NULL};
-	// createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv, &startWrapper);
 	
 	execve(sampleCodeModuleAddress, NULL, 0, argv);
 	closeScheduler();
 
-	memStatus = getMemoryStatus();
-	// if (memStatus == NULL)
-	// {
-	// 	printf("No se pudo obtener el estado de la memoria\n");
-	// 	return 1;
-	// }
-	// printf("Memoria total: %x\n", memStatus[0]);
-	// printf("Memoria reservada: %x\n", memStatus[1]);
-	// printf("Memoria libre: %x\n", memStatus[2]);
-	printerr("Memoria perdida: %x\n", memStatus[1] - occupiedMemory);
-	//drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
+	drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
 	return 0;
 }

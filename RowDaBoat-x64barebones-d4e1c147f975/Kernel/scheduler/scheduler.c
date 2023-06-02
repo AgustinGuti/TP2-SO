@@ -58,13 +58,10 @@ void initScheduler()
     scheduler->processesToFree = createLinkedList();
     scheduler->itProcessesToFree = iterator(scheduler->processesToFree);
     char *argv[2] = {"Kernel", NULL};
-    // int kernelPID = createProcess("Kernel", NULL, 1, 0, argv);
-
     scheduler->currentProcess = createProcess("Kernel", NULL, 1, 0, argv, &startWrapper, getpid(), NULL, 0);
     insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
     argv[0] = "Empty";
     scheduler->empty = createProcess("Empty", &emptyProcess, 1, 0, argv, &startWrapper, getpid(), NULL, 0);
-    // scheduler->currentProcess = getProcess(kernelPID);
     scheduler->quantum = BURST_TIME;
     scheduler->quantumCounter = BURST_TIME - 1;
     scheduler->skipPID = KERNEL_PID;
@@ -256,7 +253,6 @@ pid_t execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
 
 void yield()
 {
-    // scheduler->quantumCounter = scheduler->quantum;
     scheduler->skipPID = scheduler->currentProcess->pid;
     triggerTimer();
 }
@@ -300,7 +296,6 @@ int nice(pid_t pid, int priority)
     if (priority != process->priority)
     {
         insert(scheduler->queue[priority], process);
-        // printList(scheduler->queue[priority]);
         remove(scheduler->queue[process->priority], process);
         process->priority = priority;
     }
@@ -462,7 +457,6 @@ pid_t killProcess(pid_t pid)
             remove(scheduler->sleepingProcesses, process);
         }
         process->state = ZOMBIE;
-        // printf("Killed process %s in state %d\n", process->name, process->state);
         char newChar[1] = {EOF};
         writeProcessPipe(STDOUT, newChar, 1);
         semClose(process->waitingSem);
@@ -560,7 +554,6 @@ void startWrapper(void *entryPoint, char argc, char *argv[])
         kernel->state = READY;
         printf("Kernel ready\n");
     }
-    // printf("Process %d finished with return value %d\n", scheduler->currentProcess->pid, ret);
     killProcess(scheduler->currentProcess->pid);
 }
 

@@ -33,14 +33,6 @@ void printf(const char *fmt, ...)
 	va_end(valist);
 }
 
-void printerr(const char *fmt, int argQty, ...)
-{
-	// va_list valist;
-	// va_start(valist, argQty);
-	// printFD(STDERR, fmt, argQty, valist);
-	// va_end(valist);
-}
-
 void printFD(int fd, const char *fmt, int argQty, va_list valist)
 {
 	int pos = 0;
@@ -63,12 +55,6 @@ void printFD(int fd, const char *fmt, int argQty, va_list valist)
 			char type = fmt[pos];
 			if (type == 's')
 			{
-				// int i = 0;
-				// char *string = va_arg(valist, char *);
-				// while(string[i] != 0){
-				// 	putCharFD(string[i],fd);
-				// 	i++;
-				// }
 				printTextFD(va_arg(valist, char *), fd);
 			}
 			else if (type == 'c')

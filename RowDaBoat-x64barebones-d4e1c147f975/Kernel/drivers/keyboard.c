@@ -30,7 +30,6 @@ extern char get_key();
 #define LALT_BREAK 0xB8
 
 // Ctrl when shell is running
-
 #define LCTRL_MAKE_1 0xC2
 #define LCTRL_MAKE_LINUX 0xE2
 #define LCTRL_MAKE_TEST 0xD0

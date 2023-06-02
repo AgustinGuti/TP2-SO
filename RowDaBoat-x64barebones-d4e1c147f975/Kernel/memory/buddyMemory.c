@@ -8,7 +8,7 @@
 #include <math.h>
 #include <videoDriver.h>
 
-// Necesita 256 MB para mapear los 64 GB de memoria, con bloques de 32 bytes
+// You need 256 MB to map the 64 GB of memory, with 32-byte blocks
 
 #define BUDDY_STRUCT_SIZE 24
 
@@ -20,14 +20,13 @@
 #define OCCUPIED 1
 #define FREE 0
 
-// estructura para representar el buddy allocator
+// Structure to represent the buddy allocator
 typedef struct MemoryManagerCDT
 {
     void *initialDirection;
-    uint32_t size; // tamaño de la memoria total
+    uint32_t size; // total memory size
     uint32_t neededBlocks;
-    // uint64_t memory[neededBlocks/64]
-    uint8_t *memory; // 0 representa que está libre, 1 que está ocupado, es un arreglo que ocupa desde su posicion hasta el final de la posicion asignada al buddy
+    uint8_t *memory; // 0 represents that it is free, 1 that it is busy, it is an array that occupies from its position to the end of the position assigned to the buddy
 } MemoryManagerCDT;
 
 uint64_t alignMemoryToBlock(uint64_t size);

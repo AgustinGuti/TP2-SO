@@ -19,7 +19,7 @@ typedef PipeCDT *Pipe;
 
 char hasKeyReady();
 
-//Devuelve el codigo ASCII (decimal) del caracter obtenido
+// Returns the ASCII code (decimal) of the character obtained
 int getKeyMake(uint8_t event);
 
 char isKeyBreak(unsigned char data);

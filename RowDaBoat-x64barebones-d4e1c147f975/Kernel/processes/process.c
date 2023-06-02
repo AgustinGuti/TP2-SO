@@ -57,7 +57,6 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
 
     // Process stack is the top of the stack, stack base is process->stack + STACK_SIZE
     process->stack = (uint64_t *)malloc(STACK_SIZE * sizeof(process->stack[0]));
-    // memset(process->stack, 0, STACK_SIZE);
     if (process->stack == NULL)
     {
         /*not enough memory for process->stack*/
@@ -77,7 +76,6 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
 Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe *pipes, char pipeQty)
 {
     Process process = initProcess(name, priority, foreground, parentPID);
-    // Pipe stdPipe = createPipe(NULL);
     process->stdio = getKeyboardBuffer();
     process->fds[STDIN] = process->stdio;
     process->fds[STDOUT] = process->stdio;
@@ -104,9 +102,6 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         if (j > process->fdLimit)
         {
             return -10;
-            // process->fds = (Pipe *)realloc(process->fds, process->fdLimit * 2 * sizeof(Pipe));
-            // process->pipeTypes = (PipeType *)realloc(process->pipeTypes, process->fdLimit * 2 * sizeof(PipeType));
-            // process->fdLimit *= 2;
         }
         process->fds[j] = pipes[j];
         process->fds[j] = pipes[j];

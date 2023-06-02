@@ -36,7 +36,6 @@ static void zeroDivision(uint64_t *registers) {
 	newline();
 	printRegs(registers);
 	newline();
-	//_sti();
 }
 
 static void invalidOpcode(uint64_t *registers){
@@ -47,7 +46,6 @@ static void invalidOpcode(uint64_t *registers){
 	newline();
 	printRegs(registers);
 	newline();
-	//_sti();
 }
 
 static void other(uint64_t *registers){
@@ -58,7 +56,6 @@ static void other(uint64_t *registers){
 	newline();
 	printRegs(registers);
 	newline();	
-	//_sti();
 }
 
 static void printRegs(uint64_t * registers){
