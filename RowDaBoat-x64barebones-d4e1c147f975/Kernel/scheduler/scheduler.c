@@ -437,7 +437,11 @@ pid_t killProcess(pid_t pid)
             semPost(parent->waitingSem);
         }
         process->foreground = 0;
+        if(process->state == BLOCKED) {
+            remove(scheduler->sleepingProcesses, process);
+        }
         process->state = ZOMBIE;
+        // printf("Killed process %s in state %d\n", process->name, process->state);
         char newChar[1] = {EOF};
         writeProcessPipe(STDOUT, newChar, 1);
         semClose(process->waitingSem);

@@ -21,7 +21,7 @@ char printProcesses(char argc, char **argv)
         _sys_printProcesses(1);
         return 0;
     }
-    printf("Invalid arguments\n");
+    printf("Argumentos invalidos\n");
     return 1;
 }
 
@@ -85,7 +85,7 @@ char loop(char argc, char **argv)
     int sec = strToNum(argv[0], strlen(argv[0]));
     while (1)
     {
-        _sys_sleep(sec * 1000);
+        sleep(sec);
         printf("Hola mundo desde el proceso %d\n", _sys_getpid());
     }
     return 0;
@@ -101,4 +101,8 @@ char filter(char argc, char **argv)
         }
     }
     return 0;
+}
+
+void sleep(int sec){
+    _sys_sleep(sec * 1000);
 }

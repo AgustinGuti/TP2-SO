@@ -19,5 +19,6 @@ char cat(char argc, char **argv);
 char wc(char argc, char **argv);
 char filter(char argc, char **argv);
 char loop(char argc, char **argv);
+void sleep(int sec);
 
 #endif

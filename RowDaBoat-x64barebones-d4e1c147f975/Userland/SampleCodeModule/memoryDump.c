@@ -13,14 +13,14 @@ char memoryDump(char argc, char **argv)
 {
     if (argc == 0)
     {
-        printf("Invalid arguments\n");
+        printf("Argumentos invalidos\n");
         return 1;
     }
     char flag = 0;
     uint64_t direction = (uint64_t)hexaStrToNum(argv[0], strlen(argv[0]), &flag);
     if (flag == 1)
     {
-        printf("Invalid arguments\n");
+        printf("Argumentos invalidos\n");
         return 1;
     }
 

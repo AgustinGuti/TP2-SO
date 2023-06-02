@@ -602,7 +602,7 @@ char callSleep(char argc, char **argv)
     else
     {
         int num = strToNum(argv[0], strlen(argv[0]));
-        _sys_sleep(num);
+        sleep(num);
     }
     return 0;
 }
