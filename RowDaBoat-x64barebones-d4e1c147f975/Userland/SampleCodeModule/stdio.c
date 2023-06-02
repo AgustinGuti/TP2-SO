@@ -206,8 +206,8 @@ int scanf(const char *fmt, int argQty, ...)
 				int arrPos = 0;
 				while (readChar != 0 && (arrPos < charQty || i == 0))
 				{																	 // Nothing else to read, or reached max char quantity. If there was no max, read to the end
-					readChar = _sys_read(0, aux, 1); // STDIN, first reads into an auxiliar character to make sure it is ascii
-					if (aux[0] >= 0)
+					readChar = _sys_read(0, aux, 1); 
+					if (readChar >= 0)
 					{
 						out[arrPos++] = aux[0];
 						totalReadChars += readChar;
