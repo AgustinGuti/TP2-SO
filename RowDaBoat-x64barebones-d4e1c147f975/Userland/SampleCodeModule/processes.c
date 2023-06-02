@@ -9,20 +9,20 @@ int execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
     return _sys_execve(entryPoint, pipes, pipeQty, argv);
 }
 
-void printProcesses(char argc, char **argv)
+char printProcesses(char argc, char **argv)
 {
     if (argc == 0)
     {
         _sys_printProcesses(0);
+        return 0;
     }
-    else if (argc == 1 && strcmp(argv[0], "-k") == 0)
+    if (argc == 1 && strcmp(argv[0], "-k") == 0)
     {
         _sys_printProcesses(1);
+        return 0;
     }
-    else
-    {
-        printf("Invalid arguments\n");
-    }
+    printf("Invalid arguments\n");
+    return 1;
 }
 
 int getpid()
@@ -55,16 +55,16 @@ pid_t waitpid(pid_t pid)
     return _sys_waitpid(pid);
 }
 
-void cat()
+char cat(char argc, char **argv)
 {
-    char buffer[1];
-    do
+    char c;
+    while ((c = getChar()) != EOF)
     {
-        _sys_read(0, buffer, 1);
-        printf("%c", buffer[0]);
-    } while (buffer[0] != EOF);
+        printf("%c", c);
+    };
+    return 0;
 }
-void wc()
+char wc(char argc, char **argv)
 {
     int count = 1;
     char c;
@@ -77,17 +77,20 @@ void wc()
         }
     }
     printf("\nLineas: %d\n", count);
+    return 0;
 }
 
-void loop(int sec)
+char loop(char argc, char **argv)
 {
+    int sec = strToNum(argv[0], strlen(argv[0]));
     while (1)
     {
         _sys_sleep(sec * 1000);
         printf("Hola mundo desde el proceso %d\n", _sys_getpid());
     }
+    return 0;
 }
-void filter()
+char filter(char argc, char **argv)
 {
     char c;
     while ((c = getChar()) != EOF)
@@ -97,4 +100,5 @@ void filter()
             printf("%c", c);
         }
     }
+    return 0;
 }

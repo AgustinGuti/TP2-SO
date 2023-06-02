@@ -17,7 +17,7 @@ typedef struct P_rq
     enum State state;
 } p_rq;
 
-int64_t test_processes(char argc, char *argv[])
+char test_processes(char argc, char *argv[])
 {
     uint8_t rq;
     uint8_t alive = 0;
@@ -26,10 +26,10 @@ int64_t test_processes(char argc, char *argv[])
     char *argvAux[] = {"endless_loop", "0", NULL};
 
     if (argc != 1)
-        return -1;
+        return 1;
 
     if ((max_processes = satoi(argv[0])) <= 0)
-        return -1;
+        return 1;
 
     p_rq p_rqs[max_processes];
 
@@ -102,4 +102,5 @@ int64_t test_processes(char argc, char *argv[])
         }
         printf("Test %d completado exitosamente\n", count++);
     }
+    return 0;
 }

@@ -23,7 +23,7 @@ void backspace();
 void printf(const char *fmt, ...);
 // void printerr(const char *fmt, int argQty, ...);
 int scanf(const char *fmt, int argQty, ...);
-void cleanScreen();
+char cleanScreen(char argc, char **argv);
 
 void formatPrint(const char *fmt, uint32_t color, uint16_t row, uint16_t col, int argQty, ...);
 void printFormatChar(char character, uint32_t color, uint16_t row, uint16_t col);

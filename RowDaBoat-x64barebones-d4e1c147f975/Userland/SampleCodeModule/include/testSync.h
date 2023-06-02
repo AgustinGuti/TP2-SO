@@ -3,5 +3,5 @@
 
 #include <stdint.h>
 #include <processes.h>
-int64_t test_sync(char argc, char *argv[]);
+char test_sync(char argc, char *argv[]);
 #endif

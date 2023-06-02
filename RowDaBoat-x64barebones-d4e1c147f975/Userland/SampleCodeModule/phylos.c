@@ -34,7 +34,7 @@ pid_t *philosophersPID;
 int *timesEaten;
 int maxTimesEaten;
 
-void phylos()
+char phylos(char argc, char **argv)
 {
     state = (int *)malloc(BLOCK * sizeof(int));
     s = (sem_t *)malloc(BLOCK * sizeof(sem_t));
@@ -52,19 +52,19 @@ void phylos()
     if ((mutex = semOpen(NULL, 1)) == NULL)
     {
         printf("Error opening semaphore mutex\n");
-        return;
+        return 1;
     }
 
     if ((processToKillMutex = semOpen(NULL, 1)) == NULL)
     {
         printf("Error opening semaphore processToKillMutexName\n");
-        return;
+        return 1;
     }
 
     if ((changingQtyMutex = semOpen(NULL, 1)) == NULL)
     {
         printf("Error opening semaphore changingQty\n");
-        return;
+        return 1;
     }
 
     for (int i = 0; i < 5; i++)
@@ -90,21 +90,22 @@ void phylos()
         }
     }
 
-    for(i = 0; i < N; i++){
+    for (i = 0; i < N; i++)
+    {
         kill(philosophersPID[i]);
-    }   
+    }
 
     free(state);
     free(philosophersPID);
     semClose(mutex);
     semClose(processToKillMutex);
-    for(i = 0; i < N; i++){
+    for (i = 0; i < N; i++)
+    {
         semClose(s[i]);
     }
     free(s);
 
-
-    return;
+    return 0;
 }
 
 void addPhilo()
@@ -211,8 +212,9 @@ void eat(int phil)
     }
     printState();
 
-    if (N > 10){
-     //   printProcesses(0, NULL);
+    if (N > 10)
+    {
+        //   printProcesses(0, NULL);
     }
 }
 

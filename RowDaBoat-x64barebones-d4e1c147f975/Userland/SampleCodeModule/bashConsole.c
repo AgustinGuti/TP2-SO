@@ -1,12 +1,4 @@
 #include <bashConsole.h>
-#include <stddef.h>
-#include <processes.h>
-#include <testMM.h>
-#include <testSync.h>
-#include <testProcesses.h>
-#include <testPrio.h>
-#include <memory.h>
-#include <phylos.h>
 
 #define EOF -1
 
@@ -14,25 +6,22 @@
 #define MAX_ARG_LENGTH 100
 #define MAX_COMMAND_NAME_LENGTH 50
 
-extern void zeroDivision();
-extern void displayTime();
 char parseAndExecuteCommands(uint8_t *str, int length);
 void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int length);
 char getCommandIndex(char *commandName);
-int getFullCommand(char *str, int length, char **args);
+int getFullCommand(uint8_t *str, int length, char **args);
 
 char help(char argc, char **argv);
-char setFontSize(char argc, const char **argv);
-char exitConsole(uint8_t argumentQty, const char **arguments);
-char callMalloc(char argc, const char **argv);
-char callFree(char argc, const char **argv);
-char callGetMemoryStatus(char argc, const char **argv);
-char callBlock(char argc, const char **argv);
-char callKill(char argc, const char **argv);
-char callNice(char argc, const char **argv);
-char callSleep(char argc, const char **argv);
-char callRealloc(char argc, const char **argv);
-char callLoop(char argc, const char **argv);
+char setFontSize(char argc, char **argv);
+char exitConsole(char argumentQty, char **arguments);
+char callMalloc(char argc, char **argv);
+char callFree(char argc, char **argv);
+char callGetMemoryStatus(char argc, char **argv);
+char callBlock(char argc, char **argv);
+char callKill(char argc, char **argv);
+char callNice(char argc, char **argv);
+char callSleep(char argc, char **argv);
+char callRealloc(char argc, char **argv);
 
 typedef struct command
 {
@@ -44,38 +33,36 @@ typedef struct command
     char executable;
 } command;
 
-#define COMMAND_QTY 29
+#define COMMAND_QTY 27
 
 static command commands[COMMAND_QTY] = {
-    {"help", &help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
-    {"clear", &cleanScreen, 0, 0, "Vacia la consola.", 1},
-    {"tron", &tron, 0, 0, "Ejecuta el juego \"Tron Light Cycles\" para dos jugadores.", 1},
-    {"memory-dump", &memoryDump, 1, 1, "Recibe como parametro una direccion de memoria e imprime los 32 bytes de memoria posteriores a la misma.", 1},
-    {"time", &displayTime, 0, 0, "Imprime en pantalla la hora del sistema.", 1},
-    {"zero-division", &zeroDivision, 0, 0, "Genera la excepcion zero division y muestra en pantalla los registros en el momento del error.", 1},
-    {"invalid-opcode", &invalidOpcode, 0, 0, "Genera la excepcion invalid opcode y muestra en pantalla los registros en el momento del error.", 1},
-    {"set-font-size", &setFontSize, 1, 1, "Permite agrandar o achicar la dimension de del texto en pantalla por argumento.", 1},
-    {"inforeg", &printRegs, 0, 0, "Imprime el valor de los ultimos registros guardados. Para guardar los registros se debe presionar la tecla LCTRL.", 1},
-    {"exit", &exitConsole, 0, 0, "Termina la ejecucion de la consola.", 0},
-    {"himno-alegria", &himnoAlegria, 0, 0, "Reproduce el himno de la alegria.", 1},
-    {"malloc", &callMalloc, 1, 1, "Reserva una cantidad de memoria dada por parametro.", 1},
-    {"free", &callFree, 1, 1, "Libera la memoria reservada en la direccion dada por parametro.", 1},
-    {"ps", &printProcesses, 1, 0, "Imprime en pantalla los procesos en ejecucion.", 1},
-    {"mem", &callGetMemoryStatus, 0, 0, "Imprime en pantalla el estado de la memoria.", 1},
-    {"block", &callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1},
-    {"kill", &callKill, 1, 1, "Elimina un proceso dado por parametro.", 1},
-    {"nice", &callNice, 2, 2, "Modifica la prioridad de un proceso dado por parametro.", 1},
-    {"test-mm", &test_mm, 1, 1, "Ejecuta el test de memoria.", 1},
-    {"phylo", &phylos, 0, 0, "Ejecuta el problema de los filosofos comensales.", 1},
-    {"cat", &cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1},
-    {"test-sync", &test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1},
-    {"sleep", &callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1},
-    {"wc", &wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1},
-    {"realloc", &callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1},
-    {"loop", &callLoop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1},
-    {"filter", &filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1},
-    {"test-processes", &test_processes, 1, 1, "Ejecuta el test de procesos.", 1},
-    {"test-prio", &test_prio, 0, 0, "Ejecuta el test de prioridades.", 1},
+    {"help", help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
+    {"clear", cleanScreen, 0, 0, "Vacia la consola.", 1},
+    {"memory-dump", memoryDump, 1, 1, "Recibe como parametro una direccion de memoria e imprime los 32 bytes de memoria posteriores a la misma.", 1},
+    {"time", displayTime, 0, 0, "Imprime en pantalla la hora del sistema.", 1},
+    {"zero-division", zeroDivision, 0, 0, "Genera la excepcion zero division y muestra en pantalla los registros en el momento del error.", 1},
+    {"invalid-opcode", invalidOpcode, 0, 0, "Genera la excepcion invalid opcode y muestra en pantalla los registros en el momento del error.", 1},
+    {"set-font-size", setFontSize, 1, 1, "Permite agrandar o achicar la dimension de del texto en pantalla por argumento.", 1},
+    {"inforeg", printRegs, 0, 0, "Imprime el valor de los ultimos registros guardados. Para guardar los registros se debe presionar la tecla LCTRL.", 1},
+    {"exit", exitConsole, 0, 0, "Termina la ejecucion de la consola.", 0},
+    {"malloc", callMalloc, 1, 1, "Reserva una cantidad de memoria dada por parametro.", 1},
+    {"free", callFree, 1, 1, "Libera la memoria reservada en la direccion dada por parametro.", 1},
+    {"ps", printProcesses, 1, 0, "Imprime en pantalla los procesos en ejecucion.", 1},
+    {"mem", callGetMemoryStatus, 0, 0, "Imprime en pantalla el estado de la memoria.", 1},
+    {"block", callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1},
+    {"kill", callKill, 1, 1, "Elimina un proceso dado por parametro.", 1},
+    {"nice", callNice, 2, 2, "Modifica la prioridad de un proceso dado por parametro.", 1},
+    {"test-mm", test_mm, 1, 1, "Ejecuta el test de memoria.", 1},
+    {"phylo", phylos, 0, 0, "Ejecuta el problema de los filosofos comensales.", 1},
+    {"cat", cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1},
+    {"test-sync", test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1},
+    {"sleep", callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1},
+    {"wc", wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1},
+    {"realloc", callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1},
+    {"loop", loop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1},
+    {"filter", filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1},
+    {"test-processes", test_processes, 1, 1, "Ejecuta el test de procesos.", 1},
+    {"test-prio", test_prio, 0, 0, "Ejecuta el test de prioridades.", 1},
 };
 
 int startConsole()
@@ -209,7 +196,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     return 0;
 }
 
-int getFullCommand(char *str, int length, char **args)
+int getFullCommand(uint8_t *str, int length, char **args)
 {
     char command[length + 1];
     char **arguments = mallocArray(MAX_ARGS + 2);
@@ -374,7 +361,7 @@ char help(char argc, char **argv)
     return 0;
 }
 
-char callFree(char argc, const char **argv)
+char callFree(char argc, char **argv)
 {
     if (argc == 1 && isHexaNumber(argv[0]))
     {
@@ -397,7 +384,7 @@ char callFree(char argc, const char **argv)
     return 0;
 }
 
-char callMalloc(char argc, const char **argv)
+char callMalloc(char argc, char **argv)
 {
     if (argc == 1 && isHexaNumber(argv[0]))
     {
@@ -427,7 +414,7 @@ char callMalloc(char argc, const char **argv)
     return 0;
 }
 
-char callRealloc(char argc, const char **argv)
+char callRealloc(char argc, char **argv)
 {
     if (argc != 2 || !isHexaNumber(argv[0]) || !isHexaNumber(argv[1]))
     {
@@ -455,7 +442,7 @@ char callRealloc(char argc, const char **argv)
     return 0;
 }
 
-char callKill(char argc, const char **argv)
+char callKill(char argc, char **argv)
 {
     if (argc != 1)
     {
@@ -469,7 +456,7 @@ char callKill(char argc, const char **argv)
     return 0;
 }
 
-char callGetMemoryStatus(char argc, const char **argv)
+char callGetMemoryStatus(char argc, char **argv)
 {
     if (argc != 0)
     {
@@ -490,7 +477,7 @@ char callGetMemoryStatus(char argc, const char **argv)
     return 0;
 }
 
-char callBlock(char argc, const char **argv)
+char callBlock(char argc, char **argv)
 {
     if (argc != 1)
     {
@@ -504,21 +491,11 @@ char callBlock(char argc, const char **argv)
     return 0;
 }
 
-char callMemoryDump(uint8_t argumentQty, const char **arguments)
+char callMemoryDump(uint8_t argumentQty, char **arguments)
 {
     if (argumentQty == 1 && isHexaNumber(arguments[0]))
     {
-        char flag = 0;
-        uint64_t direction = hexaStrToNum(arguments[0], strlen(arguments[0]), &flag);
-        if (flag == 1)
-        {
-            // printerr("Direccion muy grande. Overflow\n", 0);
-            printf("Direccion muy grande. Overflow\n");
-        }
-        else
-        {
-            memoryDump(direction);
-        }
+        memoryDump(argumentQty, arguments);
     }
     else
     {
@@ -527,7 +504,7 @@ char callMemoryDump(uint8_t argumentQty, const char **arguments)
     return 0;
 }
 
-char callNice(char argc, const char **argv)
+char callNice(char argc, char **argv)
 {
     if (argc != 2)
     {
@@ -550,7 +527,7 @@ char callNice(char argc, const char **argv)
     return 0;
 }
 
-char setFontSize(char argc, const char **argv)
+char setFontSize(char argc, char **argv)
 {
     if (argc < 1)
     {
@@ -575,7 +552,7 @@ char setFontSize(char argc, const char **argv)
     return 0;
 }
 
-char exitConsole(uint8_t argumentQty, const char **arguments)
+char exitConsole(char argumentQty, char **arguments)
 {
     if (argumentQty != 0)
     {
@@ -588,7 +565,7 @@ char exitConsole(uint8_t argumentQty, const char **arguments)
     return 0;
 }
 
-char callSleep(char argc, const char **argv)
+char callSleep(char argc, char **argv)
 {
     if (argc != 1)
     {
@@ -598,20 +575,6 @@ char callSleep(char argc, const char **argv)
     {
         int num = strToNum(argv[0], strlen(argv[0]));
         _sys_sleep(num);
-    }
-    return 0;
-}
-
-char callLoop(char argc, const char **argv)
-{
-    if (argc != 1)
-    {
-        printf("Argumento invalido para loop\n");
-    }
-    else
-    {
-        int num = strToNum(argv[0], strlen(argv[0]));
-        loop(num);
     }
     return 0;
 }
