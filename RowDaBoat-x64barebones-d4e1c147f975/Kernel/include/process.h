@@ -60,6 +60,8 @@ typedef struct ProcessCDT
     uint64_t waitingTime;
     char **argv;
     char argc;
+    char hasStack;
+    char exitValue;
 } ProcessCDT;
 
 typedef struct ProcessCDT *Process;

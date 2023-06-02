@@ -65,6 +65,20 @@ void destroyLinkedList(LinkedList list)
     free(list);
 }
 
+void freeLinkedList(LinkedList list){
+    while(list->freeNodes > 0){
+        int idx = 0;
+        while(list->free[idx] == NULL){
+            idx++;
+        }
+        free(list->free[idx]);
+        list->free[idx] = NULL;
+        list->freeNodes--;
+    }
+    free(list->free);
+    free(list);
+}
+
 // Function to insert an element at the end of the linked list
 void insert(LinkedList list, void *data)
 {
@@ -306,4 +320,17 @@ void headToBack(LinkedList list)
         newTail->next = NULL;
         list->tail = newTail;
     }
+}
+
+void * findItem(LinkedList list, void *data, int (*comparator)(void *, void *)){
+    NodeCTD *current = list->head;
+    while (current != NULL)
+    {
+        if (comparator(current->data, data) == 0)
+        {
+            return current->data;
+        }
+        current = current->next;
+    }
+    return NULL;
 }

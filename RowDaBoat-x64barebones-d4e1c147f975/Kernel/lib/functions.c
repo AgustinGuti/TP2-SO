@@ -117,3 +117,8 @@ int strToNum(const char * str, int longitud){
 
     return num;
 }
+
+int intComparator(void *a, void *b)
+{
+    return *(int *)a - *(int *)b;
+}

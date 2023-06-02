@@ -109,6 +109,25 @@ int startConsole()
     return 1;
 }
 
+void freeArray(char **array, int length)
+{
+    for (int i = 0; i < length; i++)
+    {
+        free(array[i]);
+    }
+    free(array);
+}
+
+void **mallocArray(int length)
+{
+    void **array = malloc(sizeof(void *) * length);
+    for (int i = 0; i < length; i++)
+    {
+        array[i] = malloc(MAX_ARG_LENGTH + 1);
+    }
+    return array;
+}
+
 char parseAndExecuteCommands(uint8_t *str, int length)
 {
     char pipePos = -1;
@@ -123,31 +142,23 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     if (pipePos == -1)
     {
         // No pipe, execute a single command
-        char **argv = malloc(sizeof(char *) * (MAX_ARGS + 2));
-        for (int i = 0; i < MAX_ARGS + 2; i++)
-        {
-            argv[i] = malloc(MAX_ARG_LENGTH + 1);
-        }
+        char **argv = mallocArray(MAX_ARGS + 2);
         int command = getFullCommand(str, length, argv);
         if (command == -1)
         {
-            for (int i = 0; i < MAX_ARGS + 2; i++)
-            {
-                free(argv[i]);
-            }
-            free(argv);
+            freeArray(argv, MAX_ARGS + 2);
             return 0;
         }
         if (commands[command].executable == 0)
         {
-            commands[command].function(0, argv);
+            int res = commands[command].function(0, argv);
+            freeArray(argv, MAX_ARGS + 2);
+            return res;
         }
+    
         execve(commands[command].function, NULL, 0, argv);
-        for (int i = 0; i < MAX_ARGS + 2; i++)
-        {
-            free(argv[i]);
-        }
-        free(argv);
+
+        freeArray(argv, MAX_ARGS + 2);
         return 0;
     }
 
@@ -156,40 +167,21 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     Pipe pipes2[2] = {connectingPipe, NULL};
     int pipeQty = 2;
 
-    char **argv1 = malloc(sizeof(char *) * (MAX_ARGS + 2));
-    for (int i = 0; i < MAX_ARGS + 2; i++)
-    {
-        argv1[i] = malloc(MAX_ARG_LENGTH + 1);
-    }
-    char **argv2 = malloc(sizeof(char *) * (MAX_ARGS + 2));
-    for (int i = 0; i < MAX_ARGS + 2; i++)
-    {
-        argv2[i] = malloc(MAX_ARG_LENGTH + 1);
-    }
+    char **argv1 = mallocArray(MAX_ARGS + 2);
+    char **argv2 = mallocArray(MAX_ARGS + 2);
+
     int command1 = getFullCommand(str, pipePos, argv1);
     int command2 = getFullCommand(str + pipePos + 1, length - pipePos - 1, argv2);
     if (command1 == -1 || command2 == -1)
     {
-        for (int i = 0; i < MAX_ARGS + 2; i++)
-        {
-            free(argv1[i]);
-            free(argv2[i]);
-        }
-        free(argv1);
-        free(argv2);
-
+        freeArray(argv1, MAX_ARGS + 2);
+        freeArray(argv2, MAX_ARGS + 2);
         return 0;
     }
     if (commands[command1].executable == 0 || commands[command2].executable == 0)
     {
-        for (int i = 0; i < MAX_ARGS + 2; i++)
-        {
-            free(argv1[i]);
-            free(argv2[i]);
-        }
-        free(argv1);
-        free(argv2);
-
+        freeArray(argv1, MAX_ARGS + 2);
+        freeArray(argv2, MAX_ARGS + 2);
         printText("Error: one of the commands is not executable.\n");
         return 0;
     }
@@ -198,13 +190,8 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     execve(commands[command1].function, pipes1, pipeQty, argv1);
     execve(commands[command2].function, pipes2, pipeQty, argv2);
 
-    for (int i = 0; i < MAX_ARGS + 2; i++)
-    {
-        free(argv1[i]);
-        free(argv2[i]);
-    }
-    free(argv1);
-    free(argv2);
+    freeArray(argv1, MAX_ARGS + 2);
+    freeArray(argv2, MAX_ARGS + 2);
 
     return 0;
 }
@@ -212,11 +199,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
 int getFullCommand(uint8_t *str, int length, char **args)
 {
     char command[length + 1];
-    char **arguments = malloc(sizeof(char *) * MAX_ARGS);
-    for (int i = 0; i < MAX_ARGS; i++)
-    {
-        arguments[i] = malloc(MAX_ARG_LENGTH + 1);
-    }
+    char **arguments = mallocArray(MAX_ARGS + 2);
     int argc = 0;
     char commandName[length + 1];
     memcpy(command, str, length);
@@ -225,6 +208,7 @@ int getFullCommand(uint8_t *str, int length, char **args)
     int commandIndex = getCommandIndex(commandName);
     if (commandIndex == -1)
     {
+        freeArray(arguments, MAX_ARGS + 2);
         return -1;
     }
     memcpy(args[0], commandName, length + 1);
@@ -250,11 +234,7 @@ int getFullCommand(uint8_t *str, int length, char **args)
         if (argc - hasBackground > commands[commandIndex].argMaxQty || argc + hasBackground < commands[commandIndex].argMinQty)
         {
             printf("Cantidad de argumentos invalida para %s\n", commandName);
-            for (int i = 0; i < MAX_ARGS; i++)
-            {
-                free(arguments[i]);
-            }
-            free(arguments);
+            freeArray(arguments, MAX_ARGS + 2);
             return -1;
         }
 
@@ -269,19 +249,11 @@ int getFullCommand(uint8_t *str, int length, char **args)
         if (argc > commands[commandIndex].argMaxQty || argc < commands[commandIndex].argMinQty)
         {
             printf("Cantidad de argumentos invalida para %s\n", commandName);
-            for (int i = 0; i < MAX_ARGS; i++)
-            {
-                free(arguments[i]);
-            }
-            free(arguments);
+            freeArray(arguments, MAX_ARGS + 2);
             return -1;
         }
     }
-    for (int i = 0; i < MAX_ARGS; i++)
-    {
-        free(arguments[i]);
-    }
-    free(arguments);
+    freeArray(arguments, MAX_ARGS + 2);
     return commandIndex;
 }
 

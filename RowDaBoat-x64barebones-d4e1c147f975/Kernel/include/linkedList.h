@@ -26,5 +26,7 @@ void moveToBack(LinkedList list, void* data);
 void printList(LinkedList list);
 void * removeFirst(LinkedList list);
 void switchList(LinkedList origin, LinkedList dest);
+void * findItem(LinkedList list, void *data, int (*comparator)(void *, void *));
+void freeLinkedList(LinkedList list);
 
 #endif /* LINKED_LIST_H */

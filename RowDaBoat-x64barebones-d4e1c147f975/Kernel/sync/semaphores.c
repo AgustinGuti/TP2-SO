@@ -140,6 +140,7 @@ void semWait(sem_t sem)
     pid_t *pid = malloc(sizeof(pid_t));
     *pid = getpid();
     insert(sem->waitingList, pid);
+
     leaveCritical();
     blockProcess(*pid);
     return;
@@ -165,3 +166,4 @@ void semPost(sem_t sem)
     leaveCritical();
     return;
 }
+
