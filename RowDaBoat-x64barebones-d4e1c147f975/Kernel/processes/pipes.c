@@ -67,11 +67,14 @@ Pipe openPipe(char *name)
     Pipe pipe = (Pipe)malloc(sizeof(PipeCDT));
     if (pipe == NULL)
     {
+        free(newName);
         return NULL;
     }
     pipe->buffer = (char *)malloc(PIPE_SIZE * sizeof(pipe->buffer[0]));
     if (pipe->buffer == NULL)
     {
+        free(newName);
+        free(pipe);
         return NULL;
     }
     pipe->name = newName;
@@ -84,6 +87,8 @@ Pipe openPipe(char *name)
     pipe->mutex = semOpen(NULL, 1);
     if (pipe->sem == NULL)
     {
+        free(pipe->buffer);
+        free(pipe);
         return NULL;
     }
     if (newName != NULL)

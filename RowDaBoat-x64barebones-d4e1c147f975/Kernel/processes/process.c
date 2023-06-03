@@ -41,6 +41,7 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     if (process->name == NULL)
     {
         /*not enough memory for process->name*/
+        free(process);
         return NULL;
     }
     strcpy(process->name, name);
@@ -52,14 +53,30 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     process->sleepTime = 0;
     process->waitingTime = 0;
     process->fds = (Pipe *)malloc(INITIAL_FD_LIMIT * sizeof(Pipe));
+    if (process->fds == NULL)
+    {
+        /*not enough memory for process->fds*/
+        free(process->name);
+        free(process);
+        return NULL;
+    }
     process->fdLimit = INITIAL_FD_LIMIT;
     process->pipeTypes = (PipeType *)malloc(INITIAL_FD_LIMIT * sizeof(PipeType));
-
+    if (process->pipeTypes == NULL)
+    {
+        /*not enough memory for process->pipeTypes*/
+        free(process->name);
+        free(process->fds);
+        free(process);
+        return NULL;
+    }
     // Process stack is the top of the stack, stack base is process->stack + STACK_SIZE
     process->stack = (uint64_t *)malloc(STACK_SIZE * sizeof(process->stack[0]));
     if (process->stack == NULL)
     {
         /*not enough memory for process->stack*/
+        free(process->name);
+        free(process);
         return NULL;
     }
     process->stackBase = process->stack + STACK_SIZE;
@@ -76,6 +93,11 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
 Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t foreground, char *argv[], void *startWrapper, pid_t parentPID, Pipe *pipes, char pipeQty)
 {
     Process process = initProcess(name, priority, foreground, parentPID);
+    if (process == NULL)
+    {
+        /*not enough memory to allocate process*/
+        return NULL;
+    }
     process->stdio = getKeyboardBuffer();
     process->fds[STDIN] = process->stdio;
     process->fds[STDOUT] = process->stdio;
@@ -101,9 +123,9 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     {
         if (j > process->fdLimit)
         {
+            freeProcess(process);
             return -10;
         }
-        process->fds[j] = pipes[j];
         process->fds[j] = pipes[j];
         process->pipeTypes[j] = j % 2 == 0 ? READ : WRITE;
     }
@@ -250,7 +272,7 @@ int readProcessPipe(int fd, char *buffer, int size)
     {
         return -1;
     }
-    if (process->fds[fd] == process->stdio && process->pipeTypes[fd] == READ && !process->foreground)
+    if (process->fds[fd] == process->stdio && !process->foreground)
     {
         return 0;
     }
@@ -329,12 +351,12 @@ void deleteProcess(Process process)
     closePipes(process);
     free(process->fds);
     free(process->pipeTypes);
-    for (int i = 0; i < process->argc; i++)
-    {
-        free(process->argv[i]);
-    }
     if (process->argv != NULL)
     {
+        for (int i = 0; i < process->argc; i++)
+        {
+            free(process->argv[i]);
+        }
         free(process->argv);
     }
     free(process);

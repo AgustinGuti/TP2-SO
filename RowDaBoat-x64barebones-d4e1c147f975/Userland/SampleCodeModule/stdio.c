@@ -193,11 +193,8 @@ int scanf(const char *fmt, int argQty, ...)
 				while (readChar != 0 && (arrPos < charQty || i == 0))
 				{ // Nothing else to read, or reached max char quantity. If there was no max, read to the end
 					readChar = _sys_read(0, aux, 1);
-					if (aux[0] >= 0)
-					{
-						out[arrPos++] = aux[0];
-						totalReadChars += readChar;
-					}
+					out[arrPos++] = aux[0];
+					totalReadChars += readChar;
 				}
 			}
 			else if (type == 'S')
