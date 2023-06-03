@@ -36,6 +36,10 @@ Pipe openPipe(char *name)
     if (pipes == NULL)
     {
         pipes = malloc(sizeof(struct PipesCDT));
+        if (pipes == NULL)
+        {
+            return NULL;
+        }
         pipes->pipes = createLinkedList();
         pipes->it = iterator(pipes->pipes);
     }
@@ -106,16 +110,20 @@ int closePipe(Pipe pipe)
         free(pipe->buffer);
         if (pipe->name != NULL)
         {
-            remove(pipes->pipes, pipe);
+            if (pipes != NULL && pipes->pipes != NULL){
+                remove(pipes->pipes, pipe);
+            }
             free(pipe->name);
         }
         free(pipe);
     }
-    if (getSize(pipes->pipes) == 0){
-        destroyLinkedList(pipes->pipes);
-        freeIterator(pipes->it);
-        free(pipes);
-        pipes = NULL;
+    if (pipes != NULL && pipes->pipes != NULL){
+        if (getSize(pipes->pipes) == 0){
+            destroyLinkedList(pipes->pipes);
+            freeIterator(pipes->it);
+            free(pipes);
+            pipes = NULL;
+        }
     }
     return 0;
 }

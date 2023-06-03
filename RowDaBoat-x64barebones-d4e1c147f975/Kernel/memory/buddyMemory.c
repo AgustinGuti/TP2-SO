@@ -238,14 +238,13 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr)
     freeBlock(buddy->memory, bit);
 
     // Traverse up the tree, clearing parent nodes that have no siblings that are allocated
-    while (bit >= 0 && getBlockState(buddy->memory, BROTHER(bit)) == 0)
+    while (bit > 0 && getBlockState(buddy->memory, BROTHER(bit)) == 0)
     {
         bit = PARENT(bit);
         freeBlock(buddy->memory, bit);
     }
     // printTree(buddy, 6);
-    //   printf("Freeing %d bytes at 0x%x\n", block_size, ptr);
-   // ptr = NULL;
+    // printf("Freeing %d bytes at 0x%x\n", block_size, ptr);
     return block_size;
 }
 
