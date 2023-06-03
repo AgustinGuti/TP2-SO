@@ -330,6 +330,7 @@ void deleteProcess(Process process)
     }
     freeStack(process);
     free(process->name);
+    closePipes(process);
     free(process->fds);
     free(process->pipeTypes);
     for (int i = 0; i < process->argc; i++)
@@ -339,7 +340,8 @@ void deleteProcess(Process process)
     if (process->argv != NULL){
         free(process->argv);
     }
-    free(process);
+    free(process); 
+process = NULL;
 }
 
 void closePipes(Process process)

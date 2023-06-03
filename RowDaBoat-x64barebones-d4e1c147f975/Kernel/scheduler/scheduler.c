@@ -474,7 +474,6 @@ pid_t killProcess(pid_t pid)
         semClose(process->waitingSem);
         remove(scheduler->queue[process->priority], process);
         cleanChildDeletedProcesses(process);
-        closePipes(process);
         if (parent->state == ZOMBIE)
         {
             deleteProcess(process);
@@ -500,7 +499,7 @@ pid_t killProcess(pid_t pid)
 
 void cleanChildDeletedProcesses(Process process)
 {
-    // LinkedList processesToDelete = createLinkedList();
+    LinkedList processesToDelete = createLinkedList();
 
     resetIterator(scheduler->itDeleted);
     while (hasNext(scheduler->itDeleted))
@@ -508,19 +507,20 @@ void cleanChildDeletedProcesses(Process process)
         Process proc = next(scheduler->itDeleted);
         if (proc->parentPID == process->pid)
         {
-            deleteProcess(proc);
+            insert(processesToDelete, proc);
         }
     }
-    // Iterator it = iterator(processesToDelete);
-    // while (hasNext(it))
-    // {
-    //     Process proc = next(it);
-    //     remove(scheduler->deleted, proc);
-    //     remove(scheduler->processesToFree, proc);
-    //     deleteProcess(proc);
-    // }
-    // freeIterator(it);
-    // freeLinkedList(processesToDelete);
+
+    Iterator it = iterator(processesToDelete);
+    while (hasNext(it))
+    {
+        Process proc = next(it);
+        remove(scheduler->deleted, proc);
+        remove(scheduler->processesToFree, proc);
+        deleteProcess(proc);
+    }
+    freeIterator(it);
+    freeLinkedList(processesToDelete);
 }
 
 void deleteProcessesFromList(LinkedList list)
