@@ -33,38 +33,39 @@ typedef struct command
     char argMinQty;
     char *description;
     char executable;
+    char test;
 } command;
 
 #define COMMAND_QTY 27
 
 static command commands[COMMAND_QTY] = {
-    {"help", help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1},
-    {"clear", cleanScreen, 0, 0, "Vacia la consola.", 1},
-    {"memory-dump", memoryDump, 1, 1, "Recibe como parametro una direccion de memoria e imprime los 32 bytes de memoria posteriores a la misma.", 1},
-    {"time", displayTime, 0, 0, "Imprime en pantalla la hora del sistema.", 1},
-    {"zero-division", zeroDivision, 0, 0, "Genera la excepcion zero division y muestra en pantalla los registros en el momento del error.", 1},
-    {"invalid-opcode", invalidOpcode, 0, 0, "Genera la excepcion invalid opcode y muestra en pantalla los registros en el momento del error.", 1},
-    {"set-font-size", setFontSize, 1, 1, "Permite agrandar o achicar la dimension de del texto en pantalla por argumento.", 1},
-    {"inforeg", printRegs, 0, 0, "Imprime el valor de los ultimos registros guardados. Para guardar los registros se debe presionar la tecla LCTRL.", 1},
-    {"exit", exitConsole, 0, 0, "Termina la ejecucion de la consola.", 0},
-    {"malloc", callMalloc, 1, 1, "Reserva una cantidad de memoria dada por parametro.", 1},
-    {"free", callFree, 1, 1, "Libera la memoria reservada en la direccion dada por parametro.", 1},
-    {"ps", printProcesses, 1, 0, "Imprime en pantalla los procesos en ejecucion.", 1},
-    {"mem", callGetMemoryStatus, 0, 0, "Imprime en pantalla el estado de la memoria.", 1},
-    {"block", callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1},
-    {"kill", callKill, 1, 1, "Elimina un proceso dado por parametro.", 1},
-    {"nice", callNice, 2, 2, "Modifica la prioridad de un proceso dado por parametro.", 1},
-    {"test-mm", test_mm, 1, 1, "Ejecuta el test de memoria.", 1},
-    {"phylo", phylos, 0, 0, "Ejecuta el problema de los filosofos comensales.", 1},
-    {"cat", cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1},
-    {"test-sync", test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1},
-    {"sleep", callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1},
-    {"wc", wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1},
-    {"realloc", callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1},
-    {"loop", loop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1},
-    {"filter", filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1},
-    {"test-processes", test_processes, 1, 1, "Ejecuta el test de procesos.", 1},
-    {"test-prio", test_prio, 0, 0, "Ejecuta el test de prioridades.", 1},
+    {"help", help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1, 0},
+    {"clear", cleanScreen, 0, 0, "Vacia la consola.", 1, 0},
+    {"memory-dump", memoryDump, 1, 1, "Recibe como parametro una direccion de memoria e imprime los 32 bytes de memoria posteriores a la misma.", 1, 0},
+    {"time", displayTime, 0, 0, "Imprime en pantalla la hora del sistema.", 1, 0},
+    {"zero-division", zeroDivision, 0, 0, "Genera la excepcion zero division y muestra en pantalla los registros en el momento del error.", 1, 0},
+    {"invalid-opcode", invalidOpcode, 0, 0, "Genera la excepcion invalid opcode y muestra en pantalla los registros en el momento del error.", 1, 0},
+    {"set-font-size", setFontSize, 1, 1, "Permite agrandar o achicar la dimension de del texto en pantalla por argumento.", 1, 0},
+    {"inforeg", printRegs, 0, 0, "Imprime el valor de los ultimos registros guardados. Para guardar los registros se debe presionar la tecla LCTRL.", 1, 0},
+    {"exit", exitConsole, 0, 0, "Termina la ejecucion de la consola.", 0, 0},
+    {"malloc", callMalloc, 1, 1, "Reserva una cantidad de memoria dada por parametro.", 1, 0},
+    {"free", callFree, 1, 1, "Libera la memoria reservada en la direccion dada por parametro.", 1, 0},
+    {"ps", printProcesses, 1, 0, "Imprime en pantalla los procesos en ejecucion.", 1, 0},
+    {"mem", callGetMemoryStatus, 0, 0, "Imprime en pantalla el estado de la memoria.", 1, 0},
+    {"block", callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1, 0},
+    {"kill", callKill, 1, 1, "Elimina un proceso dado por parametro.", 1, 0},
+    {"nice", callNice, 2, 2, "Modifica la prioridad de un proceso dado por parametro.", 1, 0},
+    {"phylo", phylos, 0, 0, "Ejecuta el problema de los filosofos comensales.", 1, 0},
+    {"cat", cat, 0, 0, "Imprime en pantalla el contenido de un archivo dado por parametro.", 1, 0},
+    {"sleep", callSleep, 1, 1, "Duerme un proceso dado por parametro.", 1, 0},
+    {"wc", wc, 0, 0, "Imprime en pantalla la cantidad de lineas de su input.", 1, 0},
+    {"realloc", callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1, 0},
+    {"loop", loop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1, 0},
+    {"filter", filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1, 0},
+    {"test-mm", test_mm, 1, 1, "Ejecuta el test de memoria.", 1, 1},
+    {"test-sync", test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1, 1},
+    {"test-processes", test_processes, 1, 1, "Ejecuta el test de procesos.", 1, 1},
+    {"test-prio", test_prio, 0, 0, "Ejecuta el test de prioridades.", 1, 1},
 };
 
 int startConsole()
@@ -359,6 +360,17 @@ char help(char argc, char **argv)
         if (strcmp(argv[0], "please") == 0)
         {
             printf("No.\n");
+            return 0;
+        }
+        else if (strcmp(argv[0], "tests") == 0)
+        {
+            for (int i = 0; i < COMMAND_QTY; i++)
+            {
+                if (commands[i].test)
+                {
+                    printf("%s: %s\n", commands[i].name, commands[i].description);
+                }
+            }
             return 0;
         }
         else if (strcmp(argv[0], "all") == 0)
