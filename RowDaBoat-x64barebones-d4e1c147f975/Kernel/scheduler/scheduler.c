@@ -307,7 +307,6 @@ int nice(pid_t pid, int priority)
     if (priority != process->priority)
     {
         insert(scheduler->queue[priority], process);
-        // printList(scheduler->queue[priority]);
         remove(scheduler->queue[process->priority], process);
         process->priority = priority;
     }
@@ -488,7 +487,6 @@ pid_t killProcess(pid_t pid)
             remove(scheduler->sleepingProcesses, process);
         }
         process->state = ZOMBIE;
-        // printf("Killed process %s in state %d\n", process->name, process->state);
         char newChar[1] = {EOF};
         writeProcessPipe(STDOUT, newChar, 1);
         semClose(process->waitingSem);

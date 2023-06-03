@@ -113,7 +113,6 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 			}
 			uint64_t size = currentOccupiedBlock->size;
 			addBlockToFreeList(memoryManager, memoryToFree, currentOccupiedBlock->size);
-		//	printBlocks(memoryManager);
 			return size;
 		}
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
@@ -214,7 +213,6 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 
 void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
 {
-	// printBlocks(memoryManager);
 	MemoryBlock *currentBlock = memoryManager->firstOccupiedBlock;
 	MemoryBlock *newBlock = (MemoryBlock *)((uint64_t)startAddress - sizeof(MemoryBlock));
 	initializeBlock(newBlock, startAddress, size);
