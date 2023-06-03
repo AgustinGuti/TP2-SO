@@ -91,7 +91,7 @@ sem_t semOpen(char *name, int value)
     {
         leaveCritical();
         free(newName); 
-newName = NULL;
+        newName = NULL;
         return NULL;
     }
     newSem->name = newName;
@@ -105,9 +105,9 @@ newName = NULL;
     {
         leaveCritical();
         free(newName); 
-newName = NULL;
+        newName = NULL;
         free(newSem); 
-newSem = NULL;
+        newSem = NULL;
         return NULL;
     }
     *pid = getpid();
@@ -131,25 +131,26 @@ void semClose(sem_t sem)
     enterCritical();
     if (getSize(sem->connectedProcesses) == 1)
     {
-        destroyLinkedList(sem->waitingList);
         resetIterator(sem->itConnectedProcesses);
         while (hasNext(sem->itConnectedProcesses))
         {
             pid_t *pid = next(sem->itConnectedProcesses);
             remove(sem->connectedProcesses, pid);
             free(pid); 
-pid = NULL;
+            pid = NULL;
         }
         Iterator it = iterator(sem->waitingList);
         while(hasNext(it)){
             pid_t *pid = next(it);
             remove(sem->waitingList, pid);
             free(pid); 
-pid = NULL;            
+            pid = NULL;            
         }
         freeIterator(it);
         freeIterator(sem->itConnectedProcesses);
         destroyLinkedList(sem->connectedProcesses);
+        destroyLinkedList(sem->waitingList);
+
         if (sem->name != NULL)
         {
             remove(semaphores->semaphoresList, sem);
@@ -164,7 +165,7 @@ pid = NULL;
             }
         }
         free(sem); 
-sem = NULL;
+        sem = NULL;
 
         leaveCritical();
         return;
@@ -179,6 +180,7 @@ sem = NULL;
             {
                 remove(sem->connectedProcesses, pid);
                 free(pid);
+                pid = NULL;
             }
         }
     }

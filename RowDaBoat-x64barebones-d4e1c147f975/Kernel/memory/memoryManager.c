@@ -78,6 +78,8 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 			{
 				*allocatedMemorySize = memoryToAllocate + sizeof(MemoryBlock);
 			}
+			// if (allocatedMemorystartAddress == (void *)0xFFE3377)
+			// 	printBlocks(memoryManager);
 			return (uint64_t *)((uint64_t)allocatedMemorystartAddress);
 		}
 		currentFreeBlock = currentFreeBlock->nextBlock;
@@ -183,25 +185,31 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 	currentBlock->prevBlock = newBlock;
 
 	// merge blocks
-	if (prevBlock != NULL && (uint64_t)prevBlock->startAddress + prevBlock->size == (uint64_t)newBlock)
+	MemoryBlock *auxBlock = newBlock;
+	while (prevBlock != NULL && (uint64_t)prevBlock->startAddress + prevBlock->size == (uint64_t)auxBlock)
 	{
-		prevBlock->size += newBlock->size + sizeof(MemoryBlock);
-		prevBlock->nextBlock = newBlock->nextBlock;
-		if (newBlock->nextBlock != NULL)
+		prevBlock->size += auxBlock->size + sizeof(MemoryBlock);
+		prevBlock->nextBlock = auxBlock->nextBlock;
+		if (auxBlock->nextBlock != NULL)
 		{
-			newBlock->nextBlock->prevBlock = prevBlock;
+			auxBlock->nextBlock->prevBlock = prevBlock;
 		}
-		newBlock = prevBlock;
+		auxBlock = prevBlock;
+		prevBlock = prevBlock->prevBlock;
 	}
-	if (newBlock->nextBlock != NULL && (uint64_t)newBlock->startAddress + newBlock->size == (uint64_t)newBlock->nextBlock)
+
+	auxBlock = newBlock;
+	while (auxBlock->nextBlock != NULL && (uint64_t)auxBlock->startAddress + auxBlock->size == (uint64_t)auxBlock->nextBlock)
 	{
-		newBlock->size += newBlock->nextBlock->size + sizeof(MemoryBlock);
-		newBlock->nextBlock = newBlock->nextBlock->nextBlock;
-		if (newBlock->nextBlock != NULL)
+		auxBlock->size += auxBlock->nextBlock->size + sizeof(MemoryBlock);
+		auxBlock->nextBlock = auxBlock->nextBlock->nextBlock;
+		if (auxBlock->nextBlock != NULL)
 		{
-			newBlock->nextBlock->prevBlock = newBlock;
+			auxBlock->nextBlock->prevBlock = auxBlock;
 		}
+		auxBlock = auxBlock->nextBlock;
 	}
+	
 }
 
 void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
@@ -264,8 +272,8 @@ void printBlocks(MemoryManagerADT const memoryManager)
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
 	{
-		if (currentOccupiedBlock->startAddress <= (void *)0xFFE319F)
-			printf("Occupied Block Start address: %x, size: %x\n", currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
+		// if (currentOccupiedBlock->startAddress <= (void *)0xFFE3740)
+		printf("Occupied Block Start address: %x, size: %x\n", currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
 	}
 	printf("DONE\n");

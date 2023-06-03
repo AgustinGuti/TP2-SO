@@ -63,6 +63,6 @@ uint64_t *getMemoryStatus()
     memoryStatus[0] = totalMem;
     memoryStatus[1] = occupiedMem;
     memoryStatus[2] = totalMem - occupiedMem;
-  //  printBlocks(myMemoryManager);
+    // printBlocks(myMemoryManager);
     return memoryStatus;
 }

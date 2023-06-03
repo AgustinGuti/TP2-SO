@@ -36,6 +36,7 @@ void *changeProcess(void *rsp);
 void updateMostWaitingProcess();
 void cleanChildDeletedProcesses(Process process);
 void deleteProcessesFromList(LinkedList list);
+void killKernel();
 
 static char ready = 0;
 static uint64_t counter = 0;
@@ -82,6 +83,7 @@ void initScheduler()
 void closeScheduler()
 {
     ready = 0;
+    killKernel();
     for (int i = 0; i < MAX_PRIORITY; i++)
     {
         freeIterator(scheduler->it[i]);
@@ -254,7 +256,7 @@ pid_t execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
         scheduler->currentProcess->foreground = currentForeground;
     }
     else
-    {
+    {   
         insert(scheduler->queue[process->priority], process);
     }
     return process->pid;
@@ -446,8 +448,26 @@ void unblockProcessFromProcess(Process process)
     }
 }
 
+void killKernel(){
+    printf("Killing kernel\n");
+    Process process = getProcess(KERNEL_PID);
+    if (process != NULL)
+    {
+        process->foreground = 0;
+        process->state = ZOMBIE;
+        char newChar[1] = {EOF};
+        writeProcessPipe(STDOUT, newChar, 1);
+        semClose(process->waitingSem);
+        remove(scheduler->queue[process->priority], process);
+        cleanChildDeletedProcesses(process);
+
+        deleteProcess(process);
+    }
+}
+
 pid_t killProcess(pid_t pid)
 {
+    printf("Killing process %d\n", pid);
     if (pid == SHELL_PID && scheduler->currentProcess->pid != SHELL_PID)
     {
         printerr("No es posible matar la shell desde otro proceso.\n");
@@ -520,7 +540,7 @@ void cleanChildDeletedProcesses(Process process)
         deleteProcess(proc);
     }
     freeIterator(it);
-    freeLinkedList(processesToDelete);
+    destroyLinkedList(processesToDelete);
 }
 
 void deleteProcessesFromList(LinkedList list)

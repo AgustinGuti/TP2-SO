@@ -75,10 +75,10 @@ int main()
 	// printf("Memoria libre: %x\n", memStatus[2]);
 
 	initScheduler();
-	char *argv[] = {"sh", "1", NULL};
-	// createProcess("shell", sampleCodeModuleAddress, MAX_PRIORITY, 1, argv, &startWrapper);
 
+	char *argv[] = {"sh", "1", NULL};
 	execve(sampleCodeModuleAddress, NULL, 0, argv);
+
 	closeScheduler();
 	closeKeyboardBuffer();
 
