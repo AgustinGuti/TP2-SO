@@ -34,7 +34,7 @@ sem_t semOpen(char *name, int value)
         return NULL;
 
     enterCritical();
-    if (semaphores == NULL)
+    if (semaphores == NULL && name != NULL)
     {
         semaphores = malloc(sizeof(struct semaphoresCDT));
         if (semaphores == NULL)
@@ -45,10 +45,10 @@ sem_t semOpen(char *name, int value)
         semaphores->semaphoresList = createLinkedList();
         semaphores->it = iterator(semaphores->semaphoresList);
     }
-    resetIterator(semaphores->it);
     char *newName = NULL;
     if (name != NULL)
     {
+        resetIterator(semaphores->it);
         while (hasNext(semaphores->it))
         {
             sem_t sem = next(semaphores->it);
@@ -90,7 +90,8 @@ sem_t semOpen(char *name, int value)
     if (newSem == NULL)
     {
         leaveCritical();
-        free(newName);
+        free(newName); 
+newName = NULL;
         return NULL;
     }
     newSem->name = newName;
@@ -102,8 +103,10 @@ sem_t semOpen(char *name, int value)
     if (pid == NULL)
     {
         leaveCritical();
-        free(newName);
-        free(newSem);
+        free(newName); 
+newName = NULL;
+        free(newSem); 
+newSem = NULL;
         return NULL;
     }
     *pid = getpid();
@@ -127,14 +130,41 @@ void semClose(sem_t sem)
     enterCritical();
     if (getSize(sem->connectedProcesses) == 1)
     {
-        if (sem->name != NULL)
-        {
-            free(sem->name);
-        }
         destroyLinkedList(sem->waitingList);
+        resetIterator(sem->itConnectedProcesses);
+        while (hasNext(sem->itConnectedProcesses))
+        {
+            pid_t *pid = next(sem->itConnectedProcesses);
+            remove(sem->connectedProcesses, pid);
+            free(pid); 
+pid = NULL;
+        }
+        Iterator it = iterator(sem->waitingList);
+        while(hasNext(it)){
+            pid_t *pid = next(it);
+            remove(sem->waitingList, pid);
+            free(pid); 
+pid = NULL;            
+        }
+        freeIterator(it);
         freeIterator(sem->itConnectedProcesses);
         destroyLinkedList(sem->connectedProcesses);
-        remove(semaphores->semaphoresList, sem);
+        if (sem->name != NULL)
+        {
+            remove(semaphores->semaphoresList, sem);
+            free(sem->name);
+            if (getSize(semaphores->semaphoresList) == 0)
+            {
+                printf("Deleteing list\n");
+                freeIterator(semaphores->it);
+                destroyLinkedList(semaphores->semaphoresList);
+                free(semaphores);
+                semaphores = NULL;
+            }
+        }
+        free(sem); 
+sem = NULL;
+
         leaveCritical();
         return;
     }
@@ -143,11 +173,11 @@ void semClose(sem_t sem)
         resetIterator(sem->itConnectedProcesses);
         while (hasNext(sem->itConnectedProcesses))
         {
-            Process proc = next(sem->itConnectedProcesses);
-            if (proc->pid == getpid())
+            pid_t *pid = next(sem->itConnectedProcesses);
+            if (*pid == getpid())
             {
-                remove(sem->connectedProcesses, proc);
-                free(proc);
+                remove(sem->connectedProcesses, pid);
+                free(pid);
             }
         }
     }
@@ -202,4 +232,3 @@ void semPost(sem_t sem)
     leaveCritical();
     return;
 }
-

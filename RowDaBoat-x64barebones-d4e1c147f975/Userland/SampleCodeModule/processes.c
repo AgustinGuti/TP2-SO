@@ -105,6 +105,7 @@ char filter(char argc, char **argv)
     return 0;
 }
 
-void sleep(int sec){
+void sleep(int sec)
+{
     _sys_sleep(sec * 1000);
 }

@@ -35,6 +35,7 @@ Process getProcess(pid_t pid);
 void *changeProcess(void *rsp);
 void updateMostWaitingProcess();
 void cleanChildDeletedProcesses(Process process);
+void deleteProcessesFromList(LinkedList list);
 
 static char ready = 0;
 static uint64_t counter = 0;
@@ -57,10 +58,14 @@ void initScheduler()
     scheduler->itDeleted = iterator(scheduler->deleted);
     scheduler->processesToFree = createLinkedList();
     scheduler->itProcessesToFree = iterator(scheduler->processesToFree);
-    char *argv[2] = {"Kernel", NULL};
+    char *argv[1] = {NULL};
+
     scheduler->currentProcess = createProcess("Kernel", NULL, 1, 0, argv, &startWrapper, getpid(), NULL, 0);
+    if (scheduler->currentProcess == NULL)
+    {
+        return;
+    }
     insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-    argv[0] = "Empty";
     scheduler->empty = createProcess("Empty", &emptyProcess, 1, 0, argv, &startWrapper, getpid(), NULL, 0);
     scheduler->quantum = BURST_TIME;
     scheduler->quantumCounter = BURST_TIME - 1;
@@ -77,13 +82,17 @@ void initScheduler()
 void closeScheduler()
 {
     ready = 0;
-    for (int i = 0; i < MAX_PRIORITY; i++){
+    for (int i = 0; i < MAX_PRIORITY; i++)
+    {
         freeIterator(scheduler->it[i]);
+        deleteProcessesFromList(scheduler->queue[i]);
         destroyLinkedList(scheduler->queue[i]);
     }
     freeIterator(scheduler->itDeleted);
+    deleteProcessesFromList(scheduler->deleted);
     destroyLinkedList(scheduler->deleted);
     freeIterator(scheduler->itProcessesToFree);
+    deleteProcessesFromList(scheduler->processesToFree);
     destroyLinkedList(scheduler->processesToFree);
     freeIterator(scheduler->itSleepingProcesses);
     destroyLinkedList(scheduler->sleepingProcesses);
@@ -453,7 +462,8 @@ pid_t killProcess(pid_t pid)
             semPost(parent->waitingSem);
         }
         process->foreground = 0;
-        if(process->state == BLOCKED) {
+        if (process->state == BLOCKED)
+        {
             remove(scheduler->sleepingProcesses, process);
         }
         process->state = ZOMBIE;
@@ -462,13 +472,6 @@ pid_t killProcess(pid_t pid)
         semClose(process->waitingSem);
         remove(scheduler->queue[process->priority], process);
         cleanChildDeletedProcesses(process);
-        closePipes(process);
-        for (int i = 0; i < process->argc; i++)
-        {
-            free(process->argv[i]);
-        }
-        free(process->argv);
-
         if (parent->state == ZOMBIE)
         {
             deleteProcess(process);
@@ -492,7 +495,8 @@ pid_t killProcess(pid_t pid)
     return -1;
 }
 
-void cleanChildDeletedProcesses(Process process){
+void cleanChildDeletedProcesses(Process process)
+{
     LinkedList processesToDelete = createLinkedList();
 
     resetIterator(scheduler->itDeleted);
@@ -504,6 +508,7 @@ void cleanChildDeletedProcesses(Process process){
             insert(processesToDelete, proc);
         }
     }
+
     Iterator it = iterator(processesToDelete);
     while (hasNext(it))
     {
@@ -514,6 +519,17 @@ void cleanChildDeletedProcesses(Process process){
     }
     freeIterator(it);
     freeLinkedList(processesToDelete);
+}
+
+void deleteProcessesFromList(LinkedList list)
+{
+    Iterator it = iterator(list);
+    while (hasNext(it))
+    {
+        Process proc = next(it);
+        deleteProcess(proc);
+    }
+    freeIterator(it);
 }
 
 Process getForegroundProcess()
@@ -575,6 +591,9 @@ pid_t waitpid(pid_t pid)
         parent->waitingSem = semOpen(NULL, 0);
     }
     semWait(parent->waitingSem);
+    // semClose(parent->waitingSem);
+    // parent->waitingSem = NULL;
+
     return pid;
 }
 

@@ -4,18 +4,22 @@
 
 static unsigned long ticks = 0;
 
-void timer_handler() {
+void timer_handler()
+{
 	ticks++;
 }
 
-uint32_t ticks_elapsed() {
+uint32_t ticks_elapsed()
+{
 	return ticks;
 }
 
-uint32_t seconds_elapsed() {
+uint32_t seconds_elapsed()
+{
 	return ticks / 18;
 }
 
-uint32_t getMillis(){
+uint32_t getMillis()
+{
 	return ticks * 55;
 }

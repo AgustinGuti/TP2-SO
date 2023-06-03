@@ -191,8 +191,8 @@ int scanf(const char *fmt, int argQty, ...)
 				int readChar = 1;
 				int arrPos = 0;
 				while (readChar != 0 && (arrPos < charQty || i == 0))
-				{																	 // Nothing else to read, or reached max char quantity. If there was no max, read to the end
-					readChar = _sys_read(0, aux, 1); 
+				{ // Nothing else to read, or reached max char quantity. If there was no max, read to the end
+					readChar = _sys_read(0, aux, 1);
 					if (aux[0] >= 0)
 					{
 						out[arrPos++] = aux[0];

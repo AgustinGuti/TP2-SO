@@ -9,12 +9,12 @@
 typedef struct PipeCDT PipeCDT;
 typedef PipeCDT *Pipe;
 
-#define BACKSPACE   0x08
-#define NEWLINE     0x0A
-#define TAB         0x09
+#define BACKSPACE 0x08
+#define NEWLINE 0x0A
+#define TAB 0x09
 
-#define DEFAULT_LETTER_WHITE 0x00FFFFFF 		//White letters
-#define DEFAULT_BACK_BLACK			//Black backgound
+#define DEFAULT_LETTER_WHITE 0x00FFFFFF // White letters
+#define DEFAULT_BACK_BLACK              // Black backgound
 #define MAX_BUFFER_LENGTH 64
 
 char hasKeyReady();
@@ -28,8 +28,8 @@ char isKeyMake(unsigned char data);
 
 void keyboard_handler(uint8_t event);
 Pipe getKeyboardBuffer();
+void closeKeyboardBuffer();
 
-
-int getBuffer(int* out, uint32_t count);
+int getBuffer(int *out, uint32_t count);
 
 #endif

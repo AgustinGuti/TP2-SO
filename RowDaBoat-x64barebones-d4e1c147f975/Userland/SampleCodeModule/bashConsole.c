@@ -132,7 +132,7 @@ void **mallocArray(int length)
         array[i] = malloc(MAX_ARG_LENGTH + 1);
         if (array[i] == NULL)
         {
-            freeArray(array, i);
+            freeArray((char **)array, i);
             return NULL;
         }
     }
@@ -153,7 +153,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     if (pipePos == -1)
     {
         // No pipe, execute a single command
-        char **argv = mallocArray(MAX_ARGS + 2);
+        char **argv = (char **)mallocArray(MAX_ARGS + 2);
         int command = getFullCommand(str, length, argv);
         if (command == -1)
         {
@@ -166,7 +166,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
             freeArray(argv, MAX_ARGS + 2);
             return res;
         }
-    
+
         execve(commands[command].function, NULL, 0, argv);
 
         freeArray(argv, MAX_ARGS + 2);
@@ -178,12 +178,12 @@ char parseAndExecuteCommands(uint8_t *str, int length)
     Pipe pipes2[2] = {connectingPipe, NULL};
     int pipeQty = 2;
 
-    char **argv1 = mallocArray(MAX_ARGS + 2);
+    char **argv1 = (char **)mallocArray(MAX_ARGS + 2);
     if (argv1 == NULL)
     {
         return 0;
     }
-    char **argv2 = mallocArray(MAX_ARGS + 2);
+    char **argv2 = (char **)mallocArray(MAX_ARGS + 2);
     if (argv2 == NULL)
     {
         freeArray(argv1, MAX_ARGS + 2);
@@ -219,7 +219,7 @@ char parseAndExecuteCommands(uint8_t *str, int length)
 int getFullCommand(uint8_t *str, int length, char **args)
 {
     char command[length + 1];
-    char **arguments = mallocArray(MAX_ARGS + 2);
+    char **arguments = (char **)mallocArray(MAX_ARGS + 2);
     if (arguments == NULL)
     {
         return -1;

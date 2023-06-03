@@ -2,8 +2,7 @@
 #include <functions.h>
 #include <linkedList.h>
 
-
-typedef struct semaphoreCDT* sem_t;
+typedef struct semaphoreCDT *sem_t;
 
 // Creates or opens a semaphore and identifies it with the name "name".
 // If a semaphore with that name does not exist, it creates it with value "value".

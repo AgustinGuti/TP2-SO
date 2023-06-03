@@ -242,9 +242,9 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr)
         bit = PARENT(bit);
         freeBlock(buddy->memory, bit);
     }
-    //   printTree(buddy, 6);
+    // printTree(buddy, 6);
     //   printf("Freeing %d bytes at 0x%x\n", block_size, ptr);
-
+    //ptr = NULL;
     return block_size;
 }
 

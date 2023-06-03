@@ -9,15 +9,14 @@
 #define STDOUT 1
 #define STDERR 2
 
-#define BACKSPACE   0x08
-#define NEWLINE     0x0A
+#define BACKSPACE 0x08
+#define NEWLINE 0x0A
 
 typedef struct
 {
     uint16_t x;
     uint16_t y;
-}pxlCoord;
-
+} pxlCoord;
 
 // VBE attributes
 uint16_t getScreenWidth();
@@ -38,8 +37,8 @@ void putChar(uint32_t color, uint16_t id);
 
 void printFormatStringLimited(uint32_t color, const char *str, uint32_t count, uint16_t row, uint16_t col);
 
-void printf(const char* fmt, ...);
-void printerr(const char* fmt, ...);
+void printf(const char *fmt, ...);
+void printerr(const char *fmt, ...);
 
 char getBit(uint16_t value, int n);
 
@@ -53,10 +52,10 @@ void clearCharBuffer();
 void startPage();
 void sendEOF();
 
-/*	
-	Draws draws width * height * bpp/8 bytes from sprite to the screen, begining in coord.
-	Width and height should be in pizel size
+/*
+    Draws draws width * height * bpp/8 bytes from sprite to the screen, begining in coord.
+    Width and height should be in pizel size
 */
-void drawSprite(uint16_t width, uint16_t height, uint8_t sprite[height][width*3], pxlCoord coord);
+void drawSprite(uint16_t width, uint16_t height, uint8_t sprite[height][width * 3], pxlCoord coord);
 
 #endif

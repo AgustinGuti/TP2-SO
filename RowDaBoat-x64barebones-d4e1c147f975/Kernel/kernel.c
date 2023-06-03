@@ -67,6 +67,7 @@ int main()
 	
 	execve(sampleCodeModuleAddress, NULL, 0, argv);
 	closeScheduler();
+	closeKeyboardBuffer();
 
 	drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
 	return 0;

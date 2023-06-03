@@ -14,7 +14,7 @@ MemoryManagerADT initializeMemoryManager(uint64_t size, void *initialDirection, 
     return myMemoryManager;
 }
 
-static uint64_t memoryStatus[3];
+static uint64_t memoryStatus[3] = {0, 0, 0};
 
 void *malloc(uint64_t size)
 {
@@ -29,6 +29,7 @@ void *malloc(uint64_t size)
         printerr("Malloc failed\n");
     }
     return res;
+    
 }
 
 uint64_t free(void *ptr)
@@ -62,5 +63,6 @@ uint64_t *getMemoryStatus()
     memoryStatus[0] = totalMem;
     memoryStatus[1] = occupiedMem;
     memoryStatus[2] = totalMem - occupiedMem;
+  //  printBlocks(myMemoryManager);
     return memoryStatus;
 }

@@ -8,7 +8,6 @@
 #define OCCUPIED 1
 
 #define MEMORY_MANAGER_STRUCT_SIZE 16
-#define BLOCK_STRUCT_SIZE 32
 
 typedef struct MemoryBlock
 {
@@ -33,7 +32,7 @@ MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const man
 {
 	MemoryManagerADT memoryManager = (MemoryManagerADT)memoryForMemoryManager;
 	MemoryBlock *firstFreeBlock = (MemoryBlock *)(managedMemory);
-	initializeBlock(firstFreeBlock, managedMemory, managedMemorySize - BLOCK_STRUCT_SIZE);
+	initializeBlock(firstFreeBlock, managedMemory, managedMemorySize - sizeof(MemoryBlock));
 	memoryManager->firstFreeBlock = firstFreeBlock;
 	memoryManager->firstOccupiedBlock = NULL;
 	return memoryManager;
@@ -46,13 +45,17 @@ uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap)
 
 void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToAllocate, uint64_t *allocatedMemorySize)
 {
+	if (memoryToAllocate == 0)
+	{
+		return NULL;
+	}
 	MemoryBlock *currentFreeBlock = memoryManager->firstFreeBlock;
 	while (currentFreeBlock != NULL)
 	{
-		if (currentFreeBlock->size >= (memoryToAllocate + BLOCK_STRUCT_SIZE))
+		if (currentFreeBlock->size >= (memoryToAllocate + sizeof(MemoryBlock)))
 		{
 			void *allocatedMemorystartAddress = (uint64_t *)((uint64_t)currentFreeBlock->startAddress + currentFreeBlock->size - memoryToAllocate);
-			currentFreeBlock->size -= (memoryToAllocate + BLOCK_STRUCT_SIZE);
+			currentFreeBlock->size -= (memoryToAllocate + sizeof(MemoryBlock));
 
 			if (currentFreeBlock->size == 0)
 			{
@@ -73,7 +76,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 
 			if (allocatedMemorySize != NULL)
 			{
-				*allocatedMemorySize = memoryToAllocate + BLOCK_STRUCT_SIZE;
+				*allocatedMemorySize = memoryToAllocate + sizeof(MemoryBlock);
 			}
 			return (uint64_t *)((uint64_t)allocatedMemorystartAddress);
 		}
@@ -85,6 +88,10 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 
 uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFree)
 {
+	if (memoryToFree == NULL)
+	{
+		return 0;
+	}
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
 	{
@@ -144,7 +151,7 @@ void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRe
 void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
 {
 	MemoryBlock *currentBlock = memoryManager->firstFreeBlock;
-	MemoryBlock *newBlock = (MemoryBlock *)((uint64_t)startAddress - BLOCK_STRUCT_SIZE);
+	MemoryBlock *newBlock = (MemoryBlock *)((uint64_t)startAddress - sizeof(MemoryBlock));
 	initializeBlock(newBlock, startAddress, size);
 	if (currentBlock == NULL)
 	{
@@ -177,7 +184,7 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 	// merge blocks
 	if (prevBlock != NULL && (uint64_t)prevBlock->startAddress + prevBlock->size == (uint64_t)newBlock)
 	{
-		prevBlock->size += newBlock->size + BLOCK_STRUCT_SIZE;
+		prevBlock->size += newBlock->size + sizeof(MemoryBlock);
 		prevBlock->nextBlock = newBlock->nextBlock;
 		if (newBlock->nextBlock != NULL)
 		{
@@ -187,7 +194,7 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 	}
 	if (newBlock->nextBlock != NULL && (uint64_t)newBlock->startAddress + newBlock->size == (uint64_t)newBlock->nextBlock)
 	{
-		newBlock->size += newBlock->nextBlock->size + BLOCK_STRUCT_SIZE;
+		newBlock->size += newBlock->nextBlock->size + sizeof(MemoryBlock);
 		newBlock->nextBlock = newBlock->nextBlock->nextBlock;
 		if (newBlock->nextBlock != NULL)
 		{
@@ -199,7 +206,7 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
 {
 	MemoryBlock *currentBlock = memoryManager->firstOccupiedBlock;
-	MemoryBlock *newBlock = (MemoryBlock *)((uint64_t)startAddress - BLOCK_STRUCT_SIZE);
+	MemoryBlock *newBlock = (MemoryBlock *)((uint64_t)startAddress - sizeof(MemoryBlock));
 	initializeBlock(newBlock, startAddress, size);
 	if (currentBlock == NULL)
 	{
@@ -255,7 +262,8 @@ void printBlocks(MemoryManagerADT const memoryManager)
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
 	{
-		printf("Occupied Block Start address: %x, size: %x\n", currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
+		if (currentOccupiedBlock->startAddress <= (void *)0xFFE319F)
+			printf("Occupied Block Start address: %x, size: %x\n", currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
 	}
 	printf("DONE\n");
