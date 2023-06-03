@@ -118,14 +118,14 @@ char phylos(char argc, char **argv)
     }
 
     free(state);
-    free(philosophersPID); 
+    free(philosophersPID);
     semClose(mutex);
     semClose(processToKillMutex);
     for (i = 0; i < philoQty; i++)
     {
         semClose(philoSemaphores[i]);
     }
-    free(philoSemaphores); 
+    free(philoSemaphores);
 
     return 0;
 }

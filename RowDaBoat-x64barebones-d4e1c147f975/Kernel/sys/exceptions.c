@@ -61,7 +61,7 @@ static void other(uint64_t *registers)
 	printString(0xFF0000, "Other exception");
 	newline();
 	printRegs(registers);
-	newline();	
+	newline();
 }
 
 static void printRegs(uint64_t *registers)

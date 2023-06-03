@@ -208,7 +208,6 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 		}
 		auxBlock = auxBlock->nextBlock;
 	}
-	
 }
 
 void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)

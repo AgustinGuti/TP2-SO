@@ -58,14 +58,14 @@ int main()
 	load_idt();
 	saveRegisters();
 	restoreStack();
-	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE, 
-							(void *)MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE), 
-							(void *)MEMORY_INITIAL_DIRECTION, 
-							(void *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
+	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE,
+													(void *)MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE),
+													(void *)MEMORY_INITIAL_DIRECTION,
+													(void *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
 	initScheduler();
 
 	char *argv[] = {"sh", "1", NULL};
-	
+
 	execve(sampleCodeModuleAddress, NULL, 0, argv);
 
 	closeScheduler();

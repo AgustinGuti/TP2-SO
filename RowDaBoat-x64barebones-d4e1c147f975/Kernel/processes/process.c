@@ -126,7 +126,8 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         }
     }
     char **argvAux = NULL;
-    if (argc > 0){
+    if (argc > 0)
+    {
         argvAux = (char **)malloc((argc) * sizeof(char *));
         if (argvAux == NULL)
         {
@@ -332,11 +333,12 @@ void deleteProcess(Process process)
     {
         free(process->argv[i]);
     }
-    if (process->argv != NULL){
+    if (process->argv != NULL)
+    {
         free(process->argv);
     }
-    free(process); 
-process = NULL;
+    free(process);
+    process = NULL;
 }
 
 void closePipes(Process process)

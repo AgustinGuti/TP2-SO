@@ -110,15 +110,18 @@ int closePipe(Pipe pipe)
         free(pipe->buffer);
         if (pipe->name != NULL)
         {
-            if (pipes != NULL && pipes->pipes != NULL){
+            if (pipes != NULL && pipes->pipes != NULL)
+            {
                 remove(pipes->pipes, pipe);
             }
             free(pipe->name);
         }
         free(pipe);
     }
-    if (pipes != NULL && pipes->pipes != NULL){
-        if (getSize(pipes->pipes) == 0){
+    if (pipes != NULL && pipes->pipes != NULL)
+    {
+        if (getSize(pipes->pipes) == 0)
+        {
             destroyLinkedList(pipes->pipes);
             freeIterator(pipes->it);
             free(pipes);

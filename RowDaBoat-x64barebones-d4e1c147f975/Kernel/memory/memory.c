@@ -29,7 +29,6 @@ void *malloc(uint64_t size)
         printerr("Malloc failed\n");
     }
     return res;
-    
 }
 
 uint64_t free(void *ptr)

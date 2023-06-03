@@ -256,7 +256,7 @@ pid_t execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
         scheduler->currentProcess->foreground = currentForeground;
     }
     else
-    {   
+    {
         insert(scheduler->queue[process->priority], process);
     }
     return process->pid;
@@ -447,7 +447,8 @@ void unblockProcessFromProcess(Process process)
     }
 }
 
-void killKernel(){
+void killKernel()
+{
     printf("Killing kernel\n");
     Process process = getProcess(KERNEL_PID);
     if (process != NULL)
