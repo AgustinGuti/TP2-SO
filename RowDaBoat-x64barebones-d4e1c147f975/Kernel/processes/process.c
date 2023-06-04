@@ -107,8 +107,6 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     process->pipeTypes[STDIN] = READ;
     process->pipeTypes[STDOUT] = WRITE;
 
-
-
     if (pipeQty > 0)
     {
         if (pipes[0] != NULL)
@@ -128,6 +126,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     {
         if (j > process->fdLimit)
         {
+            //TODO realloc
            // freeProcess(process);
             return -10;
         }
@@ -306,12 +305,14 @@ int writeProcessPipe(int fd, char *buffer, int size)
         int index = 0;
         while (buffer[index] != 0 && index < size && buffer[0] != -1)
         {
+            if (buffer[index] == -1)
+            {
+                writeToPipe(process->fds[fd], &buffer[index], 1);
+                index++;
+                break;
+            }
             putChar(WHITE, buffer[index]);
             index++;
-        }
-        if (buffer[index] == -1)
-        {
-            writeToPipe(process->fds[fd], buffer, 1);
         }
         return size;
     }

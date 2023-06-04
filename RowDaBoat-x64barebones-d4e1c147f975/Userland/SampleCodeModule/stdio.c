@@ -112,8 +112,8 @@ void putChar(char character)
 int getChar()
 {
 	char buf[1] = {0};
-	char c = _sys_read(0, buf, 1);
-	if (c != 1)
+    char c = _sys_read(0, buf, 1);
+	if (buf[0] == -1)
 	{
 		return EOF;
 	}
@@ -184,7 +184,7 @@ int scanf(const char *fmt, int argQty, ...)
 			}
 
 			char type = fmt[pos];
-			if (type == 's')
+			if (type == 's' || type == 'S')
 			{
 				uint8_t *out = va_arg(valist, char *);
 				char aux[1] = {0};
@@ -198,24 +198,6 @@ int scanf(const char *fmt, int argQty, ...)
 						out[arrPos++] = aux[0];
 						totalReadChars += readChar;
 					}
-				}
-			}
-			else if (type == 'S')
-			{
-				uint16_t *out = va_arg(valist, char *);
-				char aux[1] = {0};
-				int readChar = 1;
-				int arrPos = 0;
-
-				while (readChar != 0 && (arrPos < charQty || i == 0))
-				{																	 // Nothing else to read, or reached max char quantity. If there was no max, read to the end
-					readChar = _sys_read(0, aux, 1); // STDIN, first reads into an auxiliar character to make sure it is not too big
-					if (aux[0] > 0)
-					{
-						out[arrPos++] = aux[0];
-						totalReadChars += readChar;
-					}
-					aux[0] = 0;
 				}
 			}
 		}

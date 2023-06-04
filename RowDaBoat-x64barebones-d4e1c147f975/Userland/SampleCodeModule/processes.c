@@ -72,7 +72,6 @@ char wc(char argc, char **argv)
     int c;
     while ((c = getChar()) != EOF)
     {
-        //  printf("%c", c);
         if (c == '\n')
         {
             count++;

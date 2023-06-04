@@ -365,6 +365,8 @@ _irq01Handler:
 	mov rax, [rsp+8]   ; RSP contains the return adress, so we get the RIP
 	mov [savedRegisters+8*16], rax
 
+	mov rax, 0x1D	;Restores original value
+
 .continue:
 	mov rsi, rax			;pass the read data as parameter
 	pop rax
@@ -556,7 +558,7 @@ section .data
 	haveSaved dq 0
 	isStackSaved dq 0
 	critical dq 0
-	textTest db "Interrupt", 0
+	textTest db "Interrupt %d", 0
 	exceptionText db "Kernel exception %d", 0
 
 section .bss

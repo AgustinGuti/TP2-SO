@@ -30,13 +30,7 @@ extern char get_key();
 #define LALT_BREAK 0xB8
 
 // Ctrl when shell is running
-#define LCTRL_MAKE_1 0xD2
-#define LCTRL_MAKE_LINUX 0xF2
-#define LCTRL_MAKE_TEST 0xD0
-#define LCTRL_MAKE_TEST_2 0xCB
-
-// Ctrl when shell is not running
-#define LCTRL_MAKE_2 0x1D
+#define LCTRL_MAKE 0x1D
 
 #define UP_ARROW 300
 #define DOWN_ARROW 301
@@ -111,11 +105,7 @@ int getKeyMake(uint8_t event)
     case LALT_BREAK:
         isAltDown = 0;
         break;
-    case LCTRL_MAKE_1:
-    case LCTRL_MAKE_2:
-    case LCTRL_MAKE_LINUX:
-    case LCTRL_MAKE_TEST:
-    case LCTRL_MAKE_TEST_2:
+    case LCTRL_MAKE:
         isCtrDown = 1;
         break;
     default:

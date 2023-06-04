@@ -28,9 +28,6 @@ int readBdf(FILE *bdf, FILE *out, FILE *outHeader)
     char linebuf[1024];
     int fontboundingbox_width = 0;
     int fontboundingbox_height = 0;
-    int fontboundingbox_xoff = 0;
-    int fontboundingbox_yoff = 0;
-    int charQty;
     char charname[1024];
     int encoding;
     int bbx;
@@ -46,6 +43,10 @@ int readBdf(FILE *bdf, FILE *out, FILE *outHeader)
     // Leo la info que me interesa del header
     while (readChar && (aux = strtok(linebuf, " \t\n\r")))
     {
+        int fontboundingbox_xoff = 0;
+        int fontboundingbox_yoff = 0;
+        int charQty;
+
         if (strcasecmp(aux, "FONTBOUNDINGBOX") == 0)
         {
             token = strtok(NULL, " \t\n\r");

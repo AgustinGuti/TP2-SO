@@ -8,7 +8,6 @@ typedef struct PipeCDT
 {
     char *buffer;
     char *name;
-    int size;
     int readIndex;
     int writeIndex;
     int attached;
@@ -78,7 +77,6 @@ Pipe openPipe(char *name)
         return NULL;
     }
     pipe->name = newName;
-    pipe->size = PIPE_SIZE;
     pipe->readIndex = 0;
     pipe->writeIndex = 0;
     pipe->attached = 1;
@@ -138,6 +136,7 @@ int closePipe(Pipe pipe)
 
 int readFromPipe(Pipe pipe, char *buffer, int size)
 {
+    //printf("readFromPipe\n");
     if (pipe == NULL || buffer == NULL || size < 0)
     {
         return -1;
@@ -154,7 +153,7 @@ int readFromPipe(Pipe pipe, char *buffer, int size)
         }
         semWait(pipe->mutex);
         buffer[i] = pipe->buffer[pipe->readIndex];
-        pipe->readIndex = (pipe->readIndex + 1) % pipe->size;
+        pipe->readIndex = (pipe->readIndex + 1) % PIPE_SIZE;
         i++;
         if (buffer[i - 1] == EOF)
         {
@@ -177,9 +176,9 @@ int writeToPipe(Pipe pipe, char *buffer, int size)
     {
         semWait(pipe->mutex);
         pipe->buffer[pipe->writeIndex] = buffer[i];
-        pipe->writeIndex = (pipe->writeIndex + 1) % pipe->size;
+        pipe->writeIndex = (pipe->writeIndex + 1) % PIPE_SIZE;
         i++;
-        if (pipe->readIndex == (pipe->writeIndex - 1) % pipe->size)
+        if (pipe->readIndex == (pipe->writeIndex - 1) % PIPE_SIZE)
         {
             if (pipe->blocked)
             {
