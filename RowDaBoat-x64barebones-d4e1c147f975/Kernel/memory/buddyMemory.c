@@ -78,7 +78,7 @@ long getBlockIndex(MemoryManagerADT buddy, void *address)
     void *currentAddress = buddy->initialDirection;
     uint64_t block_size = buddy->size;
     void *block_start = 0;
-    if (address < (void *)currentAddress || address >= (void *)(currentAddress + buddy->size))
+    if (address < (uint64_t)currentAddress || address >= ((uint64_t)currentAddress + buddy->size))
     {
         return -1;
     }
@@ -87,7 +87,7 @@ long getBlockIndex(MemoryManagerADT buddy, void *address)
         block_size = block_size >> 1; // block_size /= 2
         if (address >= (void *)((uint64_t)currentAddress + (uint64_t)block_start + block_size))
         {
-            block_start += block_size;
+            block_start = (void *)((uint64_t)block_start + block_size);
             bit = RIGHT(bit);
         }
         else
@@ -112,11 +112,11 @@ uint64_t calculateRequiredMemoryManagerSize(uint64_t memoryToMap)
 MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const managedMemory, void *const memoryForMemoryManager, void *const memoryForManagerEnd)
 {
     uint64_t memoryToMapAligned = alignMemoryToBlock(managedMemorySize);
-    if (memoryForManagerEnd - memoryForMemoryManager < calculateRequiredMemoryManagerSize(memoryToMapAligned))
+    if ((uint64_t)memoryForManagerEnd - (uint64_t)memoryForMemoryManager < calculateRequiredMemoryManagerSize(memoryToMapAligned))
     {
         return NULL;
     }
-    if (memoryToMapAligned + managedMemory > MAX_MEMORY || memoryToMapAligned + managedMemory < managedMemory)
+    if (memoryToMapAligned + (uint64_t)managedMemory > MAX_MEMORY || memoryToMapAligned + (uint64_t)managedMemory < managedMemory)
     {
         printerr("No se puede mapear mas de 64 GB de memoria");
         return NULL;
@@ -125,7 +125,7 @@ MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const man
     buddy->size = memoryToMapAligned;
     buddy->neededBlocks = (memoryToMapAligned / MIN_BLOCK_SIZE) * 2 - 1; // Suma de potencias de 2 hasta size es 2**(size+1) - 1
     buddy->initialDirection = managedMemory;
-    buddy->memory = (uint8_t *)(memoryForMemoryManager + BUDDY_STRUCT_SIZE);
+    buddy->memory = (uint8_t *)((uint64_t)memoryForMemoryManager + BUDDY_STRUCT_SIZE);
     memset(buddy->memory, 0, (buddy->neededBlocks) / 8);
     return buddy;
 }
@@ -167,7 +167,7 @@ uint64_t alignMemoryToBlock(uint64_t size)
     return alignedSize;
 }
 
-void *allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit, uint64_t *allocatedMemorySize)
+void *allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit, int64_t *allocatedMemorySize)
 {
     uint64_t block_size = getBlockSize(buddy, bit);
     if (block_size < size)
@@ -271,7 +271,7 @@ void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRe
     uint64_t currentSize = getBlockSize(memoryManager, bit);
 
     // Allocate a new block of memory with the requested size
-    void *newMemory = allocMemory(memoryManager, newSize, &allocatedMemorySize);
+    void *newMemory = allocMemory(memoryManager, newSize, allocatedMemorySize);
 
     // If the allocation failed, return NULL
     if (newMemory == NULL)
@@ -284,8 +284,7 @@ void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRe
 
     // Free the old memory block
     freeMemory(memoryManager, memoryToRealloc);
-
-    allocatedMemorySize -= currentSize;
+    *allocatedMemorySize -= currentSize;
 
     // Return a pointer to the new memory block
     return newMemory;

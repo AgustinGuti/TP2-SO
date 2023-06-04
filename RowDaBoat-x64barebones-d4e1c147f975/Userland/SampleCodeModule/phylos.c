@@ -105,8 +105,9 @@ char phylos(char argc, char **argv)
         }
     }
 
-    while(philoQty > 0){
-      removePhilo();
+    while (philoQty > 0)
+    {
+        removePhilo();
     }
 
     free(state);
@@ -134,24 +135,34 @@ void addPhilo()
         if (state == NULL)
         {
             printf("Error reallocating memory for state\n");
+            free(state);
             return;
         }
         philoSemaphores = (sem_t *)realloc(philoSemaphores, currentMax * sizeof(sem_t));
         if (philoSemaphores == NULL)
         {
             printf("Error reallocating memory for philoSemaphores\n");
+            free(state);
+            free(philoSemaphores);
             return;
         }
         philosophersPID = (pid_t *)realloc(philosophersPID, currentMax * sizeof(pid_t));
         if (philosophersPID == NULL)
         {
             printf("Error reallocating memory for philosophersPID\n");
+            free(state);
+            free(philoSemaphores);
+            free(philosophersPID);
             return;
         }
         timesEaten = (int *)realloc(timesEaten, currentMax * sizeof(int));
         if (timesEaten == NULL)
         {
             printf("Error reallocating memory for timesEaten\n");
+            free(state);
+            free(philoSemaphores);
+            free(philosophersPID);
+            free(timesEaten);
             return;
         }
     }
@@ -170,6 +181,7 @@ void addPhilo()
     if (args[0] == NULL)
     {
         printf("Error allocating memory for args[0]\n");
+        free(args);
         return;
     }
     strcpy(args[0], "philosopher");
@@ -177,6 +189,8 @@ void addPhilo()
     if (args[1] == NULL)
     {
         printf("Error allocating memory for args[1]\n");
+        free(args[0]);
+        free(args);
         return;
     }
     strcpy(args[1], foreground);
@@ -185,6 +199,9 @@ void addPhilo()
     if (args[2] == NULL)
     {
         printf("Error allocating memory for args[2]\n");
+        free(args[0]);
+        free(args[1]);
+        free(args);
         return;
     }
     args[3] = NULL;
@@ -203,7 +220,7 @@ void removePhilo()
     if (philoQty > 0)
     {
         put_forks(philoQty - 1);
-        kill(philosophersPID[philoQty-1]);
+        kill(philosophersPID[philoQty - 1]);
         semClose(philoSemaphores[philoQty - 1]);
         philoQty--;
     }

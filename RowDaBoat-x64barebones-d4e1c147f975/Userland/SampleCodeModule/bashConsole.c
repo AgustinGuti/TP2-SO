@@ -27,7 +27,7 @@ char callRealloc(char argc, char **argv);
 char callTestSync(char argc, char **argv);
 char callTestNoSync(char argc, char **argv);
 
-typedef struct command
+typedef struct commandCDT
 {
     char *name;
     char (*function)(char argc, char **argv);
@@ -36,11 +36,11 @@ typedef struct command
     char *description;
     char executable;
     char test;
-} command;
+} commandCDT;
 
 #define COMMAND_QTY 28
 
-static command commands[COMMAND_QTY] = {
+static commandCDT commands[COMMAND_QTY] = {
     {"help", help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1, 0},
     {"clear", cleanScreen, 0, 0, "Vacia la consola.", 1, 0},
     {"memory-dump", memoryDump, 1, 1, "Recibe como parametro una direccion de memoria e imprime los 32 bytes de memoria posteriores a la misma.", 1, 0},
@@ -535,19 +535,6 @@ char callBlock(char argc, char **argv)
     {
         int num = strToNum(argv[0], strlen(argv[0]));
         blockProcess(num);
-    }
-    return 0;
-}
-
-char callMemoryDump(uint8_t argumentQty, char **arguments)
-{
-    if (argumentQty == 1 && isHexaNumber(arguments[0]))
-    {
-        memoryDump(argumentQty, arguments);
-    }
-    else
-    {
-        printf("Argumento invalido para memory-dump\n");
     }
     return 0;
 }

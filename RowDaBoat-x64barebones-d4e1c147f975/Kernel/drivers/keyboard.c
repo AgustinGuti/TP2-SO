@@ -39,7 +39,7 @@ extern char get_key();
 
 #define ESCAPE 27
 
-#define MAX_MAPPED 0x40
+#define MAX_MAPPED 58
 
 #define MIN_SPECIAL_MAPPED 0xE047
 #define MAX_SPECIAL_MAPPED 0xE053
