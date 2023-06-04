@@ -84,6 +84,7 @@ void closeScheduler()
 {
     ready = 0;
     killKernel();
+
     for (int i = 0; i < MAX_PRIORITY; i++)
     {
         freeIterator(scheduler->it[i]);
@@ -101,6 +102,7 @@ void closeScheduler()
     deleteProcess(scheduler->empty);
     free(scheduler);
     scheduler = NULL;
+
 }
 
 void *schedule(void *rsp)
@@ -591,12 +593,6 @@ void startWrapper(void *entryPoint, char argc, char *argv[])
 {
     int ret = ((int (*)(int, char *[]))entryPoint)(argc, argv);
     scheduler->currentProcess->exitValue = ret;
-    if (scheduler->currentProcess->pid == 0)
-    {
-        Process kernel = getProcess(KERNEL_PID);
-        kernel->state = READY;
-        printf("Kernel ready\n");
-    }
     killProcess(scheduler->currentProcess->pid);
 }
 

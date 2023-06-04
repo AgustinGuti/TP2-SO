@@ -134,14 +134,12 @@ void semClose(sem_t sem)
         while (hasNext(sem->itConnectedProcesses))
         {
             pid_t *pid = next(sem->itConnectedProcesses);
-            remove(sem->connectedProcesses, pid);
             free(pid); 
             pid = NULL;
         }
         Iterator it = iterator(sem->waitingList);
         while(hasNext(it)){
             pid_t *pid = next(it);
-            remove(sem->waitingList, pid);
             free(pid); 
             pid = NULL;            
         }
@@ -156,7 +154,6 @@ void semClose(sem_t sem)
             free(sem->name);
             if (getSize(semaphores->semaphoresList) == 0)
             {
-                printf("Deleteing list\n");
                 freeIterator(semaphores->it);
                 destroyLinkedList(semaphores->semaphoresList);
                 free(semaphores);
@@ -208,7 +205,6 @@ void semWait(sem_t sem)
     }
     *pid = getpid();
     insert(sem->waitingList, pid);
-
     leaveCritical();
     blockProcess(*pid);
     return;
@@ -225,9 +221,11 @@ void semPost(sem_t sem)
     {
         pid_t *pid = (pid_t *)get(sem->waitingList, 0);
         remove(sem->waitingList, pid);
-        leaveCritical();
-        unblockProcess(*pid);
+        pid_t pidToUnblock = *pid;
         free(pid);
+        pid = NULL;
+        leaveCritical();
+        unblockProcess(pidToUnblock);
         return;
     }
     sem->value++;

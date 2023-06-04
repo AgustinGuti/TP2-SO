@@ -111,6 +111,7 @@ char phylos(char argc, char **argv)
 
     free(state);
     free(philosophersPID); 
+    free(timesEaten);
     semClose(mutex);
     semClose(changingQtyMutex);
     for (i = 0; i < philoQty; i++)
