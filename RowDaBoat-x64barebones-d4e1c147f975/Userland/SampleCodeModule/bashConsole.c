@@ -4,7 +4,7 @@
 
 #define EOF -1
 
-#define MAX_ARGS 10
+#define MAX_ARGS 1
 #define MAX_ARG_LENGTH 100
 #define MAX_COMMAND_NAME_LENGTH 50
 
@@ -114,9 +114,12 @@ int startConsole()
 
 void freeArray(char **array, int length)
 {
+
     for (int i = 0; i < length; i++)
     {
-        free(array[i]);
+        if (array[i] != NULL){
+            free(array[i]);
+        }
     }
     free(array);
 }
@@ -267,6 +270,7 @@ int getFullCommand(uint8_t *str, int length, char **args)
         {
             strcpy(args[i + 2], arguments[i]);
         }
+        free(args[argc + 2 - hasBackground]);
         args[argc + 2 - hasBackground] = NULL;
     }
     else
@@ -278,6 +282,7 @@ int getFullCommand(uint8_t *str, int length, char **args)
             return -1;
         }
     }
+
     freeArray(arguments, MAX_ARGS + 2);
     return commandIndex;
 }
@@ -336,9 +341,10 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
         i++;
     }
 
-    if (argLen > 0)
-        (*argQty)++;
     args[*argQty][argLen] = 0;
+    if (argLen > 0){
+        (*argQty)++;
+    }
 }
 
 char help(char argc, char **argv)

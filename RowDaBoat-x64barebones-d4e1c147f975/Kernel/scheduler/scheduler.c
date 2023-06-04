@@ -209,16 +209,25 @@ void *changeProcess(void *rsp)
     scheduler->currentProcess = getNextProcess();
     if (getSize(scheduler->processesToFree) > 0)
     {
+        LinkedList processesToFree = createLinkedList();
         resetIterator(scheduler->itProcessesToFree);
         while (hasNext(scheduler->itProcessesToFree))
         {
             Process proc = next(scheduler->itProcessesToFree);
             if (proc->pid != scheduler->currentProcess->pid)
             {
-                freeStack(proc);
-                remove(scheduler->processesToFree, proc);
+                insert(processesToFree, proc);
             }
         }
+        Iterator it = iterator(processesToFree);
+        while (hasNext(it))
+        {
+            Process proc = next(it);
+            remove(scheduler->processesToFree, proc);
+            freeStack(proc);
+        }
+        freeIterator(it);
+        destroyLinkedList(processesToFree);
     }
     scheduler->currentProcess->state = RUNNING;
     return scheduler->currentProcess->stackPointer;
@@ -448,7 +457,6 @@ void unblockProcessFromProcess(Process process)
 }
 
 void killKernel(){
-    printf("Killing kernel\n");
     Process process = getProcess(KERNEL_PID);
     if (process != NULL)
     {
@@ -466,7 +474,6 @@ void killKernel(){
 
 pid_t killProcess(pid_t pid)
 {
-    printf("Killing process %d\n", pid);
     if (pid == SHELL_PID && scheduler->currentProcess->pid != SHELL_PID)
     {
         printerr("No es posible matar la shell desde otro proceso.\n");
@@ -611,8 +618,6 @@ pid_t waitpid(pid_t pid)
         parent->waitingSem = semOpen(NULL, 0);
     }
     semWait(parent->waitingSem);
-    // semClose(parent->waitingSem);
-    // parent->waitingSem = NULL;
 
     return pid;
 }

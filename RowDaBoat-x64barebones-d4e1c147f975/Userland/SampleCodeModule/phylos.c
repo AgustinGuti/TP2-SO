@@ -28,7 +28,6 @@ int philoQty = 0;
 int currentMax = BLOCK;
 int processToKill = -1;
 int *state;
-sem_t processToKillMutex;
 sem_t changingQtyMutex;
 sem_t mutex;
 sem_t *philoSemaphores;
@@ -77,12 +76,6 @@ char phylos(char argc, char **argv)
         return 1;
     }
 
-    if ((processToKillMutex = semOpen(NULL, 1)) == NULL)
-    {
-        printf("Error opening semaphore processToKillMutexName\n");
-        return 1;
-    }
-
     if ((changingQtyMutex = semOpen(NULL, 1)) == NULL)
     {
         printf("Error opening semaphore changingQty\n");
@@ -112,15 +105,14 @@ char phylos(char argc, char **argv)
         }
     }
 
-    for (i = 0; i < philoQty; i++)
-    {
-        kill(philosophersPID[i]);
+    while(philoQty > 0){
+      removePhilo();
     }
 
     free(state);
     free(philosophersPID); 
     semClose(mutex);
-    semClose(processToKillMutex);
+    semClose(changingQtyMutex);
     for (i = 0; i < philoQty; i++)
     {
         semClose(philoSemaphores[i]);
@@ -169,8 +161,10 @@ void addPhilo()
         return;
     }
     timesEaten[philoQty - 1] = maxTimesEaten;
+
     char foreground[2] = "0";
-    char *args[4];
+    char **args = malloc(4 * sizeof(char *));
+
     args[0] = malloc(12 * sizeof(char));
     if (args[0] == NULL)
     {
@@ -198,16 +192,17 @@ void addPhilo()
     free(args[0]);
     free(args[1]);
     free(args[2]);
+    free(args);
     semPost(changingQtyMutex);
 }
 
 void removePhilo()
 {
     semWait(changingQtyMutex);
-    if (philoQty > 1)
+    if (philoQty > 0)
     {
         put_forks(philoQty - 1);
-        kill(philosophersPID[philoQty]);
+        kill(philosophersPID[philoQty-1]);
         semClose(philoSemaphores[philoQty - 1]);
         philoQty--;
     }

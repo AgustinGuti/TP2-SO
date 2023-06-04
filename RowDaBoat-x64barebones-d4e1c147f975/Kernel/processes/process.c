@@ -57,9 +57,11 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
 
     // Process stack is the top of the stack, stack base is process->stack + STACK_SIZE
     process->stack = (uint64_t *)malloc(STACK_SIZE * sizeof(process->stack[0]));
+
     if (process->stack == NULL)
     {
         /*not enough memory for process->stack*/
+        printf("not enough memory for process->stack\n");
         return NULL;
     }
     process->stackBase = process->stack + STACK_SIZE;
@@ -70,6 +72,7 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     {
         process->fds[i] = -1;
     }
+
     return process;
 }
 
@@ -81,6 +84,8 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     process->fds[STDOUT] = process->stdio;
     process->pipeTypes[STDIN] = READ;
     process->pipeTypes[STDOUT] = WRITE;
+
+
 
     if (pipeQty > 0)
     {
@@ -125,6 +130,8 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
             argc++;
         }
     }
+
+
     char **argvAux = NULL;
     if (argc > 0){
         argvAux = (char **)malloc((argc) * sizeof(char *));
@@ -135,6 +142,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     }
     process->argv = argvAux;
     process->argc = argc;
+
     for (int i = 0; i < argc; i++)
     {
         argvAux[i] = (char *)malloc(strlen(argv[i]) + 1);
@@ -145,7 +153,8 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         }
         strcpy(argvAux[i], argv[i]);
     }
-    argvAux[argc] = NULL;
+   // argvAux[argc] = NULL;
+
 
     pushToStack(process, 0x0);                // ss
     pushToStack(process, process->stackBase); // stackPointer
@@ -180,6 +189,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     {
         process->state = READY;
     }
+
     return process;
 }
 
@@ -287,7 +297,7 @@ int writeProcessPipe(int fd, char *buffer, int size)
 
 void freeStack(Process process)
 {
-    if (process->hasStack)
+    if (process != NULL && process->hasStack == 1)
     {
         free(process->stack);
         process->hasStack = 0;
