@@ -452,7 +452,6 @@ char callMalloc(char argc, char **argv)
             {
                 printf("Se reservo memoria en la direccion %x\n", ptr);
             }
-            free(ptr);
         }
     }
     else
