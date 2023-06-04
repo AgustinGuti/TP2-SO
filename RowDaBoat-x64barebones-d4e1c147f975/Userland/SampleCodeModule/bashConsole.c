@@ -24,6 +24,8 @@ char callKill(char argc, char **argv);
 char callNice(char argc, char **argv);
 char callSleep(char argc, char **argv);
 char callRealloc(char argc, char **argv);
+char callTestSync(char argc, char **argv);
+char callTestNoSync(char argc, char **argv);
 
 typedef struct command
 {
@@ -36,7 +38,7 @@ typedef struct command
     char test;
 } command;
 
-#define COMMAND_QTY 27
+#define COMMAND_QTY 28
 
 static command commands[COMMAND_QTY] = {
     {"help", help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1, 0},
@@ -63,7 +65,8 @@ static command commands[COMMAND_QTY] = {
     {"loop", loop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1, 0},
     {"filter", filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1, 0},
     {"test-mm", test_mm, 1, 1, "Ejecuta el test de memoria.", 1, 1},
-    {"test-sync", test_sync, 2, 2, "Ejecuta el test de sincronizacion.", 1, 1},
+    {"test-sync", callTestSync, 1, 1, "Ejecuta el test de sincronizacion.", 1, 1},
+    {"test-no-sync", callTestNoSync, 1, 1, "Ejecuta el test sin un mecanismo de sincronizacion.", 1, 1},
     {"test-processes", test_processes, 1, 1, "Ejecuta el test de procesos.", 1, 1},
     {"test-prio", test_prio, 0, 0, "Ejecuta el test de prioridades.", 1, 1},
 };
@@ -117,7 +120,8 @@ void freeArray(char **array, int length)
 
     for (int i = 0; i < length; i++)
     {
-        if (array[i] != NULL){
+        if (array[i] != NULL)
+        {
             free(array[i]);
         }
     }
@@ -342,7 +346,8 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
     }
 
     args[*argQty][argLen] = 0;
-    if (argLen > 0){
+    if (argLen > 0)
+    {
         (*argQty)++;
     }
 }
@@ -618,6 +623,34 @@ char callSleep(char argc, char **argv)
     {
         int num = strToNum(argv[0], strlen(argv[0]));
         sleep(num);
+    }
+    return 0;
+}
+
+char callTestSync(char argc, char **argv)
+{
+    if (argc != 1)
+    {
+        printf("Argumento invalido para test-sync\n");
+    }
+    else
+    {
+        char *args[] = {argv[0], "1"};
+        test_sync(argc + 1, args);
+    }
+    return 0;
+}
+
+char callTestNoSync(char argc, char **argv)
+{
+    if (argc != 1)
+    {
+        printf("Argumento invalido para test-no-sync\n");
+    }
+    else
+    {
+        char *args[] = {argv[0], "0"};
+        test_sync(argc + 1, args);
     }
     return 0;
 }
