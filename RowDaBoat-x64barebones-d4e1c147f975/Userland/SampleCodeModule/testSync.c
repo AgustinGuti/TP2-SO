@@ -10,7 +10,7 @@
 #include <semaphores.h>
 
 #define SEM_ID "sem"
-#define TOTAL_PAIR_PROCESSES 2
+#define TOTAL_PAIR_PROCESSES 10
 
 int64_t global; // shared memory
 
@@ -74,7 +74,7 @@ char test_sync(char argc, char *argv[])
     return 1;
   }
 
-  char *argvDec[] = {"my_process_inc", "1", argv[0], "-1", argv[1], NULL};
+  char *argvDec[] = {"my_process_inc", "0", argv[0], "-1", argv[1], NULL};
   char *argvInc[] = {"my_process_inc", "0", argv[0], "1", argv[1], NULL};
 
   global = 0;

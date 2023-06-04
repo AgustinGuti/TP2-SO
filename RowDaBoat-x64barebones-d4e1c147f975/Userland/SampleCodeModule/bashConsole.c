@@ -4,7 +4,7 @@
 
 #define EOF -1
 
-#define MAX_ARGS 1
+#define MAX_ARGS 10
 #define MAX_ARG_LENGTH 100
 #define MAX_COMMAND_NAME_LENGTH 50
 
