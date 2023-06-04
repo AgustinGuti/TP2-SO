@@ -44,7 +44,7 @@ void picMasterMask(uint8_t mask);
 
 void picSlaveMask(uint8_t mask);
 
-//Ends the execution of the cpu
+// Ends the execution of the cpu
 void haltcpu(void);
 
 #endif /* INTERRUPS_H_ */

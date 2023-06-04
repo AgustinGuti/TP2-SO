@@ -170,7 +170,8 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 
 	if (currentBlock == NULL)
 	{
-		prevBlock->nextBlock = newBlock;
+		if (prevBlock != NULL)
+			prevBlock->nextBlock = newBlock;
 		newBlock->prevBlock = prevBlock;
 		return;
 	}
@@ -208,7 +209,6 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 		}
 		auxBlock = auxBlock->nextBlock;
 	}
-	
 }
 
 void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const startAddress, const uint64_t size)
@@ -231,7 +231,8 @@ void addBlockToOccupiedList(MemoryManagerADT const memoryManager, void *const st
 
 	if (currentBlock == NULL)
 	{
-		prevBlock->nextBlock = newBlock;
+		if (prevBlock != NULL)
+			prevBlock->nextBlock = newBlock;
 		newBlock->prevBlock = prevBlock;
 		return;
 	}

@@ -110,7 +110,7 @@ char phylos(char argc, char **argv)
     }
 
     free(state);
-    free(philosophersPID); 
+    free(philosophersPID);
     free(timesEaten);
     semClose(mutex);
     semClose(changingQtyMutex);
@@ -118,7 +118,7 @@ char phylos(char argc, char **argv)
     {
         semClose(philoSemaphores[i]);
     }
-    free(philoSemaphores); 
+    free(philoSemaphores);
 
     return 0;
 }
