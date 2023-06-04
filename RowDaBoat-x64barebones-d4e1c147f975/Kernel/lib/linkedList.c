@@ -83,7 +83,8 @@ void freeLinkedList(LinkedList list)
 // Function to insert an element at the end of the linked list
 void insert(LinkedList list, void *data)
 {
-    if (list == NULL){
+    if (list == NULL)
+    {
         return NULL;
     }
     Node newNode = NULL;
@@ -123,7 +124,8 @@ void insert(LinkedList list, void *data)
 // Function to remove an element from the linked list
 void remove(LinkedList list, void *data)
 {
-    if (list == NULL){
+    if (list == NULL)
+    {
         return NULL;
     }
     NodeCTD *current = list->head;
@@ -167,7 +169,8 @@ void remove(LinkedList list, void *data)
 
 void *removeFirst(LinkedList list)
 {
-    if (list == NULL){
+    if (list == NULL)
+    {
         return NULL;
     }
     NodeCTD *current = list->head;
@@ -224,7 +227,8 @@ void switchList(LinkedList origin, LinkedList dest)
 // Function to get an element at a specific index
 void *get(LinkedList list, int index)
 {
-    if (list == NULL){
+    if (list == NULL)
+    {
         return NULL;
     }
     if (index < 0 || index >= list->size)
@@ -239,7 +243,8 @@ void *get(LinkedList list, int index)
 
 void printList(LinkedList list)
 {
-    if (list == NULL){
+    if (list == NULL)
+    {
         return;
     }
     printf("Size of list: %d\n", list->size);
@@ -259,7 +264,8 @@ void printList(LinkedList list)
 // Function to create an iterator for the linked list
 Iterator iterator(LinkedList list)
 {
-    if (list == NULL){
+    if (list == NULL)
+    {
         return NULL;
     }
     Iterator iterator = (Iterator)malloc(sizeof(IteratorCDT));
@@ -275,8 +281,9 @@ Iterator iterator(LinkedList list)
 
 void resetIterator(Iterator iterator)
 {
-    if (iterator == NULL){
-        return; 
+    if (iterator == NULL)
+    {
+        return;
     }
     iterator->current = iterator->list->head;
 }
@@ -284,8 +291,9 @@ void resetIterator(Iterator iterator)
 // Function to check if there are more elements in the iterator
 int hasNext(Iterator iterator)
 {
-    if (iterator == NULL){
-        return 0; 
+    if (iterator == NULL)
+    {
+        return 0;
     }
     return (iterator->current != NULL);
 }
@@ -293,7 +301,8 @@ int hasNext(Iterator iterator)
 // Function to get the next element from the iterator
 void *next(Iterator iterator)
 {
-    if (iterator == NULL || !hasNext(iterator)){
+    if (iterator == NULL || !hasNext(iterator))
+    {
         return NULL;
     }
 
@@ -305,8 +314,9 @@ void *next(Iterator iterator)
 // Function to get the size of the linked list
 int getSize(LinkedList list)
 {
-    if (list == NULL){
-        return 0; 
+    if (list == NULL)
+    {
+        return 0;
     }
     return list->size;
 }
@@ -314,16 +324,18 @@ int getSize(LinkedList list)
 // Function to free the memory of an iterator
 void freeIterator(Iterator iterator)
 {
-    if (iterator == NULL){
-        return; 
+    if (iterator == NULL)
+    {
+        return;
     }
     free(iterator);
 }
 
 void moveToBack(LinkedList list, void *data)
 {
-    if (list == NULL){
-        return; 
+    if (list == NULL)
+    {
+        return;
     }
     NodeCTD *current = list->head;
     while (current != NULL)
@@ -358,8 +370,9 @@ void moveToBack(LinkedList list, void *data)
 // Function to move the head of the linked list to the back
 void headToBack(LinkedList list)
 {
-    if (list == NULL){
-        return; 
+    if (list == NULL)
+    {
+        return;
     }
     if (list->head != NULL && list->head != list->tail)
     {
@@ -375,7 +388,8 @@ void headToBack(LinkedList list)
 
 void *findItem(LinkedList list, void *data, int (*comparator)(void *, void *))
 {
-    if (list == NULL){
+    if (list == NULL)
+    {
         return NULL;
     }
     NodeCTD *current = list->head;
