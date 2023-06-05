@@ -440,7 +440,7 @@ int nice(pid_t pid, int priority)
 void printProcesses(char showKilled)
 {
     int currentPriority = MAX_PRIORITY - 1;
-    printf(" Nombre    PID  ParentPID  Prioridad  Foreground  Stack Pointer  Base Pointer  State\n");
+    writeProcessPipe(STDOUT, " Nombre    PID  ParentPID  Prioridad  Foreground  Stack Pointer  Base Pointer    State\n", 88);
     while (currentPriority >= 0)
     {
         resetIterator(scheduler->it[currentPriority]);
@@ -450,33 +450,65 @@ void printProcesses(char showKilled)
             if (proc->pid != KERNEL_PID)
             {
                 int nameLenght = strlen(proc->name);
-                printf(" %s  ", proc->name);
+                writeProcessPipe(STDOUT, " ", 1);
+                writeProcessPipe(STDOUT, proc->name, nameLenght);
+                writeProcessPipe(STDOUT, "  ", 2);
+
                 if (nameLenght < 10)
                 {
                     for (int i = 0; i < 10 - nameLenght; i++)
                     {
-                        printf(" ");
+                        writeProcessPipe(STDOUT, " ", 1);
                     }
                 }
-                printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
+                char pid[decNumLength(proc->pid)+1];
+                decToStr(pid, proc->pid);
+                writeProcessPipe(STDOUT, pid, decNumLength(proc->pid));
+                writeProcessPipe(STDOUT, "       ", 7);
+
+                char parentPID[decNumLength(proc->parentPID)+1];
+                decToStr(parentPID, proc->parentPID);
+                writeProcessPipe(STDOUT, parentPID, decNumLength(proc->parentPID));
+                writeProcessPipe(STDOUT, "       ", 7);
+
+                char priority[decNumLength(proc->priority)+1];
+                decToStr(priority, proc->priority);
+                writeProcessPipe(STDOUT, priority, decNumLength(proc->priority));
+                writeProcessPipe(STDOUT, "          ", 11);
+
+                char foreground[decNumLength(proc->foreground)+1];
+                decToStr(foreground, proc->foreground);
+                writeProcessPipe(STDOUT, foreground, decNumLength(proc->foreground));
+                writeProcessPipe(STDOUT, "         ", 10);
+
+                char stackPointer[hexNumLength(proc->stackPointer)+1];
+                hexToStr(stackPointer, proc->stackPointer);
+                writeProcessPipe(STDOUT, stackPointer, hexNumLength(proc->stackPointer));
+                writeProcessPipe(STDOUT, "         ", 10);
+
+                char stackBase[hexNumLength(proc->stackBase)+1];
+                hexToStr(stackBase, proc->stackBase);
+                writeProcessPipe(STDOUT, stackBase, hexNumLength(proc->stackBase));
+                writeProcessPipe(STDOUT, "      ", 7);
+
                 char state = proc->state;
 
                 switch (state)
                 {
                 case READY:
-                    printf("    READY\n");
+                    writeProcessPipe(STDOUT, " READY\n", 10);
                     break;
                 case RUNNING:
-                    printf("    RUNNING\n");
+                    writeProcessPipe(STDOUT, " RUNNING\n", 12);
                     break;
                 case BLOCKED:
-                    printf("    BLOCKED\n");
+                    writeProcessPipe(STDOUT, " BLOCKED\n", 12);
                     break;
                 case SLEEPING:
-                    printf("    SLEEPING\n");
+                    writeProcessPipe(STDOUT, " SLEEPING\n", 13);
                     break;
                 case ZOMBIE:
-                    printf("    KILLED\n");
+                    writeProcessPipe(STDOUT, " KILLED\n", 11);
                     break;
                 }
             }
@@ -492,18 +524,21 @@ void printProcesses(char showKilled)
             if (proc->pid != KERNEL_PID)
             {
                 int nameLenght = strlen(proc->name);
-                printf(" %s  ", proc->name);
+                writeProcessPipe(STDOUT, " ", 1);
+                writeProcessPipe(STDOUT, proc->name, nameLenght);
+                writeProcessPipe(STDOUT, "  ", 2);
+
                 if (nameLenght < 10)
                 {
                     for (int i = 0; i < 10 - nameLenght; i++)
                     {
-                        printf(" ");
+                        writeProcessPipe(STDOUT, " ", 1);
                     }
                 }
                 printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
                 if (proc->state == ZOMBIE)
                 {
-                    printf("    KILLED\n");
+                    writeProcessPipe(STDOUT, "    KILLED\n", 11);
                 }
             }
         }
