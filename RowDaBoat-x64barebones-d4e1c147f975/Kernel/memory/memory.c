@@ -35,7 +35,7 @@ uint64_t free(void *ptr)
 {
     uint64_t freedMemory = freeMemory(myMemoryManager, ptr);
     occupiedMem -= freedMemory;
-  //  return freedMemory;
+    return freedMemory;
 }
 
 void *realloc(void *ptr, uint64_t newSize)

@@ -93,7 +93,9 @@ int startConsole()
                     if (printBuf[i] == NEWLINE)
                     {
                         exit = parseAndExecuteCommands(commandBuffer, commandBufferPos);
-                        printText(LINE_INDICATOR);
+                        if(!exit){
+                            printText(LINE_INDICATOR);
+                        }
                         for (int arg_idx = 0; arg_idx < commandBufferPos; arg_idx++)
                         { // Clear buffer
                             commandBuffer[arg_idx] = 0;
