@@ -221,7 +221,7 @@ void semPost(sem_t sem)
     if (getSize(sem->waitingList) > 0)
     {
         int done = 0;
-        while(!done){
+        while(!done && getSize(sem->waitingList) > 0){
             pid_t *pid = (pid_t *)get(sem->waitingList, 0);
             remove(sem->waitingList, pid);
             pid_t pidToUnblock = *pid;

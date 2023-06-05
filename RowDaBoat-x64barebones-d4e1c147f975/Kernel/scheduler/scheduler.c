@@ -451,7 +451,7 @@ void unblockProcess(pid_t pid)
 
 int getProcessState(pid_t pid){
     Process process = getProcess(pid);
-    if (process == NULL || process->pid == KERNEL_PID || process->pid == EMPTY_PID)
+    if (process == NULL)
     {
         return -1;
     }
