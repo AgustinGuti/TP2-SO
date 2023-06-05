@@ -40,10 +40,14 @@ char test_mm(char argc, char *argv[])
     rq = 0;
     total = 0;
 
-    // Request as many blocks as we can
     while (rq < MAX_BLOCKS && total < max_memory)
     {
-      int uniform = max_memory - total - 1 - BLOCK_STRUCT_SIZE;
+      #ifdef BUDDY
+        int uniform = max_memory - total - 1;
+      #else
+        int uniform = max_memory - total - 1 - BLOCK_STRUCT_SIZE;
+      #endif
+
       if (uniform <= 0)
       {
         break;
@@ -51,9 +55,15 @@ char test_mm(char argc, char *argv[])
       mm_rqs[rq].size = GetUniform(uniform) + 1;
       mm_rqs[rq].address = malloc(mm_rqs[rq].size);
 
+      #ifdef BUDDY
+        mm_rqs[rq].size = getNextPowerOfTwo(mm_rqs[rq].size);
+      #else
+        mm_rqs[rq].size += BLOCK_STRUCT_SIZE;
+      #endif
+
       if (mm_rqs[rq].address)
       {
-        total += mm_rqs[rq].size + BLOCK_STRUCT_SIZE;
+        total += mm_rqs[rq].size;
         rq++;
       }
     }
@@ -92,4 +102,12 @@ char test_mm(char argc, char *argv[])
     count++;
   }
   return 0;
+}
+
+int getNextPowerOfTwo(int value){
+  int i = 1;
+  while (i < value){
+    i *= 2;
+  }
+  return i;
 }

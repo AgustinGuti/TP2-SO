@@ -1,7 +1,7 @@
 
 all:  bootloader kernel userland image
 
-buddy: bootloader kernel2 userland image2
+buddy: bootloader kernel2 userland2 image2
 
 bootloader:
 	cd Bootloader; make all
@@ -15,10 +15,13 @@ kernel2:
 userland:
 	cd Userland; make all
 
+userland2:
+	cd Userland; make buddy
+
 image: kernel bootloader userland
 	cd Image; make all
 
-image2: kernel2 bootloader userland
+image2: kernel2 bootloader userland2
 	cd Image; make all
 
 clean:

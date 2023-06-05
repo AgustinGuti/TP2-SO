@@ -85,7 +85,9 @@
         "queue": "c",
         "sstream": "c",
         "stdexcept": "c",
-        "streambuf": "c"
+        "streambuf": "c",
+        "buddymem.h": "c",
+        "moduleloader.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
