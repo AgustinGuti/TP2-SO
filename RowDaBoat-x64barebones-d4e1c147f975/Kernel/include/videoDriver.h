@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <fonts.h>
 #include <stdarg.h>
+#include <functions.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -25,17 +26,17 @@ uint16_t getScreenPitch();
 uint32_t getScreenFrameBuffer();
 uint8_t getScreenBpp();
 
-uint32_t getPixelOffset(pxlCoord coord);
+uint64_t getPixelOffset(pxlCoord coord);
 
 void clearScreen();
 void drawLine(pxlCoord initial, pxlCoord final, uint32_t color);
 void drawRect(pxlCoord coord, uint32_t color, uint16_t width, uint16_t height);
 
-void printStringLimited(uint32_t color, uint8_t *str, uint32_t count);
+void printStringLimited(uint32_t color, char *str, uint32_t count);
 void printString(uint32_t color, char *str);
 void putChar(uint32_t color, uint16_t id);
 
-void printFormatStringLimited(uint32_t color, const char *str, uint32_t count, uint16_t row, uint16_t col);
+void printFormatStringLimited(uint32_t color, char *str, uint32_t count, uint16_t row, uint16_t col);
 
 void printf(const char *fmt, ...);
 void printerr(const char *fmt, ...);

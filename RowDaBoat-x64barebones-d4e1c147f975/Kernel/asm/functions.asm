@@ -4,9 +4,7 @@ GLOBAL getRIP
 GLOBAL getRSP
 
 triggerTimer:
-    ;cli
     int 20h
-   ; sti
     ret
 
 getRIP:

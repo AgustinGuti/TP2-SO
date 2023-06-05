@@ -36,6 +36,8 @@ void *changeProcess(void *rsp);
 void updateMostWaitingProcess();
 void cleanChildDeletedProcesses(Process process);
 void deleteProcessesFromList(LinkedList list);
+void blockProcessFromProcess(Process process);
+void unblockProcessFromProcess(Process process);
 void killKernel();
 
 static char ready = 0;
@@ -254,7 +256,7 @@ Process getNextProcess()
     return scheduler->empty;
 }
 
-pid_t execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
+pid_t execve(void *entryPoint, Pipe *pipes, char pipeQty, char *argv[])
 {
     int foreground = strToNum(argv[1], 1);
     Process process = createProcess(argv[0], entryPoint, MAX_PRIORITY, foreground, &argv[2], &startWrapper, getpid(), pipes, pipeQty);
@@ -389,8 +391,7 @@ void printProcesses(char showKilled)
                     }
                 }
                 printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
-                char state = proc->state;
-                if (proc->stack == ZOMBIE){
+                if (proc->state == ZOMBIE){
                     printf("    KILLED\n");
                 }
             }

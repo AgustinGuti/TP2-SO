@@ -10,6 +10,8 @@
 extern uint8_t *memmov(uint64_t destination, uint64_t source, uint64_t lenght);
 extern uint8_t screenBuffer[1024 * 8 * 100];
 
+void reprintFromBuffer();
+
 struct vbe_mode_info_structure
 {
 	uint16_t attributes;	// deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.
@@ -86,7 +88,7 @@ uint8_t getScreenBpp()
 	return vbeInfo->bpp;
 }
 
-uint32_t getPixelOffset(pxlCoord coord)
+uint64_t getPixelOffset(pxlCoord coord)
 {
 	uint16_t pitch = getScreenPitch();
 	uint32_t framebuffer = getScreenFrameBuffer();
@@ -130,7 +132,7 @@ void drawRect(pxlCoord coord, uint32_t color, uint16_t width, uint16_t height)
 	}
 	uint8_t bpp = getScreenBpp();
 	uint16_t pitch = getScreenPitch();
-	uint8_t *pixelOffset = getPixelOffset(coord);
+	uint8_t *pixelOffset = (uint8_t *)getPixelOffset(coord);
 
 	// Stores a line in the memory buffer
 	for (int i = 0; i < width; i++)
@@ -143,18 +145,18 @@ void drawRect(pxlCoord coord, uint32_t color, uint16_t width, uint16_t height)
 	// Copy lines
 	for (int i = 0; i < height; i++)
 	{
-		memmov(pixelOffset, screenBuffer, width * (bpp / 8));
+		memmov((uint64_t)pixelOffset, (uint64_t)screenBuffer, width * (bpp / 8));
 		pixelOffset += pitch;
 	}
 }
 
 void startPage()
 {
-	currentCharOffset = getPixelOffset((pxlCoord){0, 0});
+	currentCharOffset = (uint8_t *)getPixelOffset((pxlCoord){0, 0});
 	pageStarted = 1;
 }
 
-void printStringLimited(uint32_t color, uint8_t *str, uint32_t count)
+void printStringLimited(uint32_t color, char *str, uint32_t count)
 {
 	if (pageStarted == 0)
 	{
@@ -200,7 +202,7 @@ void printFormatString(uint32_t color, va_list valist, uint32_t argQty, const ch
 			char type = fmt[pos];
 			if (type == 's')
 			{
-				printString(color, va_arg(valist, int));
+				printString(color, va_arg(valist, char*));
 			}
 			else if (type == 'c')
 			{
@@ -315,7 +317,7 @@ void putChar(uint32_t color, uint16_t id)
 	uint8_t charByteWidth = charPixelWidth * bytePerPixel;
 
 	uint16_t charsPerLine = pitch / charByteWidth;
-	uint64_t currentCharOffsetToStart = currentCharOffset - getScreenFrameBuffer();
+	uint64_t currentCharOffsetToStart = (uint64_t)currentCharOffset - getScreenFrameBuffer();
 
 	uint16_t charsToEndOfLine = (charsPerLine - (currentCharOffsetToStart % pitch) / charByteWidth) - 1;
 	switch (id)
@@ -360,14 +362,14 @@ void putChar(uint32_t color, uint16_t id)
 	}
 }
 
-void printFormatStringLimited(uint32_t color, const char *str, uint32_t count, uint16_t row, uint16_t col)
+void printFormatStringLimited(uint32_t color, char *str, uint32_t count, uint16_t row, uint16_t col)
 {
 	if (pageStarted == 0)
 	{
 		startPage();
 	}
 	uint8_t *aux = currentCharOffset;
-	currentCharOffset = getPixelOffset((pxlCoord){col * CHAR_WIDTH * fontSize, row * CHAR_HEIGHT * fontSize});
+	currentCharOffset = (uint8_t *)getPixelOffset((pxlCoord){col * CHAR_WIDTH * fontSize, row * CHAR_HEIGHT * fontSize});
 	printStringLimited(color, str, count);
 	currentCharOffset = aux;
 }
@@ -382,12 +384,12 @@ void drawSprite(uint16_t width, uint16_t height, uint8_t sprite[height][width * 
 	{ // Check screen bounds
 		return;
 	}
-	uint8_t *pixelOffset = getPixelOffset(coord);
+	uint8_t *pixelOffset = (uint8_t *)getPixelOffset(coord);
 	uint16_t pitch = getScreenPitch();
 	uint8_t bytesPerPixel = getScreenBpp() / 8;
 	for (int i = 0; i < height; i++)
 	{
-		memmov(pixelOffset + i * pitch, sprite[i], width * bytesPerPixel);
+		memmov((uint64_t)pixelOffset + i * pitch, (uint64_t)sprite[i], width * bytesPerPixel);
 	}
 }
 
@@ -430,10 +432,10 @@ void rollUp()
 	// Much faster than reprinting the whole screen.
 	memmov(screenFrameBuffer, screenFrameBuffer + nextLineDelta, getScreenHeight() * pitch - nextLineDelta);
 
-	uint64_t currentCharOffsetToStart = currentCharOffset - screenFrameBuffer;
+	uint64_t currentCharOffsetToStart = (uint64_t)currentCharOffset - screenFrameBuffer;
 	uint16_t currentRow = currentCharOffsetToStart / pitch;
 
-	currentCharOffset = currentRow * pitch + screenFrameBuffer;
+	currentCharOffset = (uint8_t *)(currentRow * pitch + screenFrameBuffer);
 
 	// Stores a black line in memory buffer
 	for (int i = 0; i < pitch; i++)
@@ -443,7 +445,7 @@ void rollUp()
 	// Clear last line
 	for (int i = 0; i < charPixelHeight; i++)
 	{
-		memmov(currentCharOffset + i * pitch, screenBuffer, pitch);
+		memmov((uint64_t)currentCharOffset + i * pitch, (uint64_t)screenBuffer, pitch);
 	}
 }
 
@@ -466,7 +468,7 @@ void reprintFromBuffer()
 
 void newline()
 {
-	uint64_t currentCharOffsetToStart = currentCharOffset - getScreenFrameBuffer();
+	uint64_t currentCharOffsetToStart = (uint64_t)currentCharOffset - getScreenFrameBuffer();
 
 	uint16_t screenHeight = getScreenHeight();
 	uint8_t charPixelHeight = CHAR_HEIGHT * fontSize;
@@ -480,6 +482,6 @@ void newline()
 	}
 	else
 	{
-		currentCharOffset = (currentRow + 1) * getScreenPitch() * charPixelHeight + getScreenFrameBuffer();
+		currentCharOffset = (uint8_t *)((uint64_t)(currentRow + 1) * getScreenPitch() * charPixelHeight + getScreenFrameBuffer());
 	}
 }

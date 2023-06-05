@@ -87,6 +87,6 @@ int main()
 
 	printerr("Memoria perdida: %x\n", memStatus[1] - occupiedMemory);
 
-	// drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
+	drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
 	return 0;
 }
