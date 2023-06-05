@@ -57,9 +57,6 @@ static uint64_t lastOccupiedMem = 0;
 
 uint64_t *getMemoryStatus()
 {
-    printerr("Ocuppied memory: %x\n", occupiedMem);
-    printerr("Delta: %x\n", occupiedMem - lastOccupiedMem);
-    lastOccupiedMem = occupiedMem;
     memoryStatus[0] = totalMem;
     memoryStatus[1] = occupiedMem;
     memoryStatus[2] = totalMem - occupiedMem;

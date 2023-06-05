@@ -62,7 +62,7 @@ char cat(char argc, char **argv)
     int c;
     while ((c = getChar()) != EOF)
     {
-        printf("%c'", c);
+        printf("%c", c);
     };
     return 0;
 }
@@ -109,7 +109,8 @@ void sleep(int sec)
     _sys_sleep(sec * 1000);
 }
 
-void setAutoPrio(char argc, char **argv) {
+void setAutoPrio(char argc, char **argv)
+{
     char value = strToNum(argv[0], strlen(argv[0]));
     _sys_setAutoPrio(value);
 }
