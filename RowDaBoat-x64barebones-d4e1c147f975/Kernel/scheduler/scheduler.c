@@ -461,34 +461,34 @@ void printProcesses(char showKilled)
                         writeProcessPipe(STDOUT, " ", 1);
                     }
                 }
-                char pid[decNumLength(proc->pid)+1];
+                char pid[decNumLength(proc->pid) + 1];
                 decToStr(pid, proc->pid);
                 writeProcessPipe(STDOUT, pid, decNumLength(proc->pid));
                 writeProcessPipe(STDOUT, "       ", 7);
 
-                char parentPID[decNumLength(proc->parentPID)+1];
+                char parentPID[decNumLength(proc->parentPID) + 1];
                 decToStr(parentPID, proc->parentPID);
                 writeProcessPipe(STDOUT, parentPID, decNumLength(proc->parentPID));
                 writeProcessPipe(STDOUT, "       ", 7);
 
-                char priority[decNumLength(proc->priority)+1];
+                char priority[decNumLength(proc->priority) + 1];
                 decToStr(priority, proc->priority);
                 writeProcessPipe(STDOUT, priority, decNumLength(proc->priority));
                 writeProcessPipe(STDOUT, "          ", 11);
 
-                char foreground[decNumLength(proc->foreground)+1];
+                char foreground[decNumLength(proc->foreground) + 1];
                 decToStr(foreground, proc->foreground);
                 writeProcessPipe(STDOUT, foreground, decNumLength(proc->foreground));
                 writeProcessPipe(STDOUT, "         ", 10);
 
-                char stackPointer[hexNumLength(proc->stackPointer)+1];
-                hexToStr(stackPointer, proc->stackPointer);
-                writeProcessPipe(STDOUT, stackPointer, hexNumLength(proc->stackPointer));
+                char stackPointer[hexNumLength((uint64_t)proc->stackPointer) + 1];
+                hexToStr(stackPointer, (uint64_t)proc->stackPointer);
+                writeProcessPipe(STDOUT, stackPointer, hexNumLength((uint64_t)proc->stackPointer));
                 writeProcessPipe(STDOUT, "         ", 10);
 
-                char stackBase[hexNumLength(proc->stackBase)+1];
-                hexToStr(stackBase, proc->stackBase);
-                writeProcessPipe(STDOUT, stackBase, hexNumLength(proc->stackBase));
+                char stackBase[hexNumLength((uint64_t)proc->stackBase) + 1];
+                hexToStr(stackBase, (uint64_t)proc->stackBase);
+                writeProcessPipe(STDOUT, stackBase, hexNumLength((uint64_t)proc->stackBase));
                 writeProcessPipe(STDOUT, "      ", 7);
 
                 char state = proc->state;
@@ -640,11 +640,6 @@ pid_t killProcess(pid_t pid)
     if (process != NULL)
     {
         Process parent = getProcess(process->parentPID);
-        if (parent == NULL)
-        {
-            printerr("No es posible matar el proceso %d, ya que su padre no existe.\n", pid);
-            return -1;
-        }
         process->foreground = 0;
         if (process->state == BLOCKED)
         {
@@ -657,13 +652,13 @@ pid_t killProcess(pid_t pid)
         remove(scheduler->queue[process->priority], process);
         cleanChildDeletedProcesses(process);
 
-        if (parent->waitingForPID == pid)
+        if (parent != NULL && parent->waitingForPID == pid)
         {
             parent->waitingForPID = -1;
             semPost(parent->waitingSem);
         }
 
-        if (parent->state == ZOMBIE)
+        if (parent == NULL || parent->state == ZOMBIE)
         {
             deleteProcess(process);
         }

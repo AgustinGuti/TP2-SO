@@ -123,7 +123,7 @@ MemoryManagerADT createMemoryManager(uint64_t managedMemorySize, void *const man
     }
     MemoryManagerADT buddy = (MemoryManagerADT)memoryForMemoryManager;
     buddy->size = memoryToMapAligned;
-    buddy->neededBlocks = (memoryToMapAligned / MIN_BLOCK_SIZE) * 2 - 1; // Suma de potencias de 2 hasta size es 2**(size+1) - 1
+    buddy->neededBlocks = (memoryToMapAligned / MIN_BLOCK_SIZE) * 2 - 1; // sum of powers of to from 1 to i is 2^i - 1
     buddy->initialDirection = managedMemory;
     buddy->memory = (uint8_t *)((uint64_t)memoryForMemoryManager + BUDDY_STRUCT_SIZE);
     memset(buddy->memory, 0, (buddy->neededBlocks) / 8);
@@ -238,9 +238,6 @@ uint64_t freeMemory(MemoryManagerADT buddy, void *ptr)
         bit = PARENT(bit);
         freeBlock(buddy->memory, bit);
     }
-    // printTree(buddy, 6);
-    //   printf("Freeing %d bytes at 0x%x\n", block_size, ptr);
-    // ptr = NULL;
     return block_size;
 }
 

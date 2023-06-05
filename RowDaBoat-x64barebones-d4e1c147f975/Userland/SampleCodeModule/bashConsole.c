@@ -94,7 +94,8 @@ int startConsole()
                     if (printBuf[i] == NEWLINE)
                     {
                         exit = parseAndExecuteCommands(commandBuffer, commandBufferPos);
-                        if(!exit){
+                        if (!exit)
+                        {
                             printf("\n%s", LINE_INDICATOR);
                         }
                         for (int arg_idx = 0; arg_idx < commandBufferPos; arg_idx++)

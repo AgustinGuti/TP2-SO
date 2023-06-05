@@ -221,14 +221,16 @@ void semPost(sem_t sem)
     if (getSize(sem->waitingList) > 0)
     {
         int done = 0;
-        while(!done && getSize(sem->waitingList) > 0){
+        while (!done && getSize(sem->waitingList) > 0)
+        {
             pid_t *pid = (pid_t *)get(sem->waitingList, 0);
             remove(sem->waitingList, pid);
             pid_t pidToUnblock = *pid;
             free(pid);
             pid = NULL;
             leaveCritical();
-            if (getProcessState(getProcess(pidToUnblock)) == BLOCKED){
+            if (getProcessState(getProcess(pidToUnblock)) == BLOCKED)
+            {
                 unblockProcess(pidToUnblock);
                 done = 1;
             }

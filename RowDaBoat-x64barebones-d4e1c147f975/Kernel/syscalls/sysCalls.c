@@ -88,8 +88,7 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_closeProcessPipe,
     (uint64_t)&sys_sleep,
     (uint64_t)&sys_realloc,
-    (uint64_t)&sys_setAutoPrio
-};
+    (uint64_t)&sys_setAutoPrio};
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
 extern void _speaker_tone(uint16_t tune);

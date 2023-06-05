@@ -136,7 +136,6 @@ int closePipe(Pipe pipe)
 
 int readFromPipe(Pipe pipe, char *buffer, int size)
 {
-    //printf("readFromPipe\n");
     if (pipe == NULL || buffer == NULL || size < 0)
     {
         return -1;

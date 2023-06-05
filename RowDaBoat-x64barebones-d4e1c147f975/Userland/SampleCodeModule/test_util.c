@@ -97,9 +97,11 @@ void *memset(void *destiation, int32_t c, uint64_t length)
   return destiation;
 }
 
-int getNextPowerOfTwo(int value){
+int getNextPowerOfTwo(int value)
+{
   int i = 1;
-  while (i < value){
+  while (i < value)
+  {
     i *= 2;
   }
   return i;

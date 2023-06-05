@@ -8,14 +8,14 @@
 #include "test_util.h"
 #include <functions.h>
 
-#define MINOR_WAIT 50000000 // TODO: Change this value to prevent a process from flooding the screen
+#define MINOR_WAIT 50000000
 
-#define WAIT 1000000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
+#define WAIT 1000000000
 
 #define TOTAL_PROCESSES 3
-#define LOWEST 1  // TODO: Change as required
-#define MEDIUM 2  // TODO: Change as required
-#define HIGHEST 3 // TODO: Change as required
+#define LOWEST 1
+#define MEDIUM 2
+#define HIGHEST 3
 
 int64_t prio[TOTAL_PROCESSES] = {LOWEST, MEDIUM, HIGHEST};
 
@@ -28,7 +28,7 @@ char testPrio(char argc, char *args[])
   }
   int64_t pids[TOTAL_PROCESSES];
   char waitStr[10] = {0};
-  decToStr(waitStr, MINOR_WAIT); 
+  decToStr(waitStr, MINOR_WAIT);
   char *argv[] = {"endless_loop_print", "0", waitStr, NULL};
   uint64_t i;
 
@@ -38,13 +38,11 @@ char testPrio(char argc, char *args[])
   bussy_wait(WAIT);
   printf("\nCHANGING PRIORITIES...\n");
 
-
   for (i = 0; i < TOTAL_PROCESSES; i++)
     _sys_nice(pids[i], prio[i]);
 
   bussy_wait(WAIT);
   printf("\nBLOCKING...\n");
-
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     blockProcess(pids[i]);

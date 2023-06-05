@@ -42,24 +42,24 @@ char testMM(char argc, char *argv[])
 
     while (rq < MAX_BLOCKS && total < max_memory)
     {
-      #ifdef BUDDY
-        int uniform = max_memory - total - 1;
-      #else
-        int uniform = max_memory - total - 1 - BLOCK_STRUCT_SIZE;
-        if (uniform <= 0)
-        {
-          break;
-        }
-      #endif
+#ifdef BUDDY
+      int uniform = max_memory - total - 1;
+#else
+      int uniform = max_memory - total - 1 - BLOCK_STRUCT_SIZE;
+      if (uniform <= 0)
+      {
+        break;
+      }
+#endif
 
       mm_rqs[rq].size = GetUniform(uniform) + 1;
       mm_rqs[rq].address = malloc(mm_rqs[rq].size);
 
-      #ifdef BUDDY
-        mm_rqs[rq].size = getNextPowerOfTwo(mm_rqs[rq].size);
-      #else
-        total += BLOCK_STRUCT_SIZE;
-      #endif
+#ifdef BUDDY
+      mm_rqs[rq].size = getNextPowerOfTwo(mm_rqs[rq].size);
+#else
+      total += BLOCK_STRUCT_SIZE;
+#endif
 
       if (mm_rqs[rq].address)
       {
@@ -103,4 +103,3 @@ char testMM(char argc, char *argv[])
   }
   return 0;
 }
-

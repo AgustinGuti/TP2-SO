@@ -109,7 +109,6 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 				currentOccupiedBlock->nextBlock->prevBlock = currentOccupiedBlock->prevBlock;
 			}
 			uint64_t size = currentOccupiedBlock->size;
-			// printf("free %x\n", size);
 			addBlockToFreeList(memoryManager, memoryToFree, currentOccupiedBlock->size);
 			return size + sizeof(MemoryBlock);
 		}

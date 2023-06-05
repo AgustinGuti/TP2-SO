@@ -207,7 +207,6 @@ int scanf(const char *fmt, int argQty, ...)
 	return totalReadChars;
 }
 
-
 void formatPrint(const char *fmt, uint32_t color, uint16_t row, uint16_t col, int argQty, ...)
 {
 	int pos = 0;

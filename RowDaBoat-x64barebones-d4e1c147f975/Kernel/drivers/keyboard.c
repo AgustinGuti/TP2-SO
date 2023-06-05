@@ -9,7 +9,7 @@ extern void _hlt();
 extern char has_key();
 extern char get_key();
 
-// Spcecial characters must be greater than 255 in order not to clash with extended ASCII characters
+// Special characters must be greater than 255 in order not to clash with extended ASCII characters
 #define BLOCK_MAYUS 260
 #define LSHIFT 261
 #define RSHIFT 262 // NOT IMPLEMENTED

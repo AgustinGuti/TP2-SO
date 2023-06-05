@@ -83,7 +83,7 @@ char phylos(char argc, char **argv)
         return 1;
     }
 
-    for (int i = 0; i < INITIAL_PHILO_QTY ; i++)
+    for (int i = 0; i < INITIAL_PHILO_QTY; i++)
     {
         addPhilo();
     }

@@ -53,8 +53,6 @@ void *realloc(void *ptr, uint64_t newSize)
     return res;
 }
 
-static uint64_t lastOccupiedMem = 0;
-
 uint64_t *getMemoryStatus()
 {
     memoryStatus[0] = totalMem;
