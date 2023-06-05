@@ -27,6 +27,7 @@ typedef enum
     READY = 0,
     RUNNING,
     BLOCKED,
+    SLEEPING,
     ZOMBIE
 } processState;
 
@@ -62,7 +63,6 @@ typedef struct ProcessCDT
     char argc;
     char hasStack;
     char exitValue;
-    
 } ProcessCDT;
 
 typedef struct ProcessCDT *Process;

@@ -116,12 +116,14 @@ void *schedule(void *rsp)
             uint64_t millis = getMillis();
             while (hasNext(scheduler->itSleepingProcesses))
             {
-                Process p = (Process)next(scheduler->itSleepingProcesses);
-                p->sleepTime -= millis - scheduler->prevMillis;
-                if (p->sleepTime <= 0)
-                {
-                    remove(scheduler->sleepingProcesses, p);
-                    unblockProcessFromProcess(p);
+                Process process = (Process)next(scheduler->itSleepingProcesses);
+                if (process->state == SLEEPING){
+                    process->sleepTime -= millis - scheduler->prevMillis;
+                    if (process->sleepTime <= 0)
+                    {
+                        remove(scheduler->sleepingProcesses, process);
+                        process->state = READY;
+                    }
                 }
             }
             scheduler->prevMillis = millis;
@@ -346,6 +348,7 @@ void printProcesses(char showKilled)
                 }
                 printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
                 char state = proc->state;
+  
                 switch (state)
                 {
                 case READY:
@@ -356,6 +359,9 @@ void printProcesses(char showKilled)
                     break;
                 case BLOCKED:
                     printf("    BLOCKED\n");
+                    break;
+                case SLEEPING:
+                    printf("    SLEEPING\n");
                     break;
                 case ZOMBIE:
                     printf("    KILLED\n");
@@ -384,20 +390,8 @@ void printProcesses(char showKilled)
                 }
                 printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
                 char state = proc->state;
-                switch (state)
-                {
-                case READY:
-                    printf("    READY\n");
-                    break;
-                case RUNNING:
-                    printf("    RUNNING\n");
-                    break;
-                case BLOCKED:
-                    printf("    BLOCKED\n");
-                    break;
-                case ZOMBIE:
+                if (proc->stack == ZOMBIE){
                     printf("    KILLED\n");
-                    break;
                 }
             }
         }
@@ -411,7 +405,7 @@ pid_t blockHandler(pid_t pid)
     {
         return -1;
     }
-    if (process->state == READY || process->state == RUNNING)
+    if (process->state == READY || process->state == RUNNING || process->state == SLEEPING)
     {
         blockProcessFromProcess(process);
         return process->pid;
@@ -452,7 +446,14 @@ void unblockProcessFromProcess(Process process)
 {
     if (process->state == BLOCKED)
     {
-        process->state = READY;
+        if (process->sleepTime > 0)
+        {
+            process->state = SLEEPING;
+        }
+        else
+        {
+            process->state = READY;
+        }
         if (scheduler->currentProcess->pid == EMPTY_PID)
         {
             yield();
@@ -637,5 +638,6 @@ void sleep(int millis)
 {
     scheduler->currentProcess->sleepTime = millis + getMillis() - scheduler->prevMillis;
     insert(scheduler->sleepingProcesses, scheduler->currentProcess);
-    blockProcessFromProcess(scheduler->currentProcess);
+    scheduler->currentProcess->state = SLEEPING;
+    yield();
 }

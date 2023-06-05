@@ -46,12 +46,12 @@ char test_mm(char argc, char *argv[])
         int uniform = max_memory - total - 1;
       #else
         int uniform = max_memory - total - 1 - BLOCK_STRUCT_SIZE;
+        if (uniform <= 0)
+        {
+          break;
+        }
       #endif
 
-      if (uniform <= 0)
-      {
-        break;
-      }
       mm_rqs[rq].size = GetUniform(uniform) + 1;
       mm_rqs[rq].address = malloc(mm_rqs[rq].size);
 
