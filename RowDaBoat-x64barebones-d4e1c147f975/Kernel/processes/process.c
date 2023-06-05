@@ -126,8 +126,9 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     {
         if (j > process->fdLimit)
         {
-            // TODO realloc
-            // freeProcess(process);
+            process->fdLimit *= 2;
+            realloc(process->fds, process->fdLimit * sizeof(Pipe));
+            realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
             return -10;
         }
         process->fds[j] = pipes[j];
@@ -230,7 +231,9 @@ Pipe openProcessPipe(char *name, int fds[2])
     {
         if (fd == process->fdLimit)
         {
-            // TODO realloc
+            process->fdLimit *= 2;
+            realloc(process->fds, process->fdLimit * sizeof(Pipe));
+            realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
             return NULL;
         }
         fd++;
@@ -242,7 +245,9 @@ Pipe openProcessPipe(char *name, int fds[2])
     {
         if (fd == process->fdLimit)
         {
-            // TODO realloc
+            process->fdLimit *= 2;
+            realloc(process->fds, process->fdLimit * sizeof(Pipe));
+            realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
             return NULL;
         }
         fd++;
