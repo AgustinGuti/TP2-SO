@@ -15,7 +15,6 @@ typedef PipeCDT *Pipe;
 
 #define DEFAULT_LETTER_WHITE 0x00FFFFFF // White letters
 #define DEFAULT_BACK_BLACK              // Black backgound
-#define MAX_BUFFER_LENGTH 64
 
 char hasKeyReady();
 

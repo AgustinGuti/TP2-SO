@@ -3,5 +3,5 @@
 
 #include <stdint.h>
 #include <stddef.h>
-char test_prio(char argc, char *argv[]);
+char testPrio(char argc, char *argv[]);
 #endif

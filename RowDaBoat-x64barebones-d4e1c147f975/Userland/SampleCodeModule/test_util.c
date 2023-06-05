@@ -73,8 +73,10 @@ void endless_loop()
     ;
 }
 
-void endless_loop_print(uint64_t wait)
+void endless_loop_print(char argc, char **argv)
 {
+  uint64_t wait = satoi(argv[0]);
+
   int64_t pid = _sys_getpid();
 
   while (1)

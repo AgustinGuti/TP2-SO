@@ -54,7 +54,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 	{
 		if (currentFreeBlock->size >= (memoryToAllocate + sizeof(MemoryBlock)))
 		{
-			void *allocatedMemorystartAddress = (uint64_t *)((uint64_t)currentFreeBlock->startAddress + currentFreeBlock->size - memoryToAllocate);
+			void *allocatedMemoryStartAddress = (uint64_t *)((uint64_t)currentFreeBlock->startAddress + currentFreeBlock->size - memoryToAllocate);
 			currentFreeBlock->size -= (memoryToAllocate + sizeof(MemoryBlock));
 
 			if (currentFreeBlock->size == 0)
@@ -72,18 +72,16 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 					currentFreeBlock->nextBlock->prevBlock = currentFreeBlock->prevBlock;
 				}
 			}
-			addBlockToOccupiedList(memoryManager, allocatedMemorystartAddress, memoryToAllocate);
+			addBlockToOccupiedList(memoryManager, allocatedMemoryStartAddress, memoryToAllocate);
 
 			if (allocatedMemorySize != NULL)
 			{
 				*allocatedMemorySize = memoryToAllocate + sizeof(MemoryBlock);
 			}
-			// if (allocatedMemorystartAddress == (void *)0xFFE3377)
-			return (uint64_t *)((uint64_t)allocatedMemorystartAddress);
+			return (uint64_t *)((uint64_t)allocatedMemoryStartAddress);
 		}
 		currentFreeBlock = currentFreeBlock->nextBlock;
 	}
-	// printBlocks(memoryManager);
 	return NULL;
 }
 

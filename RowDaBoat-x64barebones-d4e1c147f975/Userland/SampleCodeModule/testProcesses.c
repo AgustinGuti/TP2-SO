@@ -19,7 +19,7 @@ typedef struct P_rq
     enum State state;
 } p_rq;
 
-char test_processes(char argc, char *argv[])
+char testProcesses(char argc, char *argv[])
 {
     uint8_t rq;
     uint8_t alive = 0;

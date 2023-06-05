@@ -4,5 +4,5 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <processes.h>
-char test_processes(char argc, char *argv[]);
+char testProcesses(char argc, char *argv[]);
 #endif

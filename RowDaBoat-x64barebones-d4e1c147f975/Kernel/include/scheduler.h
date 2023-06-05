@@ -9,7 +9,6 @@
 #include "time.h"
 #include "pipes.h"
 
-#define STACK_SIZE 4096
 #define BURST_TIME 10
 #define MAX_WAITING_TIME 250
 

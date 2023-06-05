@@ -64,11 +64,11 @@ static commandCDT commands[COMMAND_QTY] = {
     {"realloc", callRealloc, 2, 2, "Reasigna la memoria de un puntero dado por parametro.", 1, 0},
     {"loop", loop, 1, 1, "Imprime su ID con un saludo cada una determinada cantidad de segundos.", 1, 0},
     {"filter", filter, 0, 0, "Imprime en pantalla las vocales de su input.", 1, 0},
-    {"test-mm", test_mm, 1, 1, "Ejecuta el test de memoria.", 1, 1},
+    {"test-mm", testMM, 1, 1, "Ejecuta el test de memoria.", 1, 1},
     {"test-sync", callTestSync, 1, 1, "Ejecuta el test de sincronizacion.", 1, 1},
     {"test-no-sync", callTestNoSync, 1, 1, "Ejecuta el test sin un mecanismo de sincronizacion.", 1, 1},
-    {"test-processes", test_processes, 1, 1, "Ejecuta el test de procesos.", 1, 1},
-    {"test-prio", test_prio, 0, 0, "Ejecuta el test de prioridades.", 1, 1},
+    {"test-processes", testProcesses, 1, 1, "Ejecuta el test de procesos.", 1, 1},
+    {"test-prio", testPrio, 0, 0, "Ejecuta el test de prioridades.", 1, 1},
 };
 
 int startConsole()
