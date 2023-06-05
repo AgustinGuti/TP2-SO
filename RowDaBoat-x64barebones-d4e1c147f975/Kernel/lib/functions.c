@@ -2,9 +2,9 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <functions.h>
 
-void hex_to_str(char *char_num, uint64_t num)
+void hexToStr(char *char_num, uint64_t num)
 {
-  int digits = hex_num_length(num);
+  int digits = hexNumLength(num);
   for (int i = digits - 1; i >= 0; --i)
   {
     char aux = num % 16;
@@ -21,9 +21,9 @@ void hex_to_str(char *char_num, uint64_t num)
   char_num[digits] = 0;
 }
 
-void dec_to_str(char *char_num, int num)
+void decToStr(char *char_num, int num)
 {
-  int digits = dec_num_length(num);
+  int digits = decNumLength(num);
   int isNegative = 0;
   if (num < 0)
   {
@@ -40,7 +40,7 @@ void dec_to_str(char *char_num, int num)
   char_num[digits + isNegative] = 0;
 }
 
-int hex_num_length(uint64_t num)
+int hexNumLength(uint64_t num)
 {
   if (num < 0)
   {
@@ -58,7 +58,7 @@ int hex_num_length(uint64_t num)
   return length;
 }
 
-int dec_num_length(int num)
+int decNumLength(int num)
 {
   if (num < 0)
   {
