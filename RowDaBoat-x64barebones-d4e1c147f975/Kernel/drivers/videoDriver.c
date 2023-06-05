@@ -202,7 +202,7 @@ void printFormatString(uint32_t color, va_list valist, uint32_t argQty, const ch
 			char type = fmt[pos];
 			if (type == 's')
 			{
-				printString(color, va_arg(valist, char*));
+				printString(color, va_arg(valist, char *));
 			}
 			else if (type == 'c')
 			{
@@ -327,16 +327,8 @@ void putChar(uint32_t color, uint16_t id)
 		break;
 	case BACKSPACE:
 		lastChar--; // Remove the last inserted letter
-		if (lastChar < 0)
-		{
-			lastChar = MAX_CHAR_BUFFER - 1;
-		}
 		backspace();
 		lastChar--; // Remove the space inserted to erase the letter
-		if (lastChar < 0)
-		{
-			lastChar = MAX_CHAR_BUFFER - 1;
-		}
 		break;
 	default:
 		if (charsToEndOfLine == 0 && currentCharOffsetToStart != 0)

@@ -48,14 +48,14 @@ extern char get_key();
 
 // mapped for english keyboard
 // lowercase map
-static const uint16_t keyMapping[] =
+static const int16_t keyMapping[] =
     // 00,   01, 02  ,03  ,04   ,05  ,06,   07, 08, 09,   0A, 0B,   0C,  0D,     0E,    0F,  10, 11, 12, 13, 14, 15, 16, 17, 18 ,19, 1A, 1B, 1C, 1D,
     {-1, ESCAPE, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', BACKSPACE, TAB, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', NEWLINE, LCTRL,
      // 1E,1F ,20 ,21 ,22 ,23 ,24 ,25 ,26 ,27 ,28  ,29,  2A,  2B,2C ,2D ,2E ,2F ,30 ,31 ,32 ,33 ,34 ,35 ,  36,  37, 8,  39,  3A
      'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '|', LSHIFT, -1, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', RSHIFT, -1, LALT, ' ', BLOCK_MAYUS};
 
 // uppercase map
-static const uint16_t shiftKeyMapping[] =
+static const int16_t shiftKeyMapping[] =
     // 00,01   , 02 ,03 ,04 ,05 ,06 ,07 ,08 ,09 ,0A ,0B ,0C ,0D  ,    0E,    0F, 10,11 ,12 ,13 ,14 ,15 ,16 ,17 ,18 ,19 ,1A ,1B ,  1C,     1D,
     {-1, ESCAPE, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', BACKSPACE, TAB, 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', NEWLINE, LCTRL,
      // 1E,1F ,20 ,21 ,22 ,23 ,24 ,25 ,26 ,27 ,28  ,29,  2A,  2B,2C ,2D ,2E ,2F ,30 ,31 ,32 ,33 ,34 ,35 ,  36,  37, 38, 39,  3A
