@@ -10,7 +10,7 @@
 #define HUNGRY 1
 #define EATING 2
 
-#define BLOCK 100
+#define BLOCK 5
 
 void philosopher(char argc, char **argv);
 void take_forks(int i);

@@ -145,8 +145,7 @@ void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRe
 		return NULL;
 	}
 	memcpy(newMemory, memoryToRealloc, currentBlock->size < newSize ? currentBlock->size : newSize);
-	*allocatedMemorySize -= currentBlock->size;
-	freeMemory(memoryManager, memoryToRealloc);
+	*allocatedMemorySize -= freeMemory(memoryManager, memoryToRealloc);
 	return newMemory;
 }
 
