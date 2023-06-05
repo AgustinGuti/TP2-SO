@@ -58,7 +58,7 @@ char test_mm(char argc, char *argv[])
       #ifdef BUDDY
         mm_rqs[rq].size = getNextPowerOfTwo(mm_rqs[rq].size);
       #else
-        mm_rqs[rq].size += BLOCK_STRUCT_SIZE;
+        total += BLOCK_STRUCT_SIZE;
       #endif
 
       if (mm_rqs[rq].address)
@@ -104,10 +104,3 @@ char test_mm(char argc, char *argv[])
   return 0;
 }
 
-int getNextPowerOfTwo(int value){
-  int i = 1;
-  while (i < value){
-    i *= 2;
-  }
-  return i;
-}
