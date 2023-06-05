@@ -24,7 +24,6 @@ uint32_t GetUniform(uint32_t max)
     return (u + 1.0) * 2.328306435454494e-10 * max;
 }
 
-
 typedef struct SchedulerCDT
 {
     LinkedList queue[MAX_PRIORITY];
@@ -131,13 +130,21 @@ void initScheduler()
     scheduler->mostWaitingProcessTime = 0;
     scheduler->priorityTicketsSize = pow(2, MAX_PRIORITY) - 1;
     scheduler->priorityTickets = (int *)malloc(sizeof(int) * scheduler->priorityTicketsSize);
+    if (scheduler->priorityTickets == NULL)
+    {
+        printf("Not enough memory to allocate scheduler\n");
+        /*not enough memory to allocate scheduler*/
+        return;
+    }
     scheduler->ticketsIndex = 0;
     scheduler->autoPriority = 1;
 
-    for (int i = 0; i < MAX_PRIORITY; i++){
+    for (int i = 0; i < MAX_PRIORITY; i++)
+    {
         int limit = pow(2, i);
-        for (int j = 0; j < limit; j++){
-            scheduler->priorityTickets[j+limit-1] = i;
+        for (int j = 0; j < limit; j++)
+        {
+            scheduler->priorityTickets[j + limit - 1] = i;
         }
     }
 
@@ -185,7 +192,8 @@ void *schedule(void *rsp)
             while (hasNext(scheduler->itSleepingProcesses))
             {
                 Process process = (Process)next(scheduler->itSleepingProcesses);
-                if (process->state == SLEEPING){
+                if (process->state == SLEEPING)
+                {
                     process->sleepTime -= millis - scheduler->prevMillis;
                     if (process->sleepTime <= 0)
                     {
@@ -198,7 +206,8 @@ void *schedule(void *rsp)
             // if process skipped quantum, its priority is raised
             if (scheduler->currentProcess->state != ZOMBIE && scheduler->currentProcess->pid != EMPTY_PID)
             {
-                if (scheduler->autoPriority){
+                if (scheduler->autoPriority)
+                {
                     if (scheduler->skipPID == scheduler->currentProcess->pid)
                     {
                         scheduler->skipPID = KERNEL_PID;
@@ -220,12 +229,15 @@ void *schedule(void *rsp)
                     {
                         moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                     }
-                }else{
+                }
+                else
+                {
                     moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
             }
             uint32_t ticks = ticks_elapsed();
-            if (scheduler->autoPriority){
+            if (scheduler->autoPriority)
+            {
                 Process mostWaitingProcess = getProcess(scheduler->mostWaitingProcessPID);
                 if (mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE)
                 {
@@ -243,8 +255,9 @@ void *schedule(void *rsp)
             }
 
             void *newRsp = changeProcess(rsp);
-            
-            if (scheduler->autoPriority){
+
+            if (scheduler->autoPriority)
+            {
                 scheduler->currentProcess->waitingTime = ticks;
                 if (scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID)
                 {
@@ -257,7 +270,8 @@ void *schedule(void *rsp)
     return rsp;
 }
 
-void setAutoPrio(char autoPrio){
+void setAutoPrio(char autoPrio)
+{
     scheduler->autoPriority = autoPrio;
 }
 
@@ -318,9 +332,11 @@ void *changeProcess(void *rsp)
 Process getNextProcess()
 {
     int currentPriority = MAX_PRIORITY - 1;
-    if (!scheduler->autoPriority){
+    if (!scheduler->autoPriority)
+    {
         currentPriority = scheduler->priorityTickets[scheduler->ticketsIndex++];
-        if (scheduler->ticketsIndex == scheduler->priorityTicketsSize){
+        if (scheduler->ticketsIndex == scheduler->priorityTicketsSize)
+        {
             scheduler->ticketsIndex = 0;
         }
     }
@@ -407,6 +423,10 @@ int nice(pid_t pid, int priority)
         return -1;
     }
     Process process = getProcess(pid);
+    if (process == NULL)
+    {
+        return -1;
+    }
     if (priority != process->priority)
     {
         insert(scheduler->queue[priority], process);
@@ -440,7 +460,7 @@ void printProcesses(char showKilled)
                 }
                 printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
                 char state = proc->state;
-  
+
                 switch (state)
                 {
                 case READY:
@@ -481,7 +501,8 @@ void printProcesses(char showKilled)
                     }
                 }
                 printf("%d       %d       %d          %d         0x%x       0x%x", proc->pid, proc->parentPID, proc->priority, proc->foreground, proc->stackPointer, proc->stackBase);
-                if (proc->state == ZOMBIE){
+                if (proc->state == ZOMBIE)
+                {
                     printf("    KILLED\n");
                 }
             }
@@ -531,7 +552,6 @@ void unblockProcess(pid_t pid)
     Process process = getProcess(pid);
     unblockProcessFromProcess(process);
 }
-
 
 void unblockProcessFromProcess(Process process)
 {
@@ -585,6 +605,11 @@ pid_t killProcess(pid_t pid)
     if (process != NULL)
     {
         Process parent = getProcess(process->parentPID);
+        if (parent == NULL)
+        {
+            printerr("No es posible matar el proceso %d, ya que su padre no existe.\n", pid);
+            return -1;
+        }
         process->foreground = 0;
         if (process->state == BLOCKED)
         {

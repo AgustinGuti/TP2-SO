@@ -28,7 +28,6 @@ static pid_t currentPID = KERNEL_PID; // Static variable to track the current PI
 pid_t generatePID();
 void pushToStack(Process process, uint64_t value);
 
-
 Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t parentPID)
 {
     Process process = (Process)malloc(sizeof(ProcessCDT));
@@ -105,12 +104,15 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     process->pipeTypes[STDOUT] = WRITE;
 
     Process parent = getProcess(parentPID);
-    if (parent != NULL){
-        if (parent->fds[STDIN] != NULL){
+    if (parent != NULL)
+    {
+        if (parent->fds[STDIN] != NULL)
+        {
             process->fds[STDIN] = parent->fds[STDIN];
             process->pipeTypes[STDIN] = parent->pipeTypes[STDIN];
         }
-        if (parent->fds[STDOUT] != NULL){
+        if (parent->fds[STDOUT] != NULL)
+        {
             process->fds[STDOUT] = parent->fds[STDOUT];
             process->pipeTypes[STDOUT] = parent->pipeTypes[STDOUT];
         }
@@ -136,9 +138,21 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         if (j > process->fdLimit)
         {
             process->fdLimit *= 2;
-            realloc(process->fds, process->fdLimit * sizeof(Pipe));
-            realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
-            return NULL;
+            Pipe *auxFds = realloc(process->fds, process->fdLimit * sizeof(Pipe));
+            PipeType *auxPipeTypes = realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
+            if (auxFds == NULL || auxPipeTypes == NULL)
+            {
+                /*not enough memory for process->fds or process->pipeTypes*/
+                free(process->name);
+                free(process->fds);
+                free(process->pipeTypes);
+                free(process);
+                free(auxFds);
+                free(auxPipeTypes);
+                return NULL;
+            }
+            process->fds = auxFds;
+            process->pipeTypes = auxPipeTypes;
         }
         process->fds[j] = pipes[j];
         process->pipeTypes[j] = j % 2 == 0 ? READ : WRITE;
@@ -168,6 +182,11 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         argvAux = (char **)malloc((argc) * sizeof(char *));
         if (argvAux == NULL)
         {
+            /*not enough memory for argvAux*/
+            free(process->name);
+            free(process->fds);
+            free(process->pipeTypes);
+            free(process);
             return NULL;
         }
     }
@@ -180,16 +199,20 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         if (argvAux[i] == NULL)
         {
             /*not enough memory for argvAux[i]*/
+            free(process->name);
+            free(process->fds);
+            free(process->pipeTypes);
+            free(process);
             return NULL;
         }
         strcpy(argvAux[i], argv[i]);
     }
     // argvAux[argc] = NULL;
 
-    pushToStack(process, 0x0);                // ss
+    pushToStack(process, 0x0);                          // ss
     pushToStack(process, (uint64_t)process->stackBase); // stackPointer
-    pushToStack(process, 0x202);              // rflags
-    pushToStack(process, 0x8);                // cs
+    pushToStack(process, 0x202);                        // rflags
+    pushToStack(process, 0x8);                          // cs
     pushToStack(process, (uint64_t)startWrapper);       // rip
 
     for (int i = 0; i < 15; i++)
@@ -223,7 +246,8 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     return process;
 }
 
-void restartProcessPID(){
+void restartProcessPID()
+{
     currentPID = KERNEL_PID;
 }
 
@@ -245,9 +269,21 @@ Pipe openProcessPipe(char *name, int fds[2])
         if (fd == process->fdLimit)
         {
             process->fdLimit *= 2;
-            realloc(process->fds, process->fdLimit * sizeof(Pipe));
-            realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
-            return NULL;
+            Pipe *auxFds = realloc(process->fds, process->fdLimit * sizeof(Pipe));
+            PipeType *auxPipeTypes = realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
+            if (auxFds == NULL || auxPipeTypes == NULL)
+            {
+                /*not enough memory for process->fds or process->pipeTypes*/
+                free(process->name);
+                free(process->fds);
+                free(process->pipeTypes);
+                free(process);
+                free(auxFds);
+                free(auxPipeTypes);
+                return NULL;
+            }
+            process->fds = auxFds;
+            process->pipeTypes = auxPipeTypes;
         }
         fd++;
     }
@@ -259,9 +295,21 @@ Pipe openProcessPipe(char *name, int fds[2])
         if (fd == process->fdLimit)
         {
             process->fdLimit *= 2;
-            realloc(process->fds, process->fdLimit * sizeof(Pipe));
-            realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
-            return NULL;
+            Pipe *auxFds = realloc(process->fds, process->fdLimit * sizeof(Pipe));
+            PipeType *auxPipeTypes = realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
+            if (auxFds == NULL || auxPipeTypes == NULL)
+            {
+                /*not enough memory for process->fds or process->pipeTypes*/
+                free(process->name);
+                free(process->fds);
+                free(process->pipeTypes);
+                free(process);
+                free(auxFds);
+                free(auxPipeTypes);
+                return NULL;
+            }
+            process->fds = auxFds;
+            process->pipeTypes = auxPipeTypes;
         }
         fd++;
     }
@@ -401,7 +449,8 @@ void closePipes(Process process)
     }
 }
 
-int getProcessState(Process process){
+int getProcessState(Process process)
+{
     if (process == NULL)
     {
         return -1;

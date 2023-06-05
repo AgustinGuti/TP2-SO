@@ -42,10 +42,6 @@ void decToStr(char *char_num, int num)
 
 int hexNumLength(uint64_t num)
 {
-  if (num < 0)
-  {
-    num *= -1;
-  }
   int length = 0;
   while (num != 0)
   {
