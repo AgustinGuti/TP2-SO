@@ -7,10 +7,31 @@
 
 #define EOF -1
 
+//  Random
+static uint32_t m_z = 362436069;
+static uint32_t m_w = 521288629;
+
+uint32_t GetUint()
+{
+    m_z = 36969 * (m_z & 65535) + (m_z >> 16);
+    m_w = 18000 * (m_w & 65535) + (m_w >> 16);
+    return (m_z << 16) + m_w;
+}
+
+uint32_t GetUniform(uint32_t max)
+{
+    uint32_t u = GetUint();
+    return (u + 1.0) * 2.328306435454494e-10 * max;
+}
+
+
 typedef struct SchedulerCDT
 {
     LinkedList queue[MAX_PRIORITY];
     Iterator it[MAX_PRIORITY];
+    uint32_t ticketsIndex;
+    int *priorityTickets;
+    int priorityTicketsSize;
     LinkedList deleted;
     Iterator itDeleted;
     Process currentProcess;
@@ -26,6 +47,7 @@ typedef struct SchedulerCDT
     uint64_t prevMillis;
     pid_t mostWaitingProcessPID;
     uint64_t mostWaitingProcessTime;
+    char autoPriority;
 } SchedulerCDT;
 
 static Scheduler scheduler = NULL;
@@ -41,6 +63,35 @@ void unblockProcessFromProcess(Process process);
 void killKernel();
 
 static char ready = 0;
+
+int pow(int base, int exp)
+{
+    int result = 1;
+    while (exp)
+    {
+        if (exp & 1)
+            result *= base;
+        exp /= 2;
+        base *= base;
+    }
+
+    return result;
+}
+
+void shuffle(int *array, int n)
+{
+    if (n > 1)
+    {
+        int i;
+        for (i = 0; i < n - 1; i++)
+        {
+            int j = i + GetUniform(n - i);
+            int t = array[j];
+            array[j] = array[i];
+            array[i] = t;
+        }
+    }
+}
 
 void initScheduler()
 {
@@ -78,6 +129,20 @@ void initScheduler()
     scheduler->prevMillis = getMillis();
     scheduler->mostWaitingProcessPID = EMPTY_PID;
     scheduler->mostWaitingProcessTime = 0;
+    scheduler->priorityTicketsSize = pow(2, MAX_PRIORITY) - 1;
+    scheduler->priorityTickets = (int *)malloc(sizeof(int) * scheduler->priorityTicketsSize);
+    scheduler->ticketsIndex = 0;
+    scheduler->autoPriority = 1;
+
+    for (int i = 0; i < MAX_PRIORITY; i++){
+        int limit = pow(2, i);
+        for (int j = 0; j < limit; j++){
+            scheduler->priorityTickets[j+limit-1] = i;
+        }
+    }
+
+    shuffle(scheduler->priorityTickets, scheduler->priorityTicketsSize);
+
     ready = 1;
 }
 
@@ -102,6 +167,7 @@ void closeScheduler()
     destroyLinkedList(scheduler->sleepingProcesses);
     deleteProcess(scheduler->empty);
     restartProcessPID();
+    free(scheduler->priorityTickets);
     free(scheduler);
     scheduler = NULL;
 }
@@ -132,55 +198,67 @@ void *schedule(void *rsp)
             // if process skipped quantum, its priority is raised
             if (scheduler->currentProcess->state != ZOMBIE && scheduler->currentProcess->pid != EMPTY_PID)
             {
-                if (scheduler->skipPID == scheduler->currentProcess->pid)
-                {
-                    scheduler->skipPID = KERNEL_PID;
-                    moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                }
-                else if (scheduler->currentProcess->priority > 0 && scheduler->quantumCounter >= scheduler->quantum)
-                {
-                    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                    scheduler->currentProcess->priority--;
-                    insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                }
-                else if (scheduler->currentProcess->priority < MAX_PRIORITY - 1 && scheduler->skipQuantum)
-                {
-                    remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                    scheduler->currentProcess->priority++;
-                    insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
-                }
-                else
-                {
+                if (scheduler->autoPriority){
+                    if (scheduler->skipPID == scheduler->currentProcess->pid)
+                    {
+                        scheduler->skipPID = KERNEL_PID;
+                        moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                    }
+                    else if (scheduler->currentProcess->priority > 0 && scheduler->quantumCounter >= scheduler->quantum)
+                    {
+                        remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                        scheduler->currentProcess->priority--;
+                        insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                    }
+                    else if (scheduler->currentProcess->priority < MAX_PRIORITY - 1 && scheduler->skipQuantum)
+                    {
+                        remove(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                        scheduler->currentProcess->priority++;
+                        insert(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                    }
+                    else
+                    {
+                        moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
+                    }
+                }else{
                     moveToBack(scheduler->queue[scheduler->currentProcess->priority], scheduler->currentProcess);
                 }
             }
             uint32_t ticks = ticks_elapsed();
-            Process mostWaitingProcess = getProcess(scheduler->mostWaitingProcessPID);
-            if (mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE)
-            {
-                if (ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME)
+            if (scheduler->autoPriority){
+                Process mostWaitingProcess = getProcess(scheduler->mostWaitingProcessPID);
+                if (mostWaitingProcess != NULL && mostWaitingProcess->state != ZOMBIE)
                 {
-                    mostWaitingProcess->waitingTime = ticks;
-                    remove(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
-                    mostWaitingProcess->priority = MAX_PRIORITY - 1;
-                    insert(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
-                    scheduler->mostWaitingProcessPID = EMPTY_PID;
-                    scheduler->mostWaitingProcessTime = ticks;
-                    /*update the waiting time for each process*/
-                    updateMostWaitingProcess();
+                    if (ticks - scheduler->mostWaitingProcessTime > MAX_WAITING_TIME)
+                    {
+                        mostWaitingProcess->waitingTime = ticks;
+                        remove(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
+                        mostWaitingProcess->priority = MAX_PRIORITY - 1;
+                        insert(scheduler->queue[mostWaitingProcess->priority], mostWaitingProcess);
+                        scheduler->mostWaitingProcessPID = EMPTY_PID;
+                        scheduler->mostWaitingProcessTime = ticks;
+                        updateMostWaitingProcess();
+                    }
                 }
             }
+
             void *newRsp = changeProcess(rsp);
-            /* waiting time is set when process starts to run */
-            scheduler->currentProcess->waitingTime = ticks;
-            if (scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID)
-            {
-                updateMostWaitingProcess();
+            
+            if (scheduler->autoPriority){
+                scheduler->currentProcess->waitingTime = ticks;
+                if (scheduler->currentProcess->pid == scheduler->mostWaitingProcessPID)
+                {
+                    updateMostWaitingProcess();
+                }
             }
             return newRsp;
         }
     }
     return rsp;
+}
+
+void setAutoPrio(char autoPrio){
+    scheduler->autoPriority = autoPrio;
 }
 
 void updateMostWaitingProcess()
@@ -240,7 +318,14 @@ void *changeProcess(void *rsp)
 Process getNextProcess()
 {
     int currentPriority = MAX_PRIORITY - 1;
-    while (currentPriority >= 0)
+    if (!scheduler->autoPriority){
+        currentPriority = scheduler->priorityTickets[scheduler->ticketsIndex++];
+        if (scheduler->ticketsIndex == scheduler->priorityTicketsSize){
+            scheduler->ticketsIndex = 0;
+        }
+    }
+    int prioritiesVisited = 0;
+    while (prioritiesVisited < MAX_PRIORITY)
     {
         resetIterator(scheduler->it[currentPriority]);
         while (hasNext(scheduler->it[currentPriority]))
@@ -252,6 +337,11 @@ Process getNextProcess()
             }
         }
         currentPriority--;
+        if (currentPriority < 0)
+        {
+            currentPriority = MAX_PRIORITY - 1;
+        }
+        prioritiesVisited++;
     }
     return scheduler->empty;
 }

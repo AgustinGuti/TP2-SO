@@ -38,7 +38,7 @@ typedef struct commandCDT
     char test;
 } commandCDT;
 
-#define COMMAND_QTY 28
+#define COMMAND_QTY 29
 
 static commandCDT commands[COMMAND_QTY] = {
     {"help", help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1, 0},
@@ -69,6 +69,7 @@ static commandCDT commands[COMMAND_QTY] = {
     {"test-no-sync", callTestNoSync, 1, 1, "Ejecuta el test sin un mecanismo de sincronizacion.", 1, 1},
     {"test-processes", testProcesses, 1, 1, "Ejecuta el test de procesos.", 1, 1},
     {"test-prio", testPrio, 0, 0, "Ejecuta el test de prioridades.", 1, 1},
+    {"set-auto-prio", setAutoPrio, 1, 1, "Activa o desactiva el cambio automatico de prioridad. Recibe 1 para activarlo y 0 para descativarlo", 1, 0},
 };
 
 int startConsole()

@@ -48,5 +48,6 @@ void *_sys_realloc(void *ptr, uint64_t newSize);
 Pipe _sys_openProcessPipe(char *name, int fds[2]);
 int _sys_closeProcessPipe(int fd);
 void _sys_sleep(int millis);
+void _sys_setAutoPrio(char autoPrio);
 
 #endif

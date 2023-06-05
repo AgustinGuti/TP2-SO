@@ -9,7 +9,7 @@
 #include "time.h"
 #include "pipes.h"
 
-#define BURST_TIME 10
+#define BURST_TIME 5
 #define MAX_WAITING_TIME 250
 
 typedef struct ProcessCDT *Process;
