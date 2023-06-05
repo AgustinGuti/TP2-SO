@@ -31,7 +31,7 @@ void clearScreen();
 void drawLine(pxlCoord initial, pxlCoord final, uint32_t color);
 void drawRect(pxlCoord coord, uint32_t color, uint16_t width, uint16_t height);
 
-void printStringLimited(uint32_t color, uint8_t *str, uint32_t count);
+void printStringLimited(uint32_t color, char *str, uint32_t count);
 void printString(uint32_t color, char *str);
 void putChar(uint32_t color, uint16_t id);
 

@@ -154,7 +154,7 @@ void startPage()
 	pageStarted = 1;
 }
 
-void printStringLimited(uint32_t color, uint8_t *str, uint32_t count)
+void printStringLimited(uint32_t color, char *str, uint32_t count)
 {
 	if (pageStarted == 0)
 	{
