@@ -20,7 +20,7 @@ typedef int pid_t;
 void initScheduler();
 void closeScheduler();
 void *schedule(void *stackPointer);
-pid_t execve(void *entryPoint, Pipe *pipes, char pipeQty, char * argv[]);
+pid_t execve(void *entryPoint, Pipe *pipes, char pipeQty, char *argv[]);
 void printProcesses(char showKilled);
 pid_t getpid();
 void yield();
@@ -36,5 +36,6 @@ pid_t waitpid(pid_t pid);
 Process getCurrentProcess();
 void sleep(int millis);
 Process getProcess(pid_t pid);
+void setAutoPrio(char autoPrio);
 
 #endif /* SCHEDULER_H */

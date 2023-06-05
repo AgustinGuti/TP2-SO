@@ -109,8 +109,9 @@ void sleep(int sec)
     _sys_sleep(sec * 1000);
 }
 
-void setAutoPrio(char argc, char **argv)
+char setAutoPrio(char argc, char **argv)
 {
     char value = strToNum(argv[0], strlen(argv[0]));
     _sys_setAutoPrio(value);
+    return 0;
 }

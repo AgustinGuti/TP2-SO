@@ -20,6 +20,6 @@ char wc(char argc, char **argv);
 char filter(char argc, char **argv);
 char loop(char argc, char **argv);
 void sleep(int sec);
-void setAutoPrio(char argc, char **argv);
+char setAutoPrio(char argc, char **argv);
 
 #endif
