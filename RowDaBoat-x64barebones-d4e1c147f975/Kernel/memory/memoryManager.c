@@ -83,7 +83,7 @@ void *allocMemory(MemoryManagerADT const memoryManager, const uint64_t memoryToA
 		}
 		currentFreeBlock = currentFreeBlock->nextBlock;
 	}
-	printBlocks(memoryManager);
+	// printBlocks(memoryManager);
 	return NULL;
 }
 
@@ -197,7 +197,6 @@ void addBlockToFreeList(MemoryManagerADT const memoryManager, void *const startA
 		prevBlock = prevBlock->prevBlock;
 	}
 
-	auxBlock = newBlock;
 	while (auxBlock->nextBlock != NULL && (uint64_t)auxBlock->startAddress + auxBlock->size == (uint64_t)auxBlock->nextBlock)
 	{
 		auxBlock->size += auxBlock->nextBlock->size + sizeof(MemoryBlock);
