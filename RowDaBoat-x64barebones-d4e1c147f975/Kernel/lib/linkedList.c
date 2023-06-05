@@ -167,63 +167,6 @@ void remove(LinkedList list, void *data)
     }
 }
 
-void *removeFirst(LinkedList list)
-{
-    if (list == NULL)
-    {
-        return NULL;
-    }
-    NodeCTD *current = list->head;
-    if (current == NULL)
-        return NULL;
-
-    if (current == list->head)
-        list->head = current->next;
-
-    if (current == list->tail)
-        list->tail = current->prev;
-
-    if (current->prev != NULL)
-        current->prev->next = current->next;
-
-    if (current->next != NULL)
-        current->next->prev = current->prev;
-
-    list->size--;
-    return current->data;
-}
-
-void switchList(LinkedList origin, LinkedList dest)
-{
-    if (origin == NULL || dest == NULL)
-        return;
-    NodeCTD *current = origin->head;
-    if (current == NULL)
-        return;
-
-    if (current == origin->head)
-        origin->head = current->next;
-
-    if (current == origin->tail)
-        origin->tail = current->prev;
-
-    if (current->prev != NULL)
-        current->prev->next = current->next;
-
-    if (current->next != NULL)
-        current->next->prev = current->prev;
-
-    if (dest->tail != NULL)
-        dest->tail->next = current;
-    dest->tail = current;
-
-    if (dest->head == NULL)
-        dest->head = current;
-
-    dest->size++;
-    origin->size--;
-}
-
 // Function to get an element at a specific index
 void *get(LinkedList list, int index)
 {
@@ -364,25 +307,6 @@ void moveToBack(LinkedList list, void *data)
             return;
         }
         current = current->next;
-    }
-}
-
-// Function to move the head of the linked list to the back
-void headToBack(LinkedList list)
-{
-    if (list == NULL)
-    {
-        return;
-    }
-    if (list->head != NULL && list->head != list->tail)
-    {
-        NodeCTD *newTail = list->head;
-        list->head = list->head->next;
-        list->head->prev = NULL;
-        list->tail->next = newTail;
-        newTail->prev = list->tail;
-        newTail->next = NULL;
-        list->tail = newTail;
     }
 }
 

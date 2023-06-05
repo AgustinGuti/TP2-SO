@@ -10,8 +10,8 @@
 #include "pipes.h"
 
 #define STACK_SIZE 4096
-#define BURST_TIME 50
-#define MAX_WAITING_TIME 100
+#define BURST_TIME 10
+#define MAX_WAITING_TIME 500
 
 typedef struct ProcessCDT *Process;
 
@@ -31,11 +31,11 @@ void killForegroundProcess();
 pid_t blockHandler(pid_t pid);
 void blockProcess(pid_t pid);
 void unblockProcess(pid_t pid);
-int getProcessState(pid_t pid);
 int nice(pid_t pid, int priority);
 void startWrapper(void *entryPoint, char argc, char *argv[]);
 pid_t waitpid(pid_t pid);
 Process getCurrentProcess();
 void sleep(int millis);
+Process getProcess(pid_t pid);
 
 #endif /* SCHEDULER_H */

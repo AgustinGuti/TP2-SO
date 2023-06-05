@@ -107,6 +107,18 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     process->pipeTypes[STDIN] = READ;
     process->pipeTypes[STDOUT] = WRITE;
 
+    Process parent = getProcess(parentPID);
+    if (parent != NULL){
+        if (parent->fds[STDIN] != NULL){
+            process->fds[STDIN] = parent->fds[STDIN];
+            process->pipeTypes[STDIN] = parent->pipeTypes[STDIN];
+        }
+        if (parent->fds[STDOUT] != NULL){
+            process->fds[STDOUT] = parent->fds[STDOUT];
+            process->pipeTypes[STDOUT] = parent->pipeTypes[STDOUT];
+        }
+    }
+
     if (pipeQty > 0)
     {
         if (pipes[0] != NULL)
@@ -390,4 +402,12 @@ void closePipes(Process process)
             closePipe(process->fds[i]);
         }
     }
+}
+
+int getProcessState(Process process){
+    if (process == NULL)
+    {
+        return -1;
+    }
+    return process->state;
 }

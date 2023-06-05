@@ -25,7 +25,6 @@ int scanf(const char *fmt, int argQty, ...);
 char cleanScreen(char argc, char **argv);
 
 void formatPrint(const char *fmt, uint32_t color, uint16_t row, uint16_t col, int argQty, ...);
-void printFormatChar(char character, uint32_t color, uint16_t row, uint16_t col);
 void printFormatText(char *str, uint32_t color, uint16_t row, uint16_t col);
 
 #endif

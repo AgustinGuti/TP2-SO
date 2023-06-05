@@ -62,6 +62,7 @@ typedef struct ProcessCDT
     char argc;
     char hasStack;
     char exitValue;
+    
 } ProcessCDT;
 
 typedef struct ProcessCDT *Process;
@@ -76,5 +77,6 @@ int writeProcessPipe(int fd, char *buffer, int size);
 void deleteProcess(Process process);
 void closePipes(Process process);
 void restartProcessPID();
+int getProcessState(Process process);
 
 #endif

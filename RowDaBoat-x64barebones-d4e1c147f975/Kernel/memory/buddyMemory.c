@@ -204,10 +204,6 @@ void *allocMemoryRec(MemoryManagerADT buddy, uint64_t size, uint64_t bit, int64_
     return (void *)((uint64_t)buddy->initialDirection + (uint64_t)getBlockStart(buddy, bit));
 }
 
-void printMemoryState()
-{
-}
-
 void *allocMemory(MemoryManagerADT buddy, uint64_t size, uint64_t *allocatedMemorySize)
 {
     void *res = allocMemoryRec(buddy, size, 0, allocatedMemorySize);

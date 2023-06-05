@@ -279,7 +279,7 @@ void eat(int phil)
 {
     // long for so it takes a while
     int i = 0;
-    while (i < 1000000)
+    while (i < 10000000)
     {
         i++;
     }
@@ -295,7 +295,7 @@ void think(int phil)
 {
     // long for so it takes a while
     int i = 0;
-    while (i < 1000000)
+    while (i < 10000000)
     {
         i++;
     }

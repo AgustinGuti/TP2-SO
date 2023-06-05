@@ -207,11 +207,6 @@ int scanf(const char *fmt, int argQty, ...)
 	return totalReadChars;
 }
 
-void sendEOF()
-{
-	char buf[1] = {EOF};
-	_sys_write(1, buf, 1);
-}
 
 void formatPrint(const char *fmt, uint32_t color, uint16_t row, uint16_t col, int argQty, ...)
 {

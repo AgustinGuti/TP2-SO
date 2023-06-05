@@ -4,6 +4,5 @@
 
 void timer_handler();
 uint32_t ticks_elapsed();
-uint32_t seconds_elapsed();
 uint32_t getMillis();
 #endif

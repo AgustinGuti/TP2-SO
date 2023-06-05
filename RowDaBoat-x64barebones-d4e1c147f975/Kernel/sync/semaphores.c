@@ -228,7 +228,7 @@ void semPost(sem_t sem)
             free(pid);
             pid = NULL;
             leaveCritical();
-            if (getProcessState(pidToUnblock) == BLOCKED){
+            if (getProcessState(getProcess(pidToUnblock)) == BLOCKED){
                 unblockProcess(pidToUnblock);
                 done = 1;
             }

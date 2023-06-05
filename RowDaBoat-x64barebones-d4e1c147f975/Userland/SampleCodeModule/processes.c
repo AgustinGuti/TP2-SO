@@ -4,7 +4,7 @@
 
 #define EOF -1
 
-#define IS_VOWEL(c) ((c) == 'a' || (c) == 'e' || (c) == 'i' || (c) == 'o' || (c) == 'u')
+#define IS_VOWEL(c) ((c) == 'a' || (c) == 'e' || (c) == 'i' || (c) == 'o' || (c) == 'u' || (c) == 'A' || (c) == 'E' || (c) == 'I' || (c) == 'O' || (c) == 'U')
 
 int execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
 {
@@ -62,7 +62,7 @@ char cat(char argc, char **argv)
     int c;
     while ((c = getChar()) != EOF)
     {
-        printf("%c", c);
+        printf("%c'", c);
     };
     return 0;
 }

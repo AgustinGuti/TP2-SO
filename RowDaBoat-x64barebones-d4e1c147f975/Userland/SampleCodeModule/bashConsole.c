@@ -52,7 +52,7 @@ static commandCDT commands[COMMAND_QTY] = {
     {"exit", exitConsole, 0, 0, "Termina la ejecucion de la consola.", 0, 0},
     {"malloc", callMalloc, 1, 1, "Reserva una cantidad de memoria dada por parametro.", 1, 0},
     {"free", callFree, 1, 1, "Libera la memoria reservada en la direccion dada por parametro.", 1, 0},
-    {"ps", printProcesses, 1, 0, "Imprime en pantalla los procesos en ejecucion.", 1, 0},
+    {"ps", printProcesses, 1, 0, "Imprime en pantalla los procesos en ejecucion. El argumento '-k' muestra los procesos eliminados", 1, 0},
     {"mem", callGetMemoryStatus, 0, 0, "Imprime en pantalla el estado de la memoria.", 1, 0},
     {"block", callBlock, 1, 1, "Bloquea un proceso dado por parametro.", 1, 0},
     {"kill", callKill, 1, 1, "Elimina un proceso dado por parametro.", 1, 0},
@@ -94,7 +94,7 @@ int startConsole()
                     {
                         exit = parseAndExecuteCommands(commandBuffer, commandBufferPos);
                         if(!exit){
-                            printText(LINE_INDICATOR);
+                            printf("\n%s", LINE_INDICATOR);
                         }
                         for (int arg_idx = 0; arg_idx < commandBufferPos; arg_idx++)
                         { // Clear buffer

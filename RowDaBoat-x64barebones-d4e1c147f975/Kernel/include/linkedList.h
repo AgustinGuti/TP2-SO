@@ -19,12 +19,9 @@ int hasNext(Iterator iterator);
 void *next(Iterator iterator);
 int getSize(LinkedList list);
 void freeIterator(Iterator iterator);
-void headToBack(LinkedList list);
 void resetIterator(Iterator iterator);
 void moveToBack(LinkedList list, void *data);
 void printList(LinkedList list);
-void *removeFirst(LinkedList list);
-void switchList(LinkedList origin, LinkedList dest);
 void *findItem(LinkedList list, void *data, int (*comparator)(void *, void *));
 void freeLinkedList(LinkedList list);
 

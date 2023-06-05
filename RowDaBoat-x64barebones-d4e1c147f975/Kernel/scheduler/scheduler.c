@@ -447,15 +447,6 @@ void unblockProcess(pid_t pid)
     unblockProcessFromProcess(process);
 }
 
-int getProcessState(pid_t pid){
-    Process process = getProcess(pid);
-    if (process == NULL)
-    {
-        return -1;
-    }
-    return process->state;
-}
-
 
 void unblockProcessFromProcess(Process process)
 {
