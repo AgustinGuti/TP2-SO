@@ -17,8 +17,8 @@
 #define READY_CALLS 34 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
-void sys_write(int fd, const char *buf, uint64_t count);
-int sys_read(int fd, const char *buf, uint32_t count);
+void sys_write(int fd, char *buf, uint64_t count);
+int sys_read(int fd, char *buf, uint32_t count);
 void sys_drawSprite(uint16_t xTopLeft, uint16_t yTopLeft, uint16_t width, uint16_t height, uint8_t sprite[height][width * getScreenBpp() / 8]);
 uint32_t sys_getMillis();
 void sys_cleanScreen();
@@ -28,12 +28,12 @@ void sys_beep(uint16_t frequency);
 void sys_getTime(int *hour, int *min, int *seg);
 void sys_setFontSize(uint8_t size, uint8_t rewrite);
 uint8_t sys_getFontSize();
-void sys_formatWrite(int fd, const char *buf, uint64_t count, uint32_t color, uint16_t row, uint16_t col);
+void sys_formatWrite(int fd, char *buf, uint64_t count, uint32_t color, uint16_t row, uint16_t col);
 uint8_t sys_getScreenBpp();
 char sys_getSavedRegisters(uint64_t registers[REGISTER_QTY]);
 void *sys_malloc(uint64_t size);
 uint64_t sys_free(void *ptr);
-int sys_execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[]);
+int sys_execve(void *entryPoint, Pipe *pipes, char pipeQty, char *argv[]);
 void sys_printProcesses(char showKilled);
 void sys_exit(int status);
 void sys_yield();
@@ -89,7 +89,7 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_realloc};
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
-extern void _speaker_tune(uint16_t tune);
+extern void _speaker_tone(uint16_t tune);
 extern void _speaker_off();
 extern void _hlt();
 
@@ -102,13 +102,13 @@ void setupSysCalls()
     _setupSysCalls(READY_CALLS, sysCalls);
 }
 
-void sys_write(int fd, const char *buf, uint64_t count)
+void sys_write(int fd, char *buf, uint64_t count)
 {
-    return writeProcessPipe(fd, buf, count);
+    writeProcessPipe(fd, buf, count);
 }
 
 // Read up to count chars to buf, returns amount of chars
-int sys_read(int fd, const char *buf, uint32_t count)
+int sys_read(int fd, char *buf, uint32_t count)
 {
     return readProcessPipe(fd, buf, count);
 }
@@ -132,7 +132,7 @@ void *sys_realloc(void *ptr, uint64_t newSize)
     return realloc(ptr, newSize);
 }
 
-int sys_execve(void *entryPoint, Pipe *pipes, char pipeQty, char *const argv[])
+int sys_execve(void *entryPoint, Pipe *pipes, char pipeQty, char *argv[])
 {
     return execve(entryPoint, pipes, pipeQty, argv);
 }
@@ -212,7 +212,7 @@ void sys_getTime(int *hour, int *min, int *seg)
     *seg = get_seconds();
 }
 
-void sys_formatWrite(int fd, const char *buf, uint64_t count, uint32_t color, uint16_t row, uint16_t col)
+void sys_formatWrite(int fd, char *buf, uint64_t count, uint32_t color, uint16_t row, uint16_t col)
 {
     switch (fd)
     {
@@ -297,7 +297,7 @@ Pipe sys_openProcessPipe(char *name, int fds[2])
 
 int sys_closeProcessPipe(int fd)
 {
-    closeProcessPipe(fd);
+    return closeProcessPipe(fd);
 }
 
 void sys_sleep(int millis)

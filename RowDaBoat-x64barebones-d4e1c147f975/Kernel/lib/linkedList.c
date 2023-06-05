@@ -85,7 +85,7 @@ void insert(LinkedList list, void *data)
 {
     if (list == NULL)
     {
-        return NULL;
+        return;
     }
     Node newNode = NULL;
     if (list->freeNodes)
@@ -126,7 +126,7 @@ void remove(LinkedList list, void *data)
 {
     if (list == NULL)
     {
-        return NULL;
+        return;
     }
     NodeCTD *current = list->head;
     while (current != NULL)
