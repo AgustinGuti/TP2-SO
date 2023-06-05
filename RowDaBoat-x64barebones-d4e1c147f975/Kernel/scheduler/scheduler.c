@@ -102,7 +102,6 @@ void closeScheduler()
     deleteProcess(scheduler->empty);
     free(scheduler);
     scheduler = NULL;
-
 }
 
 void *schedule(void *rsp)
@@ -182,7 +181,6 @@ void *schedule(void *rsp)
 
 void updateMostWaitingProcess()
 {
-    int currentPriority = scheduler->currentProcess->priority;
     for (int i = 0; i < MAX_PRIORITY; i++)
     {
         /* add 1 to waitingtime for each process*/
