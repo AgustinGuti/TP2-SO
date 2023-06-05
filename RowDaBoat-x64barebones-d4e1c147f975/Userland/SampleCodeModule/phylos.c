@@ -131,23 +131,27 @@ void addPhilo()
     if (philoQty > currentMax)
     {
         currentMax *= 2;
-        state = (int *)realloc(state, currentMax * sizeof(int));
-        if (state == NULL)
+        int *newState = (int *)realloc(state, currentMax * sizeof(int));
+        if (newState == NULL)
         {
             printf("Error reallocating memory for state\n");
             free(state);
             return;
         }
-        philoSemaphores = (sem_t *)realloc(philoSemaphores, currentMax * sizeof(sem_t));
-        if (philoSemaphores == NULL)
+        state = newState;
+
+        sem_t *newPhiloSemaphores = (sem_t *)realloc(philoSemaphores, currentMax * sizeof(sem_t));
+        if (newPhiloSemaphores == NULL)
         {
             printf("Error reallocating memory for philoSemaphores\n");
             free(state);
             free(philoSemaphores);
             return;
         }
-        philosophersPID = (pid_t *)realloc(philosophersPID, currentMax * sizeof(pid_t));
-        if (philosophersPID == NULL)
+        philoSemaphores = newPhiloSemaphores;
+
+        pid_t *newPhilosophersPID = (pid_t *)realloc(philosophersPID, currentMax * sizeof(pid_t));
+        if (newPhilosophersPID == NULL)
         {
             printf("Error reallocating memory for philosophersPID\n");
             free(state);
@@ -155,8 +159,10 @@ void addPhilo()
             free(philosophersPID);
             return;
         }
-        timesEaten = (int *)realloc(timesEaten, currentMax * sizeof(int));
-        if (timesEaten == NULL)
+        philosophersPID = newPhilosophersPID;
+
+        int *newTimesEaten = (int *)realloc(timesEaten, currentMax * sizeof(int));
+        if (newTimesEaten == NULL)
         {
             printf("Error reallocating memory for timesEaten\n");
             free(state);
@@ -165,6 +171,7 @@ void addPhilo()
             free(timesEaten);
             return;
         }
+        timesEaten = newTimesEaten;
     }
     state[philoQty - 1] = THINKING;
     if ((philoSemaphores[philoQty - 1] = semOpen(NULL, 1)) == NULL)
@@ -176,7 +183,11 @@ void addPhilo()
 
     char foreground[2] = "0";
     char **args = malloc(4 * sizeof(char *));
-
+    if (args == NULL)
+    {
+        printf("Error allocating memory for args\n");
+        return;
+    }
     args[0] = malloc(12 * sizeof(char));
     if (args[0] == NULL)
     {
