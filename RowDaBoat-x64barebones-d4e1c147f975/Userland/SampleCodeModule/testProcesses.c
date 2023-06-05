@@ -60,7 +60,6 @@ char testProcesses(char argc, char *argv[])
             for (rq = 0; rq < max_processes; rq++)
             {
                 action = GetUniform(100) % 2;
-
                 switch (action)
                 {
                 case 0:

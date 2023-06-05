@@ -80,6 +80,8 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     {
         /*not enough memory for process->stack*/
         free(process->name);
+        free(process->fds);
+        free(process->pipeTypes);
         free(process);
         printf("not enough memory for process->stack\n");
         return NULL;
@@ -168,6 +170,11 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         argvAux = (char **)malloc((argc) * sizeof(char *));
         if (argvAux == NULL)
         {
+            free(process->name);
+            free(process->fds);
+            free(process->pipeTypes);
+            free(process->stack);
+            free(process);
             return NULL;
         }
     }

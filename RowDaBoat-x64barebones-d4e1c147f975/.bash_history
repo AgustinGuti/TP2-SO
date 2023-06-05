@@ -29,13 +29,6 @@ make all
 make all
 make all
 make all
-make all
-make all
-make all
-make all
-make all
-make all
-make all
 make clean
 make all
 make all
@@ -498,3 +491,10 @@ plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o report.tasks PVS-S
 pvs-studio-analyzer trace -- make
 pvs-studio-analyzer analyze
 pvs-studio-analyzer trace -- make
+gdb
+cd ~
+gdb
+q
+exit
+cd ~
+exit

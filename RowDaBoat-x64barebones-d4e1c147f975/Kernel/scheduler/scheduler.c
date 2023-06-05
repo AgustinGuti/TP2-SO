@@ -36,7 +36,7 @@ typedef struct SchedulerCDT
     Iterator itDeleted;
     Process currentProcess;
     Process empty;
-    char skipPID;
+    pid_t skipPID;
     int quantum;
     int quantumCounter;
     char skipQuantum;

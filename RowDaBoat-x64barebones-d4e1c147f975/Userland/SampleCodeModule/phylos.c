@@ -10,7 +10,8 @@
 #define HUNGRY 1
 #define EATING 2
 
-#define BLOCK 5
+#define BLOCK 10
+#define INITIAL_PHILO_QTY 5
 
 void philosopher(char argc, char **argv);
 void take_forks(int i);
@@ -82,7 +83,7 @@ char phylos(char argc, char **argv)
         return 1;
     }
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < INITIAL_PHILO_QTY ; i++)
     {
         addPhilo();
     }
