@@ -32,7 +32,7 @@ void drawLine(pxlCoord initial, pxlCoord final, uint32_t color);
 void drawRect(pxlCoord coord, uint32_t color, uint16_t width, uint16_t height);
 
 void printStringLimited(uint32_t color, uint8_t *str, uint32_t count);
-void printString(uint32_t color, uint8_t *str);
+void printString(uint32_t color, char *str);
 void putChar(uint32_t color, uint16_t id);
 
 void printFormatStringLimited(uint32_t color, const char *str, uint32_t count, uint16_t row, uint16_t col);
@@ -50,7 +50,6 @@ void backspace();
 void cleanScreen();
 void clearCharBuffer();
 void startPage();
-void sendEOF();
 
 /*
     Draws draws width * height * bpp/8 bytes from sprite to the screen, begining in coord.

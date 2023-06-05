@@ -190,7 +190,7 @@ void updateMostWaitingProcess()
         while (hasNext(scheduler->it[i]))
         {
             Process proc = next(scheduler->it[i]);
-            if (proc->waitingTime < scheduler->mostWaitingProcessTime && proc->pid >= 0 || scheduler->mostWaitingProcessPID == EMPTY_PID && proc->pid != KERNEL_PID)
+            if ((proc->waitingTime < scheduler->mostWaitingProcessTime && proc->pid >= 0) || (scheduler->mostWaitingProcessPID == EMPTY_PID && proc->pid != KERNEL_PID))
             {
                 scheduler->mostWaitingProcessPID = proc->pid;
                 scheduler->mostWaitingProcessTime = proc->waitingTime;

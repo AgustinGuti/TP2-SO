@@ -11,7 +11,7 @@
 
 #define STACK_SIZE 4096
 #define BURST_TIME 10
-#define MAX_WAITING_TIME 500
+#define MAX_WAITING_TIME 250
 
 typedef struct ProcessCDT *Process;
 

@@ -25,6 +25,9 @@ enum
 #define GREEN 0x0000FF00
 
 static pid_t currentPID = KERNEL_PID; // Static variable to track the current PID
+pid_t generatePID();
+void pushToStack(Process process, uint64_t value);
+
 
 Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t parentPID)
 {
@@ -83,12 +86,6 @@ Process initProcess(char *name, uint8_t priority, uint8_t foreground, pid_t pare
     }
     process->stackBase = process->stack + STACK_SIZE;
     process->stackPointer = process->stackBase;
-    process->fds[STDIN] = STDIN;
-    process->fds[STDOUT] = STDOUT;
-    for (int i = 2; i < process->fdLimit; i++)
-    {
-        process->fds[i] = -1;
-    }
 
     return process;
 }
@@ -141,7 +138,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
             process->fdLimit *= 2;
             realloc(process->fds, process->fdLimit * sizeof(Pipe));
             realloc(process->pipeTypes, process->fdLimit * sizeof(PipeType));
-            return -10;
+            return NULL;
         }
         process->fds[j] = pipes[j];
         process->pipeTypes[j] = j % 2 == 0 ? READ : WRITE;
@@ -190,16 +187,16 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     // argvAux[argc] = NULL;
 
     pushToStack(process, 0x0);                // ss
-    pushToStack(process, process->stackBase); // stackPointer
+    pushToStack(process, (uint64_t)process->stackBase); // stackPointer
     pushToStack(process, 0x202);              // rflags
     pushToStack(process, 0x8);                // cs
-    pushToStack(process, startWrapper);       // rip
+    pushToStack(process, (uint64_t)startWrapper);       // rip
 
     for (int i = 0; i < 15; i++)
     { // push 15 registries
         if (i == RDI)
         {
-            pushToStack(process, entryPoint);
+            pushToStack(process, (uint64_t)entryPoint);
         }
         else if (i == RSI)
         {
@@ -207,7 +204,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         }
         else if (i == RDX)
         {
-            pushToStack(process, argvAux);
+            pushToStack(process, (uint64_t)argvAux);
         }
         else
         {

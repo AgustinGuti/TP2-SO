@@ -126,7 +126,7 @@ void *reallocMemory(MemoryManagerADT const memoryManager, void *const memoryToRe
 	{
 		return NULL;
 	}
-	void *newMemory = allocMemory(memoryManager, newSize, allocatedMemorySize);
+	void *newMemory = allocMemory(memoryManager, newSize, (uint64_t *)allocatedMemorySize);
 	if (newMemory == NULL)
 	{
 		return NULL;

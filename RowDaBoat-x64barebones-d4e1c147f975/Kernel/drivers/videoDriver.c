@@ -167,7 +167,7 @@ void printStringLimited(uint32_t color, uint8_t *str, uint32_t count)
 	}
 }
 
-void printString(uint32_t color, uint8_t *str)
+void printString(uint32_t color, char *str)
 {
 	if (pageStarted == 0)
 	{

@@ -15,7 +15,7 @@ static void printRegs(uint64_t *registers);
 static const char *registerNames[CANT_REGISTERS] = {
 		"RAX", "RBX", "RCX", "RDX", "RSI", "RDI", "RBP", "R8 ", "R9 ", "R10", "R11", "R12", "R13", "R14", "R15", "RSP", "RIP"};
 
-static const uint64_t (*exceptions[])() = {&zeroDivision, &other, &other, &other, &other, &other, &invalidOpcode};
+static void (*exceptions[])(uint64_t *registers) = {&zeroDivision, &other, &other, &other, &other, &other, &invalidOpcode};
 
 void exceptionDispatcher(int exception, uint64_t registers[CANT_REGISTERS])
 {
@@ -49,7 +49,6 @@ static void invalidOpcode(uint64_t *registers)
 	printRegs(registers);
 	newline();
 	_sti();
-	printProcesses(1);
 }
 
 static void other(uint64_t *registers)

@@ -2,19 +2,19 @@
 #define PROCESS_H
 
 #include <stdint.h>
-#include "memory.h"
+#include <memory.h>
 #include "functions.h"
 #include <semaphores.h>
 #include <videoDriver.h>
 #include <keyboard.h>
-#include "pipes.h"
+#include <pipes.h>
+#include <interrupts.h>
 
 // Forward declaration for Pipe type
 typedef struct PipeCDT PipeCDT;
 typedef PipeCDT *Pipe;
 
 #define STACK_SIZE 4096
-#define PIPE_SIZE 1024
 #define INITIAL_FD_LIMIT 10
 
 #define MAX_PRIORITY 4
