@@ -126,8 +126,8 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     {
         if (j > process->fdLimit)
         {
-            //TODO realloc
-           // freeProcess(process);
+            // TODO realloc
+            // freeProcess(process);
             return -10;
         }
         process->fds[j] = pipes[j];
@@ -152,7 +152,6 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         }
     }
 
-
     char **argvAux = NULL;
     if (argc > 0)
     {
@@ -175,8 +174,7 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
         }
         strcpy(argvAux[i], argv[i]);
     }
-   // argvAux[argc] = NULL;
-
+    // argvAux[argc] = NULL;
 
     pushToStack(process, 0x0);                // ss
     pushToStack(process, process->stackBase); // stackPointer
@@ -303,7 +301,7 @@ int writeProcessPipe(int fd, char *buffer, int size)
     if (process->fds[fd] == process->stdio)
     {
         int index = 0;
-        while (buffer[index] != 0 && index < size && buffer[0] != -1)
+        while (index < size && buffer[index] != 0 && buffer[0] != -1)
         {
             if (buffer[index] == -1)
             {

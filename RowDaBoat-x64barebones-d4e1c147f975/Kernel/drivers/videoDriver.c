@@ -161,7 +161,7 @@ void printStringLimited(uint32_t color, uint8_t *str, uint32_t count)
 		startPage();
 	}
 	int i = 0;
-	while (str[i] != 0 && i < count)
+	while (i < count && str[i] != 0)
 	{
 		putChar(color, str[i++]);
 	}
@@ -368,7 +368,6 @@ void printFormatStringLimited(uint32_t color, const char *str, uint32_t count, u
 	}
 	uint8_t *aux = currentCharOffset;
 	currentCharOffset = getPixelOffset((pxlCoord){col * CHAR_WIDTH * fontSize, row * CHAR_HEIGHT * fontSize});
-	int i = 0;
 	printStringLimited(color, str, count);
 	currentCharOffset = aux;
 }
@@ -395,7 +394,6 @@ void drawSprite(uint16_t width, uint16_t height, uint8_t sprite[height][width * 
 void backspace()
 {
 	uint8_t bpp = getScreenBpp();
-	uint16_t pitch = getScreenPitch();
 	currentCharOffset -= CHAR_WIDTH * fontSize * (bpp / 8);
 	putChar(0x000000, ' ');
 	currentCharOffset -= CHAR_WIDTH * fontSize * (bpp / 8);
@@ -424,7 +422,6 @@ void rollUp()
 	}
 
 	uint16_t pitch = getScreenPitch();
-	uint16_t screenWidth = getScreenWidth();
 	uint16_t charPixelHeight = CHAR_HEIGHT * fontSize;
 
 	uint32_t nextLineDelta = pitch * charPixelHeight;

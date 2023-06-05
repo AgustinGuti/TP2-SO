@@ -36,7 +36,6 @@ void *getStackBase()
 
 void *initializeKernelBinary()
 {
-	char buffer[10];
 	void *moduleAddresses[] = {
 			sampleCodeModuleAddress,
 			sampleDataModuleAddress};
@@ -62,7 +61,7 @@ int main()
 													(void *)MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE),
 													(void *)MEMORY_INITIAL_DIRECTION,
 													(void *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
-	
+
 	uint64_t *memStatus = getMemoryStatus();
 	uint64_t occupiedMemory = memStatus[1];
 
@@ -80,6 +79,6 @@ int main()
 
 	printerr("Memoria perdida: %x\n", memStatus[1] - occupiedMemory);
 
-	//drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
+	// drawRect((pxlCoord){0, 0}, 0x00FF00, getScreenWidth(), getScreenHeight()); // Execution has ended succesfully
 	return 0;
 }

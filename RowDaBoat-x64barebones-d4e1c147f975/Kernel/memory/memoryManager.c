@@ -111,7 +111,7 @@ uint64_t freeMemory(MemoryManagerADT const memoryManager, void *const memoryToFr
 				currentOccupiedBlock->nextBlock->prevBlock = currentOccupiedBlock->prevBlock;
 			}
 			uint64_t size = currentOccupiedBlock->size;
-			//printf("free %x\n", size);
+			// printf("free %x\n", size);
 			addBlockToFreeList(memoryManager, memoryToFree, currentOccupiedBlock->size);
 			return size + sizeof(MemoryBlock);
 		}
@@ -262,7 +262,7 @@ void printBlocks(MemoryManagerADT const memoryManager)
 	MemoryBlock *currentFreeBlock = memoryManager->firstFreeBlock;
 	while (currentFreeBlock != NULL)
 	{
-		printf("Free Block Start address: %x, size: %x\n", currentFreeBlock->startAddress, currentFreeBlock->size);
+		printf("Free Block Start address: %x, size: %x\n", (uint64_t)currentFreeBlock->startAddress, currentFreeBlock->size);
 		currentFreeBlock = currentFreeBlock->nextBlock;
 	}
 	printf("\n");
@@ -271,7 +271,7 @@ void printBlocks(MemoryManagerADT const memoryManager)
 	MemoryBlock *currentOccupiedBlock = memoryManager->firstOccupiedBlock;
 	while (currentOccupiedBlock != NULL)
 	{
-		printf("Occupied Block Start address: %x, size: %x\n", currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
+		printf("Occupied Block Start address: %x, size: %x\n", (uint64_t)currentOccupiedBlock->startAddress, currentOccupiedBlock->size);
 		currentOccupiedBlock = currentOccupiedBlock->nextBlock;
 	}
 	printf("DONE\n");

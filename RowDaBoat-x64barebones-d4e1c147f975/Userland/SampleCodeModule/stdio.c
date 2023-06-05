@@ -112,7 +112,7 @@ void putChar(char character)
 int getChar()
 {
 	char buf[1] = {0};
-    char c = _sys_read(0, buf, 1);
+	_sys_read(0, buf, 1);
 	if (buf[0] == -1)
 	{
 		return EOF;
