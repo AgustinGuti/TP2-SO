@@ -173,10 +173,6 @@ SECTION .text
 	cmp rdx, 0x400000	; start of userland
 	jge .retKernel
 
-	mov rdi, exceptionText
-	mov rsi, %1 ; exception number
-	call printf
-
 .loop:
 	call haltcpu
 	jmp .loop	

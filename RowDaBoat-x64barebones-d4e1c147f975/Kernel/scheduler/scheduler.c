@@ -39,7 +39,6 @@ void deleteProcessesFromList(LinkedList list);
 void killKernel();
 
 static char ready = 0;
-static uint64_t counter = 0;
 
 void initScheduler()
 {
@@ -100,6 +99,7 @@ void closeScheduler()
     freeIterator(scheduler->itSleepingProcesses);
     destroyLinkedList(scheduler->sleepingProcesses);
     deleteProcess(scheduler->empty);
+    restartProcessPID();
     free(scheduler);
     scheduler = NULL;
 }
@@ -488,9 +488,6 @@ void killKernel()
 
 pid_t killProcess(pid_t pid)
 {
-    printf("Killing process %d\n", pid);
-    printProcesses(0);
-
     if (pid == KERNEL_PID || pid == EMPTY_PID)
     {
         printerr("No es posible matar el kernel.\n");

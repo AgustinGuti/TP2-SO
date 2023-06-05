@@ -214,6 +214,10 @@ Process createProcess(char *name, void *entryPoint, uint8_t priority, uint8_t fo
     return process;
 }
 
+void restartProcessPID(){
+    currentPID = KERNEL_PID;
+}
+
 Pipe openProcessPipe(char *name, int fds[2])
 {
     Process process = getCurrentProcess();

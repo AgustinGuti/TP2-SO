@@ -52,16 +52,24 @@ extern void restoreStack();
 #define MEMORY_INITIAL_DIRECTION 0x600000
 #define MEMORY_TO_MAP_SIZE (0xFFFFFFF - MEMORY_INITIAL_DIRECTION)
 
+static uint16_t timesRun = 0;
+
 int main()
 {
 	load_idt();
 	saveRegisters();
 	restoreStack();
+	if (timesRun)
+	{
+		closeScheduler();
+		closeKeyboardBuffer();
+	}
+	timesRun++;
 	initializeMemoryManager((uint64_t)MEMORY_TO_MAP_SIZE,
 													(void *)MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE),
 													(void *)MEMORY_INITIAL_DIRECTION,
 													(void *)(MEMORY_INITIAL_DIRECTION + calculateRequiredMemoryManagerSize((uint64_t)MEMORY_TO_MAP_SIZE)));
-
+	
 	uint64_t *memStatus = getMemoryStatus();
 	uint64_t occupiedMemory = memStatus[1];
 
