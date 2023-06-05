@@ -220,13 +220,19 @@ void semPost(sem_t sem)
     enterCritical();
     if (getSize(sem->waitingList) > 0)
     {
-        pid_t *pid = (pid_t *)get(sem->waitingList, 0);
-        remove(sem->waitingList, pid);
-        pid_t pidToUnblock = *pid;
-        free(pid);
-        pid = NULL;
-        leaveCritical();
-        unblockProcess(pidToUnblock);
+        int done = 0;
+        while(!done && getSize(sem->waitingList) > 0){
+            pid_t *pid = (pid_t *)get(sem->waitingList, 0);
+            remove(sem->waitingList, pid);
+            pid_t pidToUnblock = *pid;
+            free(pid);
+            pid = NULL;
+            leaveCritical();
+            if (getProcessState(pidToUnblock) == BLOCKED){
+                unblockProcess(pidToUnblock);
+                done = 1;
+            }
+        }
         return;
     }
     sem->value++;

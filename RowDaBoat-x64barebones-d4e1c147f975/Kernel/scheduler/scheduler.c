@@ -447,12 +447,25 @@ void unblockProcess(pid_t pid)
     unblockProcessFromProcess(process);
 }
 
+int getProcessState(pid_t pid){
+    Process process = getProcess(pid);
+    if (process == NULL)
+    {
+        return -1;
+    }
+    return process->state;
+}
+
+
 void unblockProcessFromProcess(Process process)
 {
-    process->state = READY;
-    if (scheduler->currentProcess->pid == EMPTY_PID)
+    if (process->state == BLOCKED)
     {
-        yield();
+        process->state = READY;
+        if (scheduler->currentProcess->pid == EMPTY_PID)
+        {
+            yield();
+        }
     }
 }
 
@@ -475,6 +488,14 @@ void killKernel()
 
 pid_t killProcess(pid_t pid)
 {
+    printf("Killing process %d\n", pid);
+    printProcesses(0);
+
+    if (pid == KERNEL_PID || pid == EMPTY_PID)
+    {
+        printerr("No es posible matar el kernel.\n");
+        return -1;
+    }
     if (pid == SHELL_PID && scheduler->currentProcess->pid != SHELL_PID)
     {
         printerr("No es posible matar la shell desde otro proceso.\n");
@@ -484,11 +505,6 @@ pid_t killProcess(pid_t pid)
     if (process != NULL)
     {
         Process parent = getProcess(process->parentPID);
-        if (parent->waitingForPID == process->pid)
-        {
-            parent->waitingForPID = -1;
-            semPost(parent->waitingSem);
-        }
         process->foreground = 0;
         if (process->state == BLOCKED)
         {
@@ -500,6 +516,13 @@ pid_t killProcess(pid_t pid)
         semClose(process->waitingSem);
         remove(scheduler->queue[process->priority], process);
         cleanChildDeletedProcesses(process);
+
+        if (parent->waitingForPID == pid)
+        {
+            parent->waitingForPID = -1;
+            semPost(parent->waitingSem);
+        }
+
         if (parent->state == ZOMBIE)
         {
             deleteProcess(process);
