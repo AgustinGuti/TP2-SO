@@ -34,6 +34,7 @@ GLOBAL _sys_openProcessPipe
 GLOBAL _sys_closeProcessPipe
 GLOBAL _sys_sleep
 GLOBAL _sys_setAutoPrio
+GLOBAL _sys_createSharedMem
 
 section .text
 ;void _sys_write(int fd, char *str, int lenght);
@@ -447,6 +448,18 @@ _sys_setAutoPrio:
     mov rbp, rsp
     
     mov rax, 34     ;id 
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+;void * sys_createSharedMem(char *name);
+_sys_createSharedMem:
+    push rbp
+    mov rbp, rsp
+    
+    mov rax, 35     ;id 
     int 80h
 
     mov rsp, rbp

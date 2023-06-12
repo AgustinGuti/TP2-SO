@@ -49,5 +49,5 @@ Pipe _sys_openProcessPipe(char *name, int fds[2]);
 int _sys_closeProcessPipe(int fd);
 void _sys_sleep(int millis);
 void _sys_setAutoPrio(char autoPrio);
-
+void * _sys_createSharedMem(char *name);
 #endif

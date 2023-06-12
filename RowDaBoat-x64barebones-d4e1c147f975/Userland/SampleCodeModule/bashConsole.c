@@ -26,6 +26,7 @@ char callSleep(char argc, char **argv);
 char callRealloc(char argc, char **argv);
 char callTestSync(char argc, char **argv);
 char callTestNoSync(char argc, char **argv);
+char createSharedMem(char argc, char **argv);
 
 typedef struct commandCDT
 {
@@ -38,7 +39,7 @@ typedef struct commandCDT
     char test;
 } commandCDT;
 
-#define COMMAND_QTY 29
+#define COMMAND_QTY 30
 
 static commandCDT commands[COMMAND_QTY] = {
     {"help", help, 1, 0, "Imprime en pantalla los comandos disponibles. Si el argumento identifica a otro comando, explica su funcionamiento.", 1, 0},
@@ -70,6 +71,7 @@ static commandCDT commands[COMMAND_QTY] = {
     {"test-processes", testProcesses, 1, 1, "Ejecuta el test de procesos.", 1, 1},
     {"test-prio", testPrio, 0, 0, "Ejecuta el test de prioridades.", 1, 1},
     {"set-auto-prio", setAutoPrio, 1, 1, "Activa o desactiva el cambio automatico de prioridad. Recibe 1 para activarlo y 0 para descativarlo", 1, 0},
+    {"create-shared-mem", createSharedMem, 0,0, "Crea memoria compartida", 1, 0},
 };
 
 int startConsole()
@@ -118,6 +120,9 @@ int startConsole()
     }
     return 1;
 }
+
+
+
 
 void freeArray(char **array, int length)
 {
@@ -355,6 +360,21 @@ void getCommandAndArgs(char *str, char *args[], int *argQty, char *command, int 
         (*argQty)++;
     }
 }
+
+char createSharedMem(char argc, char **argv){
+    char **argsReader = mallocArray(3);
+    strcpy(argsReader[0],"readerProcess");
+    strcpy(argsReader[1],"1");
+    argsReader[2]=NULL;
+    char ** argsWriter = mallocArray(3);
+    strcpy(argsWriter[0], "writer");
+    strcpy(argsWriter[1], "1");
+    argsWriter[2] = NULL;
+
+    execve(writerProcess, NULL, 0, argsWriter);
+    execve(readerProcess, NULL, 0, argsReader);
+}
+
 
 char help(char argc, char **argv)
 {

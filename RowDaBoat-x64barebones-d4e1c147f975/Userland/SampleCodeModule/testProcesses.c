@@ -2,6 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <testProcesses.h>
 #include <stdio.h>
+#include <memory.h>
+#include <sysCallInterface.h>
 
 #include <stdio.h>
 #include "test_util.h"
@@ -104,4 +106,20 @@ char testProcesses(char argc, char *argv[])
         printf("Test %d completado exitosamente\n", count++);
     }
     return 0;
+}
+
+
+void readerProcess(){
+    char * sharedMem = _sys_createSharedMem("sharedMem");
+    char * msg = malloc(100);
+    memcpy(msg, sharedMem, 11);
+    printf("Mensaje recibido: %s\n", msg);
+}
+
+void writerProcess(){
+    char * sharedMem = _sys_createSharedMem("sharedMem");
+    char *text = malloc(strlen("Hola Mundo") + 1);
+    strcpy(text, "Hola Mundo");
+    text[10]=0;
+    memcpy(sharedMem, text, strlen(text) + 1);
 }

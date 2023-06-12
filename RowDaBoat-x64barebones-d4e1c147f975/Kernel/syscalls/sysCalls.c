@@ -6,6 +6,7 @@
 #include <scheduler.h>
 #include <semaphores.h>
 #include <process.h>
+#include <sharedMemory.h>
 
 #define OUT_LETTER_COLOR BLACK // Blanco sobre negro
 #define OUT_BACK_COLOR BLACK
@@ -14,7 +15,7 @@
 
 #define PIT_OSCILLATOR_FREQ 1193180 // Frequency of the PIT oscillator:1.193180 MHz
 
-#define READY_CALLS 35 // functions quantity in sysCalls[]
+#define READY_CALLS 36 // functions quantity in sysCalls[]
 #define REGISTER_QTY 17
 
 void sys_write(int fd, char *buf, uint64_t count);
@@ -52,6 +53,7 @@ Pipe sys_openProcessPipe(char *name, int fds[2]);
 int sys_closeProcessPipe(int fd);
 void sys_sleep(int millis);
 void sys_setAutoPrio(char autoPrio);
+void *sys_createSharedMem(char *name);
 
 static uint64_t sysCalls[] = {
     (uint64_t)&sys_write,
@@ -88,7 +90,9 @@ static uint64_t sysCalls[] = {
     (uint64_t)&sys_closeProcessPipe,
     (uint64_t)&sys_sleep,
     (uint64_t)&sys_realloc,
-    (uint64_t)&sys_setAutoPrio};
+    (uint64_t)&sys_setAutoPrio,
+    (uint64_t)&sys_createSharedMem,
+};
 
 extern void _setupSysCalls(int qty, uint64_t functions[]);
 extern void _speaker_tone(uint16_t tune);
@@ -310,4 +314,8 @@ void sys_sleep(int millis)
 void sys_setAutoPrio(char autoPrio)
 {
     setAutoPrio(autoPrio);
+}
+
+void *sys_createSharedMem(char *name){
+    return createSharedMem(name);
 }
