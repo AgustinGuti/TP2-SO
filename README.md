@@ -1,3 +1,7 @@
+# Introducción
+
+Este trabajo forma parte de la materia Sistemas Operativos y consiste en la creación de un kernel simple basándonos en el trabajo práctico final de la materia anterior, Arquitectura de Computadoras. Para ello, se implementaron un Memory Manager, procesos, scheduling y mecanismos de IPC y sincronización. 
+
 # Instrucciones de compilación y ejecución
 
 Todos los comandos que se muestran a continuación deben ser realizados
